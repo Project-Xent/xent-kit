@@ -155,6 +155,23 @@ XtkEl *xtk_items_repeater(XtkUi *ui, XtkListDesc desc) {
 	return xtk_items_host(ui, XTK_CONTROL_ITEMS_REPEATER, desc);
 }
 
+XtkEl *xtk_flip_view(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_FLIP_VIEW, NULL);
+	if (!el) return NULL;
+	el->flip = desc;
+	xtk_el_adopt(ui, el, children);
+	return el;
+}
+
+XtkEl *xtk_pips_pager(XtkUi *ui, XtkPipsDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_PIPS_PAGER, NULL);
+	if (!el) return NULL;
+	if (desc.count < 0) desc.count = 0;
+	if (desc.max_visible <= 0) desc.max_visible = 5;
+	el->pips = desc;
+	return el;
+}
+
 static XtkEl *xtk_stack(XtkUi *ui, XtkControlType type, bool row, XtkStackDesc desc, XtkEl *children []) {
 	XtkEl *el = xtk_el_new(ui, type, NULL);
 	if (!el) return NULL;

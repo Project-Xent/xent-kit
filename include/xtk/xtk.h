@@ -318,6 +318,36 @@ typedef struct XtkListItemDesc {
 /** @brief Grid column count for a given content width (shared with backends). */
 int xtk_list_auto_columns(float cross, float item_width, int explicit_columns);
 
+/**
+ * @brief FlipView: one viewport-sized page at a time. The element's
+ * children are the pages (mount-time set, like TabView); selection is
+ * controlled — navigation posts on_select and the model drives selected.
+ * Adjacent moves animate; longer jumps snap (WinUI behavior).
+ */
+typedef struct XtkFlipDesc {
+	int    selected;
+	bool   vertical;  /**< Vertical paging (default horizontal). */
+	XtkMsg on_select; /**< Delivered with .i = the new page index. */
+} XtkFlipDesc;
+
+/** @brief PipsPager Previous/Next button visibility. */
+typedef enum XtkPipsNavVis
+{
+	XTK_PIPS_NAV_COLLAPSED = 0,
+	XTK_PIPS_NAV_VISIBLE,
+	XTK_PIPS_NAV_ON_HOVER,
+} XtkPipsNavVis;
+
+/** @brief PipsPager (dot pager; pairs naturally with a FlipView). */
+typedef struct XtkPipsDesc {
+	int           count;       /**< NumberOfPages. */
+	int           selected;    /**< SelectedPageIndex. */
+	int           max_visible; /**< Visible pips cap; 0 = 5. */
+	bool          vertical;
+	XtkPipsNavVis nav;         /**< Previous/Next buttons. */
+	XtkMsg        on_select;   /**< Delivered with .i = the new page index. */
+} XtkPipsDesc;
+
 typedef enum XtkNavKind
 {
 	XTK_NAV_ITEM = 0, /**< Selectable menu item. */
@@ -388,6 +418,8 @@ struct XtkEl {
 		XtkNavDesc       nav;
 		XtkListDesc      list;
 		XtkListItemDesc  item;
+		XtkFlipDesc      flip;
+		XtkPipsDesc      pips;
 	};
 
 	XtkEl **children; /**< Arena array of child_count valid pointers. */
@@ -443,6 +475,7 @@ XtkEl         *xtk_list_view(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_list_box(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_grid_view(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_items_repeater(XtkUi *ui, XtkListDesc desc);
+XtkEl         *xtk_pips_pager(XtkUi *ui, XtkPipsDesc desc);
 
 XtkEl         *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl         *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
@@ -451,6 +484,7 @@ XtkEl         *xtk_scroll(XtkUi *ui, XtkEl *children []);
 XtkEl         *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []);
 XtkEl         *xtk_nav_view(XtkUi *ui, XtkNavDesc desc, XtkEl *children []);
 XtkEl         *xtk_tab_view(XtkUi *ui, XtkTabViewDesc desc, XtkEl *children []);
+XtkEl         *xtk_flip_view(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []);
 XtkEl         *xtk_content_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkEl *children []);
 
 /**
