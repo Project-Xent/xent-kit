@@ -172,6 +172,21 @@ XtkEl *xtk_pips_pager(XtkUi *ui, XtkPipsDesc desc) {
 	return el;
 }
 
+XtkEl *xtk_auto_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_AUTO_SUGGEST, placeholder);
+	if (!el) return NULL;
+	desc.content    = xtk_strdup(ui, desc.content);
+	desc.query_icon = xtk_strdup(ui, desc.query_icon);
+	if (desc.count < 0) desc.count = 0;
+	char const **items
+	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.count ? desc.count : 1));
+	if (!items) return NULL;
+	for (int i = 0; i < desc.count; i++) items [i] = xtk_strdup(ui, desc.suggestions [i]);
+	desc.suggestions = items;
+	el->suggest      = desc;
+	return el;
+}
+
 static XtkEl *xtk_stack(XtkUi *ui, XtkControlType type, bool row, XtkStackDesc desc, XtkEl *children []) {
 	XtkEl *el = xtk_el_new(ui, type, NULL);
 	if (!el) return NULL;

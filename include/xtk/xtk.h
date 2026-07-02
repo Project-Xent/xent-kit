@@ -338,6 +338,25 @@ typedef enum XtkPipsNavVis
 	XTK_PIPS_NAV_ON_HOVER,
 } XtkPipsNavVis;
 
+/**
+ * @brief AutoSuggestBox: a TextBox with a suggestions popup. Elm round trip:
+ * typing posts on_text (UserInput only); the app recomputes .suggestions in
+ * its model; the next frame's desc carries them and the control opens the
+ * list (closing it when the list is empty or focus leaves). Down/Up preview
+ * suggestions into the box (posting on_chosen); Enter or the query button
+ * posts on_query; Escape restores the typed text and closes.
+ */
+typedef struct XtkAutoSuggestDesc {
+	char const        *content;     /**< Controlled text; NULL = uncontrolled. */
+	char const *const *suggestions; /**< Current suggestion strings (copied). */
+	int                count;
+	char const        *query_icon;  /**< Segoe Fluent Icons name; NULL hides the button. */
+	bool               disabled;
+	XtkMsg             on_text;     /**< .ptr = transient UTF-8 (user input only). */
+	XtkMsg             on_query;    /**< .ptr = transient query text; .i = chosen index or -1. */
+	XtkMsg             on_chosen;   /**< .i = previewed suggestion index. */
+} XtkAutoSuggestDesc;
+
 /** @brief PipsPager (dot pager; pairs naturally with a FlipView). */
 typedef struct XtkPipsDesc {
 	int           count;       /**< NumberOfPages. */
@@ -418,8 +437,9 @@ struct XtkEl {
 		XtkNavDesc       nav;
 		XtkListDesc      list;
 		XtkListItemDesc  item;
-		XtkFlipDesc      flip;
-		XtkPipsDesc      pips;
+		XtkFlipDesc        flip;
+		XtkPipsDesc        pips;
+		XtkAutoSuggestDesc suggest;
 	};
 
 	XtkEl **children; /**< Arena array of child_count valid pointers. */
@@ -476,6 +496,7 @@ XtkEl         *xtk_list_box(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_grid_view(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_items_repeater(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_pips_pager(XtkUi *ui, XtkPipsDesc desc);
+XtkEl         *xtk_auto_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc);
 
 XtkEl         *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl         *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
