@@ -255,6 +255,69 @@ typedef struct XtkDialogDesc {
 	XtkMsg      on_result;      /**< Delivered with .i = XtkDialogResult. */
 } XtkDialogDesc;
 
+/** @brief WinUI ListViewBase SelectionMode. Zero = Single. */
+typedef enum XtkListSelMode
+{
+	XTK_LIST_SELECT_SINGLE = 0, /**< One selected item; selection follows focus. */
+	XTK_LIST_SELECT_NONE,       /**< No selection; clicks still post on_invoke-style selects. */
+	XTK_LIST_SELECT_MULTIPLE,   /**< Checkbox-style toggling; focus moves don't select. */
+	XTK_LIST_SELECT_EXTENDED,   /**< Ctrl/Shift ranges with an anchor (desktop default). */
+} XtkListSelMode;
+
+/** @brief Which items-host flavor a synthesized row belongs to (chrome + interactivity). */
+typedef enum XtkListKind
+{
+	XTK_LIST_KIND_LIST = 0, /**< ListViewItem chrome (pill + subtle fill). */
+	XTK_LIST_KIND_LIST_BOX, /**< ListBoxItem chrome (filled selection). */
+	XTK_LIST_KIND_GRID,     /**< GridViewItem chrome (border + corner check). */
+	XTK_LIST_KIND_REPEATER, /**< No chrome, not interactive (pure layout). */
+} XtkListKind;
+
+/**
+ * @brief Virtualized items host shared by ListView / ListBox / GridView /
+ * ItemsRepeater. The view function never builds all rows: the reconciler
+ * realizes only the cells intersecting the scroll viewport (plus overscan)
+ * by calling @c item per visible index, and recycles the retained controls
+ * as the window shifts (slot-keyed identity), so a million-row list costs
+ * a viewport's worth of nodes.
+ *
+ * Cells are uniform (@c item_height; 0 = 40). Grids wrap indices across
+ * @c columns (0 = auto from viewport width / item_width). In Single mode
+ * selection is model-driven (@c selected + on_select .i); Multiple and
+ * Extended selection sets are control-retained (anchors, Ctrl/Shift) and
+ * on_select posts the lead index after each change.
+ */
+typedef struct XtkListDesc {
+	int            count;                                   /**< Total item count. */
+	float          item_height;                             /**< Uniform cell height in DIPs; 0 = 40. */
+	float          item_width;                              /**< Grid cell width; 0 on lists = full row. */
+	int            columns;                                 /**< Grid columns; 0 = auto from width. Lists: 1. */
+	int            overscan;                                /**< Extra rows realized beyond the viewport; 0 = 4. */
+	XtkEl        *(*item)(XtkUi *ui, void *env, int index); /**< Build cell @p index (called per realized cell). */
+	void          *env;                                     /**< Passed through to @c item. */
+	XtkListSelMode sel_mode;                                /**< 0 = Single. */
+	int            selected;                                /**< Single mode: selected index; -1 = none. */
+	XtkMsg         on_select;                               /**< Delivered with .i = the lead selected index. */
+} XtkListDesc;
+
+/**
+ * @brief Synthesized per-cell wrapper (reconciler-internal; public so the
+ * backend can read placement/selection when applying props and wiring
+ * clicks). x/y/w/h are content-space placement computed by the reconciler;
+ * w == 0 means "full host width" (single-column rows).
+ */
+typedef struct XtkListItemDesc {
+	int         index;    /**< Item index this wrapper currently presents. */
+	XtkListKind kind;     /**< Chrome/interactivity flavor. */
+	bool        selected; /**< Single mode: item is the selected entry. */
+	bool        multi;    /**< Multiple mode: show the checkbox + content shift. */
+	float       x, y;     /**< Content-space slot origin. */
+	float       w, h;     /**< Cell size; w 0 = full host width. */
+} XtkListItemDesc;
+
+/** @brief Grid column count for a given content width (shared with backends). */
+int xtk_list_auto_columns(float cross, float item_width, int explicit_columns);
+
 typedef enum XtkNavKind
 {
 	XTK_NAV_ITEM = 0, /**< Selectable menu item. */
@@ -323,6 +386,8 @@ struct XtkEl {
 		XtkMenuBarDesc   menu_bar;
 		XtkDialogDesc    dialog;
 		XtkNavDesc       nav;
+		XtkListDesc      list;
+		XtkListItemDesc  item;
 	};
 
 	XtkEl **children; /**< Arena array of child_count valid pointers. */
@@ -374,6 +439,10 @@ XtkEl         *xtk_number_box(XtkUi *ui, XtkNumberDesc desc);
 XtkEl         *xtk_dropdown_button(XtkUi *ui, char const *label, XtkDropdownDesc desc);
 XtkEl         *xtk_split_button(XtkUi *ui, char const *label, XtkSplitDesc desc);
 XtkEl         *xtk_menu_bar(XtkUi *ui, XtkMenuBarDesc desc);
+XtkEl         *xtk_list_view(XtkUi *ui, XtkListDesc desc);
+XtkEl         *xtk_list_box(XtkUi *ui, XtkListDesc desc);
+XtkEl         *xtk_grid_view(XtkUi *ui, XtkListDesc desc);
+XtkEl         *xtk_items_repeater(XtkUi *ui, XtkListDesc desc);
 
 XtkEl         *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl         *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);

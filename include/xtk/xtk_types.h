@@ -105,8 +105,21 @@ typedef enum XtkControlType
 	XTK_CONTROL_NAV_VIEW_ITEM,
 	XTK_CONTROL_TAB_VIEW,
 	XTK_CONTROL_TAB_VIEW_ITEM,
+	XTK_CONTROL_LIST_ITEM,
+	XTK_CONTROL_LIST_BOX,
+	XTK_CONTROL_GRID_VIEW,
+	XTK_CONTROL_ITEMS_REPEATER,
+	XTK_CONTROL_FLIP_VIEW,
+	XTK_CONTROL_PIPS_PAGER,
+	XTK_CONTROL_AUTO_SUGGEST,
 	XTK_CONTROL_CUSTOM,
 } XtkControlType;
+
+/** @brief True for the four virtualized items-host roots (ListView family). */
+static bool inline xtk_is_list_type(XtkControlType t) {
+	return t == XTK_CONTROL_LIST || t == XTK_CONTROL_LIST_BOX || t == XTK_CONTROL_GRID_VIEW
+	    || t == XTK_CONTROL_ITEMS_REPEATER;
+}
 
 /* -------------------------------------------------------------------------
  * Text

@@ -125,6 +125,36 @@ XtkEl *xtk_content_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkE
 	return el;
 }
 
+/* No children here: the reconciler realizes the visible cell window itself
+ * (xtk_list_realize), so the desc tree stays O(viewport), not O(count). */
+static XtkEl *xtk_items_host(XtkUi *ui, XtkControlType type, XtkListDesc desc) {
+	XtkEl *el = xtk_el_new(ui, type, NULL);
+	if (!el) return NULL;
+	if (desc.count < 0 || !desc.item) desc.count = 0;
+	if (desc.item_height <= 0.0f) desc.item_height = 40.0f;
+	if (desc.overscan <= 0) desc.overscan = 4;
+	el->list = desc;
+	return el;
+}
+
+XtkEl *xtk_list_view(XtkUi *ui, XtkListDesc desc) { return xtk_items_host(ui, XTK_CONTROL_LIST, desc); }
+
+XtkEl *xtk_list_box(XtkUi *ui, XtkListDesc desc) { return xtk_items_host(ui, XTK_CONTROL_LIST_BOX, desc); }
+
+XtkEl *xtk_grid_view(XtkUi *ui, XtkListDesc desc) {
+	/* GridView defaults to WinUI's 4px-gapped fixed cells; item_width is
+	 * required for wrapping — default to a square cell when omitted. */
+	if (desc.item_height <= 0.0f) desc.item_height = 104.0f;
+	if (desc.item_width <= 0.0f) desc.item_width = desc.item_height;
+	return xtk_items_host(ui, XTK_CONTROL_GRID_VIEW, desc);
+}
+
+XtkEl *xtk_items_repeater(XtkUi *ui, XtkListDesc desc) {
+	desc.sel_mode = XTK_LIST_SELECT_NONE;
+	desc.selected = -1;
+	return xtk_items_host(ui, XTK_CONTROL_ITEMS_REPEATER, desc);
+}
+
 static XtkEl *xtk_stack(XtkUi *ui, XtkControlType type, bool row, XtkStackDesc desc, XtkEl *children []) {
 	XtkEl *el = xtk_el_new(ui, type, NULL);
 	if (!el) return NULL;

@@ -24,8 +24,15 @@ static bool xtk_runtime_take(XtkRuntime *rt, XtkMsg *out) {
 	return true;
 }
 
+void xtk_runtime_invalidate(XtkRuntime *rt) {
+	if (!rt) return;
+	rt->force = true;
+	rt->backend.request_frame(rt->backend.ctx);
+}
+
 void xtk_runtime_frame(XtkRuntime *rt) {
-	bool   dirty = rt->q_head != rt->q_tail || !rt->root;
+	bool   dirty = rt->q_head != rt->q_tail || !rt->root || rt->force;
+	rt->force    = false;
 
 	XtkMsg msg;
 	while (xtk_runtime_take(rt, &msg)) rt->update(rt->model, msg);

@@ -41,6 +41,16 @@ typedef struct XtkBackend {
 	bool       (*is_interactive)(XtkEl const *el);
 	void       (*request_frame)(void *ctx);
 	void       (*node_cleanup)(XtkNode *node);
+
+	/* Virtualized-list support (both optional; NULL = headless fallback).
+	 * list_viewport reports the list's scroll offset, viewport extent, and
+	 * cross-axis width in DIPs, returning false while layout hasn't produced
+	 * one yet. The reconciler realizes only the cells intersecting it.
+	 * list_realized reports the realized window back so the backend can
+	 * detect when scrolling moves the viewport outside it (and then call
+	 * xtk_runtime_invalidate to schedule a re-realization). */
+	bool       (*list_viewport)(void *ctx, XentNodeId id, float *offset, float *extent, float *cross);
+	void       (*list_realized)(void *ctx, XentNodeId id, int first, int last, int cols);
 } XtkBackend;
 
 struct XtkRuntime {
@@ -59,6 +69,10 @@ struct XtkRuntime {
 	XtkMsg       queue [XTK_QUEUE_CAP];
 	int          q_head;
 	int          q_tail;
+
+	bool         force; /**< Rebuild the view next frame even with no messages
+	                         (set by xtk_runtime_invalidate; e.g. a virtualized
+	                         list scrolled outside its realized window). */
 };
 
 XtkRuntime *xtk_runtime_create(
@@ -67,6 +81,9 @@ XtkRuntime *xtk_runtime_create(
 void xtk_runtime_destroy(XtkRuntime *rt);
 void xtk_runtime_frame(XtkRuntime *rt);
 void xtk_runtime_post(XtkRuntime *rt, XtkMsg msg);
+
+/** @brief Force a view rebuild next frame without posting a message. */
+void xtk_runtime_invalidate(XtkRuntime *rt);
 
 void xtk_reconcile(XtkRuntime *rt, XtkEl *next);
 void xtk_unmount_all(XtkRuntime *rt);
