@@ -109,16 +109,28 @@ typedef enum XtkControlType
 	XTK_CONTROL_LIST_BOX,
 	XTK_CONTROL_GRID_VIEW,
 	XTK_CONTROL_ITEMS_REPEATER,
+	XTK_CONTROL_ITEMS_VIEW,
 	XTK_CONTROL_FLIP_VIEW,
 	XTK_CONTROL_PIPS_PAGER,
 	XTK_CONTROL_AUTO_SUGGEST,
+	XTK_CONTROL_TOGGLE_SPLIT_BUTTON,
+	XTK_CONTROL_RADIO_BUTTONS,
+	XTK_CONTROL_RATING,
+	XTK_CONTROL_SELECTOR_BAR,
+	XTK_CONTROL_SELECTOR_BAR_ITEM,
+	XTK_CONTROL_BREADCRUMB_BAR,
+	XTK_CONTROL_BREADCRUMB_ITEM,
+	XTK_CONTROL_TEACHING_TIP,
+	XTK_CONTROL_TREE_VIEW,
+	XTK_CONTROL_TREE_ITEM,
+	XTK_CONTROL_REFRESH,
 	XTK_CONTROL_CUSTOM,
 } XtkControlType;
 
 /** @brief True for the four virtualized items-host roots (ListView family). */
 static bool inline xtk_is_list_type(XtkControlType t) {
 	return t == XTK_CONTROL_LIST || t == XTK_CONTROL_LIST_BOX || t == XTK_CONTROL_GRID_VIEW
-	    || t == XTK_CONTROL_ITEMS_REPEATER;
+	    || t == XTK_CONTROL_ITEMS_REPEATER || t == XTK_CONTROL_ITEMS_VIEW;
 }
 
 /* -------------------------------------------------------------------------
@@ -216,6 +228,37 @@ typedef enum XtkDialogResult
 	XTK_DIALOG_PRIMARY,
 	XTK_DIALOG_SECONDARY,
 } XtkDialogResult;
+
+/* -------------------------------------------------------------------------
+ * Teaching tip
+ * ---------------------------------------------------------------------- */
+
+/** @brief WinUI TeachingTipPlacementMode. Zero = Auto. */
+typedef enum XtkTeachingTipPlacement
+{
+	XTK_TIP_PLACE_AUTO = 0,
+	XTK_TIP_PLACE_TOP,
+	XTK_TIP_PLACE_BOTTOM,
+	XTK_TIP_PLACE_LEFT,
+	XTK_TIP_PLACE_RIGHT,
+	XTK_TIP_PLACE_TOP_RIGHT,
+	XTK_TIP_PLACE_TOP_LEFT,
+	XTK_TIP_PLACE_BOTTOM_RIGHT,
+	XTK_TIP_PLACE_BOTTOM_LEFT,
+	XTK_TIP_PLACE_LEFT_TOP,
+	XTK_TIP_PLACE_LEFT_BOTTOM,
+	XTK_TIP_PLACE_RIGHT_TOP,
+	XTK_TIP_PLACE_RIGHT_BOTTOM,
+	XTK_TIP_PLACE_CENTER,
+} XtkTeachingTipPlacement;
+
+/** @brief Why a teaching tip closed (WinUI TeachingTipCloseReason). */
+typedef enum XtkTeachingTipCloseReason
+{
+	XTK_TIP_CLOSE_BUTTON = 0,
+	XTK_TIP_CLOSE_LIGHT_DISMISS,
+	XTK_TIP_CLOSE_PROGRAMMATIC,
+} XtkTeachingTipCloseReason;
 
 #ifdef __cplusplus
 }

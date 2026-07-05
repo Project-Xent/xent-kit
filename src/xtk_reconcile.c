@@ -108,6 +108,7 @@ static XtkListKind xtk_list_kind_for(XtkControlType type) {
 	case XTK_CONTROL_LIST_BOX       : return XTK_LIST_KIND_LIST_BOX;
 	case XTK_CONTROL_GRID_VIEW      : return XTK_LIST_KIND_GRID;
 	case XTK_CONTROL_ITEMS_REPEATER : return XTK_LIST_KIND_REPEATER;
+	case XTK_CONTROL_ITEMS_VIEW     : return XTK_LIST_KIND_ITEMS;
 	default                         : return XTK_LIST_KIND_LIST;
 	}
 }

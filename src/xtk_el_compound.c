@@ -63,14 +63,81 @@ XtkMenuItemDesc const *xtk_menu_items_dup(XtkUi *ui, XtkMenuItemDesc const *item
 	return copy;
 }
 
-XtkEl *xtk_split_button(XtkUi *ui, char const *label, XtkSplitDesc desc) {
-	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_SPLIT_BUTTON, label);
+static XtkEl *xtk_split_el(XtkUi *ui, XtkControlType type, char const *label, XtkSplitDesc desc) {
+	XtkEl *el = xtk_el_new(ui, type, label);
 	if (!el) return NULL;
 	desc.icon = xtk_strdup(ui, desc.icon);
 	if (desc.item_count < 0) desc.item_count = 0;
 	desc.items = xtk_menu_items_dup(ui, desc.items, desc.item_count);
 	if (desc.item_count > 0 && !desc.items) return NULL;
 	el->split = desc;
+	return el;
+}
+
+XtkEl *xtk_split_button(XtkUi *ui, char const *label, XtkSplitDesc desc) {
+	return xtk_split_el(ui, XTK_CONTROL_SPLIT_BUTTON, label, desc);
+}
+
+/* ToggleSplitButton shares XtkSplitDesc; the .checked/.on_toggle fields drive
+ * the primary-zone toggle instead of .on_click. */
+XtkEl *xtk_toggle_split_button(XtkUi *ui, char const *label, XtkSplitDesc desc) {
+	return xtk_split_el(ui, XTK_CONTROL_TOGGLE_SPLIT_BUTTON, label, desc);
+}
+
+XtkEl *xtk_radio_buttons(XtkUi *ui, XtkRadioButtonsDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_RADIO_BUTTONS, NULL);
+	if (!el) return NULL;
+	desc.header = xtk_strdup(ui, desc.header);
+	if (desc.item_count < 0) desc.item_count = 0;
+	XtkRadioItem *items = ( XtkRadioItem * ) xtk_arena_alloc(
+	  xtk_ui_arena(ui), sizeof(XtkRadioItem) * ( size_t ) (desc.item_count ? desc.item_count : 1)
+	);
+	if (!items) return NULL;
+	for (int i = 0; i < desc.item_count; i++) {
+		items [i]       = desc.items [i];
+		items [i].label = xtk_strdup(ui, desc.items [i].label);
+	}
+	desc.items         = items;
+	el->radio_buttons  = desc;
+	return el;
+}
+
+XtkEl *xtk_breadcrumb_bar(XtkUi *ui, XtkBreadcrumbDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_BREADCRUMB_BAR, NULL);
+	if (!el) return NULL;
+	if (desc.count < 0) desc.count = 0;
+	char const **items
+	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.count ? desc.count : 1));
+	if (!items) return NULL;
+	for (int i = 0; i < desc.count; i++) items [i] = xtk_strdup(ui, desc.items [i]);
+	desc.items     = items;
+	el->breadcrumb = desc;
+	return el;
+}
+
+XtkEl *xtk_selector_bar(XtkUi *ui, XtkSelectorBarDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_SELECTOR_BAR, NULL);
+	if (!el) return NULL;
+	if (desc.item_count < 0) desc.item_count = 0;
+	XtkSelectorItem *items = ( XtkSelectorItem * ) xtk_arena_alloc(
+	  xtk_ui_arena(ui), sizeof(XtkSelectorItem) * ( size_t ) (desc.item_count ? desc.item_count : 1)
+	);
+	if (!items) return NULL;
+	for (int i = 0; i < desc.item_count; i++) {
+		items [i]      = desc.items [i];
+		items [i].text = xtk_strdup(ui, desc.items [i].text);
+		items [i].icon = xtk_strdup(ui, desc.items [i].icon);
+	}
+	desc.items        = items;
+	el->selector_bar  = desc;
+	return el;
+}
+
+XtkEl *xtk_rating(XtkUi *ui, XtkRatingDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_RATING, NULL);
+	if (!el) return NULL;
+	desc.caption = xtk_strdup(ui, desc.caption);
+	el->rating   = desc;
 	return el;
 }
 
@@ -125,6 +192,18 @@ XtkEl *xtk_content_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkE
 	return el;
 }
 
+XtkEl *xtk_teaching_tip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_TEACHING_TIP, title);
+	if (!el) return NULL;
+	desc.subtitle    = xtk_strdup(ui, desc.subtitle);
+	desc.icon        = xtk_strdup(ui, desc.icon);
+	desc.action_text = xtk_strdup(ui, desc.action_text);
+	desc.close_text  = xtk_strdup(ui, desc.close_text);
+	el->teaching_tip = desc;
+	xtk_el_adopt(ui, el, children);
+	return el;
+}
+
 /* No children here: the reconciler realizes the visible cell window itself
  * (xtk_list_realize), so the desc tree stays O(viewport), not O(count). */
 static XtkEl *xtk_items_host(XtkUi *ui, XtkControlType type, XtkListDesc desc) {
@@ -153,6 +232,65 @@ XtkEl *xtk_items_repeater(XtkUi *ui, XtkListDesc desc) {
 	desc.sel_mode = XTK_LIST_SELECT_NONE;
 	desc.selected = -1;
 	return xtk_items_host(ui, XTK_CONTROL_ITEMS_REPEATER, desc);
+}
+
+XtkEl *xtk_items_view(XtkUi *ui, XtkItemsViewDesc desc) {
+	XtkListDesc list = {
+	  .count                = desc.count,
+	  .item_height          = desc.item_height,
+	  .item_width           = desc.item_width,
+	  .columns              = desc.columns,
+	  .overscan             = desc.overscan,
+	  .item                 = desc.item,
+	  .env                  = desc.env,
+	  .sel_mode             = desc.selection_mode,
+	  .selected             = desc.selected,
+	  .on_select            = desc.on_select,
+	  .item_spacing         = desc.item_spacing,
+	  .item_invoked_enabled = desc.item_invoked_enabled,
+	  .on_invoke            = desc.on_invoke,
+	};
+	if (list.item_height <= 0.0f) list.item_height = 40.0f;
+	if (desc.layout == XTK_ITEMS_LAYOUT_STACK_V) {
+		list.columns    = 1;
+		list.item_width = 0.0f;
+	}
+	else if (list.item_width <= 0.0f) {
+		list.item_width = list.item_height;
+	}
+	if (list.item_width > 0.0f) list.item_width += desc.item_spacing;
+	list.item_height += desc.item_spacing;
+
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_ITEMS_VIEW, NULL);
+	if (!el) return NULL;
+	if (list.count < 0 || !list.item) list.count = 0;
+	if (list.overscan <= 0) list.overscan = 4;
+	el->list = list;
+	return el;
+}
+
+static XtkTreeNodeDesc const *xtk_tree_nodes_dup(XtkUi *ui, XtkTreeNodeDesc const *nodes, int32_t count) {
+	if (!nodes || count <= 0) return NULL;
+	XtkTreeNodeDesc *copy = ( XtkTreeNodeDesc * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy) * ( size_t ) count);
+	if (!copy) return NULL;
+	for (int32_t i = 0; i < count; i++) {
+		copy [i]          = nodes [i];
+		copy [i].text     = xtk_strdup(ui, nodes [i].text);
+		copy [i].icon     = xtk_strdup(ui, nodes [i].icon);
+		copy [i].children = xtk_tree_nodes_dup(ui, nodes [i].children, nodes [i].child_count);
+		if (!copy [i].children) copy [i].child_count = 0;
+	}
+	return copy;
+}
+
+XtkEl *xtk_tree_view(XtkUi *ui, XtkTreeDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_TREE_VIEW, NULL);
+	if (!el) return NULL;
+	if (desc.row_height <= 0.0f) desc.row_height = 28.0f;
+	desc.roots = xtk_tree_nodes_dup(ui, desc.roots, desc.root_count);
+	if (!desc.roots) desc.root_count = 0;
+	el->tree_view = desc;
+	return el;
 }
 
 XtkEl *xtk_flip_view(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []) {
@@ -243,6 +381,14 @@ XtkEl *xtk_nav_view(XtkUi *ui, XtkNavDesc desc, XtkEl *children []) {
 	}
 	desc.items = items;
 	el->nav    = desc;
+	xtk_el_adopt(ui, el, children);
+	return el;
+}
+
+XtkEl *xtk_refresh_container(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_REFRESH, NULL);
+	if (!el) return NULL;
+	el->refresh = desc;
 	xtk_el_adopt(ui, el, children);
 	return el;
 }
