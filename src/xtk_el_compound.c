@@ -310,6 +310,45 @@ XtkEl *xtk_pips_pager(XtkUi *ui, XtkPipsDesc desc) {
 	return el;
 }
 
+XtkEl *xtk_person_picture(XtkUi *ui, XtkPersonPictureDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_PERSON_PICTURE, NULL);
+	if (!el) return NULL;
+	desc.display_name  = xtk_strdup(ui, desc.display_name);
+	desc.initials      = xtk_strdup(ui, desc.initials);
+	desc.image         = xtk_strdup(ui, desc.image);
+	desc.badge_glyph   = xtk_strdup(ui, desc.badge_glyph);
+	el->person_picture = desc;
+	return el;
+}
+
+XtkEl *xtk_split_view(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *content) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_SPLIT_VIEW, NULL);
+	if (!el) return NULL;
+	el->split_view = desc;
+
+	/* Internal wrappers: content mounts first (drawn under), pane second (on top
+	 * for overlay). The SplitView positions the two wrappers each frame. */
+	XtkEl *cw = xtk_el_new(ui, XTK_CONTROL_SPLIT_VIEW_CONTENT, NULL);
+	XtkEl *pw = xtk_el_new(ui, XTK_CONTROL_SPLIT_VIEW_PANE, NULL);
+	if (!cw || !pw) return NULL;
+	if (content) xtk_el_adopt(ui, cw, (XtkEl *[]) {content, XTK_END});
+	if (pane) xtk_el_adopt(ui, pw, (XtkEl *[]) {pane, XTK_END});
+	xtk_el_adopt(ui, el, (XtkEl *[]) {cw, pw, XTK_END});
+	return el;
+}
+
+XtkEl *xtk_pager(XtkUi *ui, XtkPagerDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_PAGER, NULL);
+	if (!el) return NULL;
+	if (desc.count < 1) desc.count = 1;
+	if (desc.selected < 0) desc.selected = 0;
+	if (desc.selected > desc.count - 1) desc.selected = desc.count - 1;
+	desc.prefix = xtk_strdup(ui, desc.prefix);
+	desc.suffix = xtk_strdup(ui, desc.suffix);
+	el->pager   = desc;
+	return el;
+}
+
 XtkEl *xtk_auto_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_AUTO_SUGGEST, placeholder);
 	if (!el) return NULL;

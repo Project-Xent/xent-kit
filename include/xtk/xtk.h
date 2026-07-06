@@ -398,6 +398,37 @@ typedef struct XtkAutoSuggestDesc {
 	XtkMsg             on_chosen;   /**< .i = previewed suggestion index. */
 } XtkAutoSuggestDesc;
 
+/** @brief PagerControl display mode (how the current page is presented). */
+typedef enum XtkPagerDisplayMode
+{
+	XTK_PAGER_DISPLAY_AUTO = 0,     /**< NumberPanel. */
+	XTK_PAGER_DISPLAY_NUMBER_PANEL, /**< Numbered buttons with ellipsis. */
+	XTK_PAGER_DISPLAY_NUMBER_TEXT,  /**< "prefix n suffix N" label. */
+} XtkPagerDisplayMode;
+
+/** @brief PagerControl per-button (First/Previous/Next/Last) visibility. */
+typedef enum XtkPagerButtonVis
+{
+	XTK_PAGER_BUTTON_AUTO = 0,    /**< Visible; disabled at the relevant edge. */
+	XTK_PAGER_BUTTON_ALWAYS,      /**< Always visible and enabled. */
+	XTK_PAGER_BUTTON_HIDDEN_EDGE, /**< Hidden at the relevant edge, visible otherwise. */
+	XTK_PAGER_BUTTON_NONE,        /**< Collapsed. */
+} XtkPagerButtonVis;
+
+/** @brief PagerControl (numeric/arrow pager; distinct from the dot PipsPager). */
+typedef struct XtkPagerDesc {
+	int                 count;        /**< NumberOfPages (>= 1). */
+	int                 selected;     /**< SelectedPageIndex (0-based). */
+	XtkPagerDisplayMode display_mode; /**< 0 = Auto (NumberPanel). */
+	XtkPagerButtonVis   first_button; /**< 0 = Auto. */
+	XtkPagerButtonVis   prev_button;  /**< 0 = Auto. */
+	XtkPagerButtonVis   next_button;  /**< 0 = Auto. */
+	XtkPagerButtonVis   last_button;  /**< 0 = Auto. */
+	char const         *prefix;       /**< NUMBER_TEXT leading label (e.g. "Page"). */
+	char const         *suffix;       /**< NUMBER_TEXT infix before the total (e.g. "of"). */
+	XtkMsg              on_select;    /**< Delivered with .i = the new page index. */
+} XtkPagerDesc;
+
 /** @brief PipsPager (dot pager; pairs naturally with a FlipView). */
 typedef struct XtkPipsDesc {
 	int           count;       /**< NumberOfPages. */
@@ -568,6 +599,49 @@ typedef struct XtkTeachingTipDesc {
 	XtkMsg                  on_close;         /**< Delivered with .i = XtkTeachingTipCloseReason. */
 } XtkTeachingTipDesc;
 
+/**
+ * @brief PersonPicture — a circular avatar showing a photo, initials, or a
+ * placeholder glyph, with an optional top-right badge. Leaf (no children).
+ */
+typedef struct XtkPersonPictureDesc {
+	char const *display_name; /**< Derives initials when @c initials is NULL. */
+	char const *initials;     /**< Explicit initials override. */
+	char const *image;        /**< Profile-photo source path, or NULL. */
+	char const *badge_glyph;  /**< Segoe Fluent Icons name for the badge, or NULL. */
+	int32_t     badge_number; /**< Badge count (capped "99+"); <= 0 hides it. */
+	float       size;         /**< Diameter (DIP); 0 = default 72. */
+	bool        is_group;     /**< Group placeholder (People glyph). */
+} XtkPersonPictureDesc;
+
+/** @brief SplitView pane display mode. */
+typedef enum XtkSplitViewDisplayMode
+{
+	XTK_SPLITVIEW_INLINE = 0,      /**< Pane pushes content; 0 width when closed. */
+	XTK_SPLITVIEW_COMPACT_INLINE,  /**< Closed shows a compact strip; pushes content. */
+	XTK_SPLITVIEW_OVERLAY,         /**< Pane floats over content; 0 width when closed. */
+	XTK_SPLITVIEW_COMPACT_OVERLAY, /**< Compact strip always; pane floats over content. */
+} XtkSplitViewDisplayMode;
+
+/** @brief SplitView pane placement. */
+typedef enum XtkSplitViewPanePlacement
+{
+	XTK_SPLITVIEW_LEFT = 0,
+	XTK_SPLITVIEW_RIGHT,
+} XtkSplitViewPanePlacement;
+
+/**
+ * @brief SplitView — a collapsible side pane beside main content. Built from a
+ * pane element and a content element; controlled by .pane_open (the model owns
+ * the toggle, e.g. a button or a TitleBar pane-toggle).
+ */
+typedef struct XtkSplitViewDesc {
+	bool                      pane_open;
+	XtkSplitViewDisplayMode   display_mode;
+	XtkSplitViewPanePlacement pane_placement;
+	float                     open_pane_length;    /**< 0 = default 320. */
+	float                     compact_pane_length; /**< 0 = default 48. */
+} XtkSplitViewDesc;
+
 /* -------------------------------------------------------------------------
  * Element tree (public for the reconciler and tests; treat as read-only)
  * ---------------------------------------------------------------------- */
@@ -620,6 +694,9 @@ struct XtkEl {
 		XtkAutoSuggestDesc suggest;
 		XtkRefreshDesc     refresh;
 		XtkTeachingTipDesc teaching_tip;
+		XtkPersonPictureDesc person_picture;
+		XtkPagerDesc       pager;
+		XtkSplitViewDesc   split_view;
 	};
 
 	XtkEl **children; /**< Arena array of child_count valid pointers. */
@@ -683,6 +760,8 @@ XtkEl         *xtk_items_repeater(XtkUi *ui, XtkListDesc desc);
 XtkEl         *xtk_items_view(XtkUi *ui, XtkItemsViewDesc desc);
 XtkEl         *xtk_tree_view(XtkUi *ui, XtkTreeDesc desc);
 XtkEl         *xtk_pips_pager(XtkUi *ui, XtkPipsDesc desc);
+XtkEl         *xtk_person_picture(XtkUi *ui, XtkPersonPictureDesc desc);
+XtkEl         *xtk_pager(XtkUi *ui, XtkPagerDesc desc);
 XtkEl         *xtk_auto_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc);
 
 XtkEl         *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
@@ -695,6 +774,7 @@ XtkEl         *xtk_tab_view(XtkUi *ui, XtkTabViewDesc desc, XtkEl *children []);
 XtkEl         *xtk_flip_view(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []);
 XtkEl         *xtk_content_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkEl *children []);
 XtkEl         *xtk_teaching_tip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl *children []);
+XtkEl         *xtk_split_view(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *content);
 XtkEl         *xtk_refresh_container(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []);
 
 /**
