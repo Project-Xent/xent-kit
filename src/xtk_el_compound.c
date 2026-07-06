@@ -337,6 +337,16 @@ XtkEl *xtk_split_view(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *cont
 	return el;
 }
 
+XtkEl *xtk_title_bar(XtkUi *ui, char const *title, XtkTitleBarDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_TITLE_BAR, NULL);
+	if (!el) return NULL;
+	el->text        = xtk_strdup(ui, title);
+	desc.subtitle   = xtk_strdup(ui, desc.subtitle);
+	desc.icon       = xtk_strdup(ui, desc.icon);
+	el->title_bar   = desc;
+	return el;
+}
+
 XtkEl *xtk_pager(XtkUi *ui, XtkPagerDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CONTROL_PAGER, NULL);
 	if (!el) return NULL;
@@ -418,8 +428,9 @@ XtkEl *xtk_nav_view(XtkUi *ui, XtkNavDesc desc, XtkEl *children []) {
 		items [i].icon  = xtk_strdup(ui, items [i].icon);
 		items [i].label = xtk_strdup(ui, items [i].label);
 	}
-	desc.items = items;
-	el->nav    = desc;
+	desc.items     = items;
+	desc.app_title = xtk_strdup(ui, desc.app_title);
+	el->nav        = desc;
 	xtk_el_adopt(ui, el, children);
 	return el;
 }

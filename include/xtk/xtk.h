@@ -568,10 +568,12 @@ typedef struct XtkTreeDesc {
 } XtkTreeDesc;
 
 typedef struct XtkNavDesc {
-	XtkNavItemDesc const *items;     /**< Copied into the arena. */
+	XtkNavItemDesc const *items;      /**< Copied into the arena. */
 	int                   item_count;
-	int                   selected;  /**< Index into items[] (headers/separators count). */
-	XtkMsg                on_select; /**< Delivered with .i = the selected item index. */
+	int                   selected;   /**< Index into items[] (headers/separators count). */
+	bool                  window_title_bar; /**< Extend into the OS title bar; the nav top strip owns it. */
+	char const           *app_title;  /**< App title shown in the integrated title bar, or NULL. */
+	XtkMsg                on_select;   /**< Delivered with .i = the selected item index. */
 } XtkNavDesc;
 
 /**
@@ -642,6 +644,22 @@ typedef struct XtkSplitViewDesc {
 	float                     compact_pane_length; /**< 0 = default 48. */
 } XtkSplitViewDesc;
 
+/**
+ * @brief TitleBar — a WinUI 3 TitleBar band: optional back and pane-toggle
+ * buttons, an icon, and a title/subtitle. Title comes from the builder's
+ * @c title argument. Leaf (no children).
+ */
+typedef struct XtkTitleBarDesc {
+	char const *subtitle;         /**< NULL/"" hides the subtitle. */
+	char const *icon;             /**< Segoe Fluent Icons name, or NULL. */
+	bool        show_back;
+	bool        back_disabled;    /**< Show the back button greyed/disabled. */
+	bool        show_pane_toggle;
+	bool        integrate_window; /**< Report drag/passthrough regions to the window. */
+	XtkMsg      on_back;
+	XtkMsg      on_pane_toggle;
+} XtkTitleBarDesc;
+
 /* -------------------------------------------------------------------------
  * Element tree (public for the reconciler and tests; treat as read-only)
  * ---------------------------------------------------------------------- */
@@ -697,6 +715,7 @@ struct XtkEl {
 		XtkPersonPictureDesc person_picture;
 		XtkPagerDesc       pager;
 		XtkSplitViewDesc   split_view;
+		XtkTitleBarDesc    title_bar;
 	};
 
 	XtkEl **children; /**< Arena array of child_count valid pointers. */
@@ -775,6 +794,7 @@ XtkEl         *xtk_flip_view(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []);
 XtkEl         *xtk_content_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkEl *children []);
 XtkEl         *xtk_teaching_tip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl *children []);
 XtkEl         *xtk_split_view(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *content);
+XtkEl         *xtk_title_bar(XtkUi *ui, char const *title, XtkTitleBarDesc desc);
 XtkEl         *xtk_refresh_container(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []);
 
 /**
