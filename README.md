@@ -1,6 +1,6 @@
 # xent-kit
 
-Platform-agnostic declarative UI toolkit for the Xent framework, written in C17.
+Platform-agnostic declarative UI toolkit for the Xent framework, written in C23.
 xent-kit provides the Elm-architecture runtime, virtual DOM reconciler, and element
 API that all Xent backends share.
 
@@ -32,7 +32,7 @@ xmake                    # build library + tests
 xmake run test_xtk_el    # run element layer tests
 ```
 
-Requires a C17 compiler and `xmake`.
+Requires a C23 compiler and `xmake`.
 
 ## Dependencies
 

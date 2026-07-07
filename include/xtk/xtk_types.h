@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h> /* portable static_assert: a keyword in C23/C++, a macro in C11/C17 */
 
 #ifdef __cplusplus
 extern "C"
@@ -24,6 +25,8 @@ extern "C"
 typedef struct XtkColor {
 	uint32_t rgba;
 } XtkColor;
+
+static_assert(sizeof(XtkColor) == 4, "XtkColor is a packed 0xRRGGBBAA word");
 
 static XtkColor inline xtk_color_rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 	XtkColor c = {(( uint32_t ) r << 24) | (( uint32_t ) g << 16) | (( uint32_t ) b << 8) | a};
@@ -132,6 +135,8 @@ typedef enum XtkControlType
 	XTK_CONTROL_TITLE_BAR,
 	XTK_CONTROL_CUSTOM,
 } XtkControlType;
+
+static_assert(XTK_CONTROL_CUSTOM < 256, "XtkControlType must stay byte-storable for backend node stores");
 
 /** @brief True for the four virtualized items-host roots (ListView family). */
 static bool inline xtk_is_list_type(XtkControlType t) {

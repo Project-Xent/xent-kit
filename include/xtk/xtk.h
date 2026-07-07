@@ -53,6 +53,12 @@ typedef struct XtkEl XtkEl;
 extern XtkEl *const  XTK_END;
 
 /**
+ * @brief Build a children-array literal without writing the trailing XTK_END:
+ * `xtk_column(ui, desc, xtk_kids(a, b, c))`. Empty is fine: `xtk_kids()`.
+ */
+#define xtk_kids(...) ((XtkEl *[]){__VA_ARGS__ __VA_OPT__(,) XTK_END})
+
+/**
  * @brief A message value posted by a control interaction (Elm-style).
  *
  * Controls never invoke user callbacks; they enqueue the XtkMsg bound to them
@@ -727,7 +733,7 @@ struct XtkEl {
  * ---------------------------------------------------------------------- */
 
 /** @brief Create a build context (owns the frame arena). */
-XtkUi         *xtk_ui_create(void);
+XENT_NODISCARD XtkUi *xtk_ui_create(void);
 
 /** @brief Destroy the build context and its arena. */
 void           xtk_ui_destroy(XtkUi *ui);
@@ -736,10 +742,10 @@ void           xtk_ui_destroy(XtkUi *ui);
 void           xtk_ui_begin(XtkUi *ui);
 
 /** @brief Copy a string into the frame arena (NULL passes through). */
-char          *xtk_strdup(XtkUi *ui, char const *s);
+XENT_NODISCARD char *xtk_strdup(XtkUi *ui, char const *s);
 
 /** @brief printf into the frame arena — for transient labels. */
-char          *xtk_fmt(XtkUi *ui, char const *fmt, ...);
+XENT_NODISCARD char *xtk_fmt(XtkUi *ui, char const *fmt, ...);
 
 /* -------------------------------------------------------------------------
  * Builders
@@ -802,7 +808,7 @@ XtkEl         *xtk_refresh_container(XtkUi *ui, XtkRefreshDesc desc, XtkEl *chil
  * NULL-filled with XTK_END pre-placed in the last slot. Fill any subset of
  * [0..capacity); remaining NULL slots are skipped like conditionals.
  */
-XtkEl        **xtk_children_alloc(XtkUi *ui, int capacity);
+XENT_NODISCARD XtkEl **xtk_children_alloc(XtkUi *ui, int capacity);
 
 /* -------------------------------------------------------------------------
  * Modifiers (return the same element)
