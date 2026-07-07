@@ -9,12 +9,15 @@
 #include "xtk/xtk.h"
 #include <stddef.h>
 
+/* Portable max fundamental alignment (MSVC's C stddef.h omits max_align_t). */
+typedef union { long long ll; long double ld; void *p; } XtkMaxAlign;
+
 /** @brief Chunked bump allocator; reset keeps the first chunk hot. */
 typedef struct XtkArenaChunk {
 	struct XtkArenaChunk *next;
 	size_t                capacity;
 	size_t                used;
-	_Alignas(max_align_t) unsigned char data [];
+	_Alignas(XtkMaxAlign) unsigned char data [];
 } XtkArenaChunk;
 
 typedef struct XtkArena {

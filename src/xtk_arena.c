@@ -48,7 +48,7 @@ void xtk_arena_reset(XtkArena *arena) {
 }
 
 static size_t xtk_align_up(size_t n) {
-	size_t const a = _Alignof(max_align_t);
+	size_t const a = _Alignof(XtkMaxAlign);
 	return (n + a - 1) & ~(a - 1);
 }
 
