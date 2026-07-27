@@ -1,23 +1,32 @@
 # xent-kit
 
-Platform-agnostic declarative UI toolkit for the Xent framework, written in C23.
-xent-kit provides the Elm-architecture runtime, virtual DOM reconciler, and element
-API that all Xent backends share.
+Project Xent's platform-neutral standard control protocol, retained Host, and
+declarative runtime, written in C23. Imperative code and declarative views use
+the same control descriptors, properties, events, handles, and atomic batches.
 
 ## Architecture
 
-- **Element layer** (`xtk_el.h`) — declarative element constructors (`xtk_button`,
-  `xtk_text`, `xtk_column`, etc.) that build a per-frame element tree on an arena.
-- **Reconciler** (`xtk_reconcile.h`) — diffs the previous and current element trees,
-  mounts/unmounts/reorders nodes through an `XtkBackend` vtable, and patches props
-  in place. Supports keyed identity for stable reorder.
-- **Runtime** (`xtk_runtime.h`) — message queue, frame pump, and the Elm update/view
-  loop. Backends call `xtk_runtime_frame()` each frame; the runtime drains messages,
-  calls `update`, rebuilds the view, and reconciles.
-- **Backend vtable** (`XtkBackend`) — 9 function pointers that a platform backend
-  implements: `create`, `destroy`, `apply_props`, `mount_setup`, `is_interactive`,
-  `request_frame`, `pre_unmount`, `node_cleanup`, `binding_create`. Write it once in
-  xent-kit, implement it per platform.
+- `xtk_descriptor.h` and `xtk_catalog.h` define the standard control/property/
+  event vocabulary.
+- `xtk_batch.h` is the mutation wire format. A Host validates, prepares, and
+  atomically commits one batch or leaves the live tree unchanged.
+- `xtk_host.h` is the retained Host ABI. `xtk_scene.h` and the generated
+  `xtk_controls.h` provide typed imperative conveniences over it.
+- `xtk.h` builds transient declarative element trees. The reconciler emits only
+  public `XtkBatch` operations and publishes its new composition after commit.
+- `xtk_msg.h` supplies the bounded message/update/view runtime. Messages drain
+  before one build/reconcile/commit per frame.
+- `xtk_component.h` defines transactional Components and typed, Scene-scoped
+  Providers. Component state belongs to the Host, not the transient tree.
+
+Sibling identity is either positional or keyed. String keys remain useful for
+diagnostics; `xtk_keyed_u64` provides allocation-free scalar identity. Keyed
+matching is O(n), reuses retained capacity, and emits ordered moves.
+
+Virtualization is a control-neutral retained-region contract: the runtime asks
+the Host for a viewport and publishes the realized range. ListView, GridView,
+ItemsView, and custom Components can share that seam without a list-specific
+Host ABI.
 
 ## Backends
 
@@ -27,12 +36,15 @@ API that all Xent backends share.
 
 ## Build
 
-```bash
-xmake                    # build library + tests
-xmake run test_xtk_el    # run element layer tests
+```sh
+xmake
+xmake test
+xmake run test_xtk_reconcile_txn
 ```
 
-Requires a C23 compiler and `xmake`.
+The test gate includes Host atomicity, allocation failures, Components,
+Providers, generated catalog coverage, event routing, virtualization,
+reconciliation, and static/revisioned regions.
 
 ## Dependencies
 
