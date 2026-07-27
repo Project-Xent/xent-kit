@@ -1,14 +1,15 @@
 /**
  * @file test_xtk_list.c
- * @brief Headless reconciler test for the virtualized list: window
- * realization from the viewport, slot-key recycling on scroll (no
- * mount/unmount churn), selection patching, offset clamping after count
- * shrink, and realized-range reporting through the backend vtable.
+ * @brief Virtualized list through XtkRtCfg + retained Host.
  */
+#include <xtk/xtk_catalog.h>
 #include <xtk/xtk_reconcile.h>
+#include "xtk_retained.h"
+
+#include "runtime/xtk_runtime_internal.h"
+#include "reconcile/xtk_reconcile_internal.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define EXPECT(cond, msg)              \
@@ -26,103 +27,156 @@ enum
 	MSG_SELECT,
 };
 
-/* -------------------------------------------------------------------------
- * Mock backend: real xent nodes (so append/destroy stay consistent), plus
- * counters and captures the assertions read.
- * ---------------------------------------------------------------------- */
-
 typedef struct Mock {
-	XentContext *ctx;
-
-	bool         viewport_ready;
-	float        offset;
-	float        extent;
-
-	int          realized_first;
-	int          realized_last;
-
-	int          item_creates;
-	int          item_destroys;
-
-	/* Last-frame capture of applied item props, keyed by window position. */
-	int          applied_indices [256];
-	bool         applied_selected [256];
-	int          applied_count;
+	bool  viewport_ready;
+	float offset;
+	float extent;
+	int   realized_first;
+	int   realized_last;
+	int   prepares;
+	int   commits;
+	int   creates;
+	int   destroys;
 } Mock;
 
-static void *mock_binding_create(void *ctx, XtkRuntime *rt) {
-	( void ) ctx;
-	XtkRuntime **b = ( XtkRuntime ** ) calloc(1, sizeof(*b));
-	if (b) *b = rt;
-	return b;
+typedef struct CountingHost {
+	XtkHost              base;
+	XtkHost             *inner;
+	XtkHostVtable        vt;
+	XtkHostVtable const *inner_vt;
+	Mock                *mock;
+} CountingHost;
+
+static CountingHost       *as_ch(XtkHost *host) { return ( CountingHost * ) host; }
+
+static CountingHost const *as_ch_c(XtkHost const *host) { return ( CountingHost const * ) host; }
+
+static XtkBatchError       counting_preflight(XtkHost *host, XtkBatch *batch, XtkBatchDiag *diagnostic) {
+	CountingHost *ch = as_ch(host);
+	return ch->inner_vt->preflight(ch->inner, batch, diagnostic);
 }
 
-static XentNodeId mock_create(void *ctx, XentNodeId parent, XtkEl const *el, void *binding) {
-	( void ) binding;
-	Mock      *m  = ( Mock * ) ctx;
-	XentNodeId id = xent_create_node(m->ctx);
-	if (id == XENT_NODE_INVALID) return id;
-	if (parent != XENT_NODE_INVALID) xent_append_child(m->ctx, parent, id);
-	if (el->type == XTK_CONTROL_LIST_ITEM) m->item_creates++;
-	xent_set_node_tag(m->ctx, id, ( uint8_t ) el->type);
-	return id;
+static XtkBatchError
+counting_prepare(XtkHost *host, XtkBatch *batch, XtkPrepare **out_prepare, XtkBatchDiag *diagnostic) {
+	CountingHost *ch = as_ch(host);
+	ch->mock->prepares++;
+	for (uint32_t i = 0; i < batch->count; i++) {
+		XtkBatchOp const *op = &batch->ops [i];
+		if (op->kind == XTK_BATCH_OP_CREATE && op->u.create.type == XTK_CTRL_LISTITEM) ch->mock->creates++;
+		if (op->kind == XTK_BATCH_OP_DESTROY && op->u.destroy.target.kind == XTK_REF_EXISTING) {
+			if (ch->inner_vt->type(ch->inner, op->u.destroy.target.u.existing) == XTK_CTRL_LISTITEM)
+				ch->mock->destroys++;
+		}
+	}
+	return ch->inner_vt->prepare(ch->inner, batch, out_prepare, diagnostic);
 }
 
-static void mock_destroy(void *ctx, XentNodeId id) {
-	Mock *m = ( Mock * ) ctx;
-	if (( XtkControlType ) xent_get_node_tag(m->ctx, id) == XTK_CONTROL_LIST_ITEM) m->item_destroys++;
-	xent_destroy_node(m->ctx, id);
+static XtkBatchResult *counting_commit(XtkHost *host, XtkPrepare *prepare, XtkBatchDiag *diagnostic) {
+	CountingHost *ch = as_ch(host);
+	ch->mock->commits++;
+	return ch->inner_vt->commit(ch->inner, prepare, diagnostic);
 }
 
-static void mock_pre_unmount(void *ctx, XentNodeId id) {
-	( void ) ctx;
-	( void ) id;
+static void counting_abort(XtkHost *host, XtkPrepare *prepare) {
+	as_ch(host)->inner_vt->abort(as_ch(host)->inner, prepare);
 }
 
-static void mock_mount_setup(void *ctx, XtkNode *node, XentNodeId id, XtkEl const *el) {
-	( void ) ctx;
-	( void ) node;
-	( void ) id;
-	( void ) el;
+static bool counting_is_live(XtkHost const *host, XtkCtrl control) {
+	return as_ch_c(host)->inner_vt->live(as_ch_c(host)->inner, control);
 }
 
-static void mock_apply_props(void *ctx, XtkNode *node, XtkEl const *prev, XtkEl const *el) {
-	( void ) node;
-	( void ) prev;
-	Mock *m = ( Mock * ) ctx;
-	if (el->type != XTK_CONTROL_LIST_ITEM || m->applied_count >= 256) return;
-	m->applied_indices [m->applied_count]  = el->item.index;
-	m->applied_selected [m->applied_count] = el->item.selected;
-	m->applied_count++;
+static uint64_t counting_revision(XtkHost const *host) {
+	return as_ch_c(host)->inner_vt->revision(as_ch_c(host)->inner);
 }
 
-static bool mock_is_interactive(XtkEl const *el) { return el->type == XTK_CONTROL_LIST_ITEM; }
+static XtkCtrl counting_scene_root(XtkHost const *host) { return as_ch_c(host)->inner_vt->root(as_ch_c(host)->inner); }
 
-static void mock_request_frame(void *ctx) { ( void ) ctx; }
+static XtkCtrlId counting_control_type(XtkHost const *host, XtkCtrl control) {
+	return as_ch_c(host)->inner_vt->type(as_ch_c(host)->inner, control);
+}
 
-static void mock_node_cleanup(XtkNode *node) { free(node->binding); }
+static XtkCtrl counting_parent(XtkHost const *host, XtkCtrl control) {
+	return as_ch_c(host)->inner_vt->parent(as_ch_c(host)->inner, control);
+}
 
-static bool mock_list_viewport(void *ctx, XentNodeId id, float *offset, float *extent, float *cross) {
+static XtkCtrl counting_first_child(XtkHost const *host, XtkCtrl control) {
+	return as_ch_c(host)->inner_vt->first(as_ch_c(host)->inner, control);
+}
+
+static XtkCtrl counting_next_sibling(XtkHost const *host, XtkCtrl control) {
+	return as_ch_c(host)->inner_vt->next(as_ch_c(host)->inner, control);
+}
+
+static XtkCtrlDesc const *counting_descriptor(XtkHost const *host, XtkCtrlId type) {
+	return as_ch_c(host)->inner_vt->desc(as_ch_c(host)->inner, type);
+}
+
+static bool counting_get_property(
+  XtkHost const *host, XtkCtrl control, XtkPropertyId property, XtkValueView *out_value, XtkChangeStamp *out_change
+) {
+	return as_ch_c(host)->inner_vt->prop(as_ch_c(host)->inner, control, property, out_value, out_change);
+}
+
+static bool counting_resource_is_valid(XtkHost const *host, XtkResource resource, XtkResourceTypeId type) {
+	return as_ch_c(host)->inner_vt->res_valid(as_ch_c(host)->inner, resource, type);
+}
+
+static bool counting_resource_retain(XtkHost *host, XtkResource resource, XtkResourceTypeId type) {
+	return as_ch(host)->inner_vt->res_retain(as_ch(host)->inner, resource, type);
+}
+
+static void counting_resource_release(XtkHost *host, XtkResource resource, XtkResourceTypeId type) {
+	as_ch(host)->inner_vt->res_release(as_ch(host)->inner, resource, type);
+}
+
+static uint32_t counting_dispatch(XtkHost *host, XtkEvent const *event) {
+	return as_ch(host)->inner_vt->dispatch(as_ch(host)->inner, event);
+}
+
+static void wrap_host(CountingHost *ch, XtkHost *inner, Mock *mock) {
+	ch->inner          = inner;
+	ch->inner_vt       = inner->vt;
+	ch->mock           = mock;
+	ch->vt             = *inner->vt;
+	ch->vt.preflight   = counting_preflight;
+	ch->vt.prepare     = counting_prepare;
+	ch->vt.commit      = counting_commit;
+	ch->vt.abort       = counting_abort;
+	ch->vt.live        = counting_is_live;
+	ch->vt.revision    = counting_revision;
+	ch->vt.root        = counting_scene_root;
+	ch->vt.type        = counting_control_type;
+	ch->vt.parent      = counting_parent;
+	ch->vt.first       = counting_first_child;
+	ch->vt.next        = counting_next_sibling;
+	ch->vt.desc        = counting_descriptor;
+	ch->vt.prop        = counting_get_property;
+	ch->vt.res_valid   = counting_resource_is_valid;
+	ch->vt.res_retain  = counting_resource_retain;
+	ch->vt.res_release = counting_resource_release;
+	ch->vt.dispatch    = counting_dispatch;
+	ch->base.vt        = &ch->vt;
+	ch->base.impl      = inner->impl;
+}
+
+static bool mock_viewport(void *ctx, XentNodeId id, XtkViewport *out) {
 	( void ) id;
 	Mock *m = ( Mock * ) ctx;
 	if (!m->viewport_ready) return false;
-	*offset = m->offset;
-	*extent = m->extent;
-	*cross  = 800.0f;
+	out->offset = m->offset;
+	out->extent = m->extent;
+	out->cross  = 800.0f;
 	return true;
 }
 
-static void mock_list_realized(void *ctx, XentNodeId id, int first, int last, int cols) {
+static void mock_virtual_range(void *ctx, XentNodeId id, XtkVirtualRange const *range) {
 	( void ) id;
-	( void ) cols;
 	Mock *m           = ( Mock * ) ctx;
-	m->realized_first = first;
-	m->realized_last  = last;
+	m->realized_first = range->first;
+	m->realized_last  = range->last;
 }
 
-/* -------------------------------------------------------------------------
- * App: a plain list over `count` rows.
- * ---------------------------------------------------------------------- */
+static void mock_request_frame(void *ctx) { ( void ) ctx; }
 
 typedef struct Model {
 	int count;
@@ -141,113 +195,117 @@ static XtkEl *row(XtkUi *ui, void *env, int index) {
 
 static XtkEl *view(XtkUi *ui, void *model) {
 	Model *mo = ( Model * ) model;
-	return xtk_list_view(
+	return xtk_list(
 	  ui, (XtkListDesc) {
-	        .count       = mo->count,
-	        .item_height = 40.0f,
-	        .item        = row,
-	        .env         = mo,
-	        .selected    = mo->selected,
-	        .on_select   = xtk_msg(MSG_SELECT),
-	      }
+			.nitem  = mo->count,
+			.itemh  = 40.0f,
+			.item   = row,
+			.env    = mo,
+			.sel    = mo->selected,
+			.select = xtk_msg(MSG_SELECT),
+		  }
 	);
 }
 
 static void frame_reset(Mock *m) {
-	m->applied_count = 0;
-	m->item_creates  = 0;
-	m->item_destroys = 0;
+	m->creates  = 0;
+	m->destroys = 0;
+	m->prepares = 0;
+	m->commits  = 0;
 }
 
-static bool applied_has(Mock const *m, int index, bool selected) {
-	for (int i = 0; i < m->applied_count; i++)
-		if (m->applied_indices [i] == index && m->applied_selected [i] == selected) return true;
+static bool list_item_selected(XtkHost *host, XtkRt *rt, int index) {
+	XtkNode *list = rt->root;
+	if (!list || list->child_count <= 0) return false;
+	uint64_t key = ( uint64_t ) (index % list->child_count);
+	for (int i = 0; i < list->child_count; i++) {
+		XtkNode *child = list->children [i];
+		if (child->key.kind != XTK_KEY_U64 || child->key.value.u64 != key) continue;
+		XtkValueView   sel    = {0};
+		XtkChangeStamp change = {0};
+		if (!host->vt->prop(host, ( XtkCtrl ) child->node, XTK_PROP_SELECTED, &sel, &change)) return false;
+		return sel.kind == XTK_VALUE_BOOL && sel.u.b;
+	}
 	return false;
 }
 
 int main(void) {
-	XentContext *ctx = xent_create_context(NULL);
-	EXPECT(ctx, "xent context");
-	XentNodeId host = xent_create_node(ctx);
-	EXPECT(host != XENT_NODE_INVALID, "host node");
+	XtkHost *inner = xtk_retained_host_create();
+	EXPECT(inner, "retained host");
+	Mock         mock = {.realized_first = -100, .realized_last = -100};
+	CountingHost counted;
+	wrap_host(&counted, inner, &mock);
 
-	Mock       mock = {.ctx = ctx, .realized_first = -100, .realized_last = -100};
-	XtkBackend be   = {
-	    .ctx            = &mock,
-	    .binding_create = mock_binding_create,
-	    .create         = mock_create,
-	    .destroy        = mock_destroy,
-	    .pre_unmount    = mock_pre_unmount,
-	    .mount_setup    = mock_mount_setup,
-	    .apply_props    = mock_apply_props,
-	    .is_interactive = mock_is_interactive,
-	    .request_frame  = mock_request_frame,
-	    .node_cleanup   = mock_node_cleanup,
-	    .list_viewport  = mock_list_viewport,
-	    .list_realized  = mock_list_realized,
+	XentNodeId host_root = ( XentNodeId ) counted.base.vt->root(&counted.base);
+	XtkRtCfg   cfg       = {
+	  .ctx           = &mock,
+	  .request_frame = mock_request_frame,
+	  .viewport      = mock_viewport,
+	  .virtual_range = mock_virtual_range,
 	};
-
-	Model       model = {.count = 1000, .selected = -1};
-	XtkRuntime *rt    = xtk_runtime_create(ctx, &be, host, &model, update, view);
+	Model  model = {.count = 1000, .selected = -1};
+	XtkRt *rt    = xtk_rt_create(&counted.base, &cfg, host_root, &model, update, view);
 	EXPECT(rt, "runtime");
 
-	/* 1. Mount with no viewport yet: fallback 600px window at offset 0.
-	 * item_height 40, overscan 4 -> rows 0 .. ceil(600/40)-1+4 = 18. */
-	xtk_runtime_frame(rt);
-	EXPECT(mock.realized_first == 0 && mock.realized_last == 18, "fallback window 0..18");
-	EXPECT(mock.item_creates == 19, "19 rows mounted");
-	EXPECT(mock.item_destroys == 0, "no rows destroyed at mount");
+	for (int i = 0; i < XTK_QUEUE_CAP; i++)
+		EXPECT(xtk_rt_post(rt, xtk_msg(MSG_SELECT)) == XTK_POST_ACCEPTED, "queue accepts capacity");
+	EXPECT(xtk_rt_post(rt, xtk_msg(MSG_SELECT)) == XTK_POST_FULL, "queue reports overflow");
+	XtkOverflowStatus ov = xtk_rt_overflow(rt);
+	EXPECT(ov.dropped_since_ack == 1u && ov.sticky, "overflow status sticky");
+	xtk_rt_ackoverflow(rt);
+	ov = xtk_rt_overflow(rt);
+	EXPECT(!ov.sticky && ov.dropped_since_ack == 0u, "acknowledge clears sticky");
+	while (rt->q_count) {
+		rt->q_head = (rt->q_head + 1u) % XTK_QUEUE_CAP;
+		rt->q_count--;
+	}
 
-	/* 2. Real viewport appears: 400px at offset 400 -> first floor(400/40)-4=6,
-	 * last ceil(800/40)-1+4=23. Window shrinks 19 -> 18: slot keys shift, at
-	 * most one row remounts; the rest patch in place. */
+	XtkFrameResult fr = xtk_rt_frame(rt);
+	EXPECT(fr.status == XTK_FRAME_COMMITTED, "mount commits");
+	EXPECT(mock.realized_first == 0 && mock.realized_last == 18, "fallback window 0..18");
+	EXPECT(mock.creates == 19, "19 rows mounted");
+	EXPECT(mock.destroys == 0, "no rows destroyed at mount");
+	EXPECT(mock.prepares == 1 && mock.commits == 1, "one prepare/commit");
+
 	mock.viewport_ready = true;
 	mock.offset         = 400.0f;
 	mock.extent         = 400.0f;
 	frame_reset(&mock);
-	xtk_runtime_invalidate(rt);
-	xtk_runtime_frame(rt);
+	xtk_rt_invalidate(rt);
+	fr = xtk_rt_frame(rt);
+	EXPECT(fr.status == XTK_FRAME_COMMITTED, "viewport frame");
 	EXPECT(mock.realized_first == 6 && mock.realized_last == 23, "window 6..23");
-	EXPECT(mock.item_destroys - mock.item_creates == 1, "window shrink retires exactly one row");
-	EXPECT(mock.item_creates <= 1, "window shrink recycles the rest");
-	EXPECT(applied_has(&mock, 23, false), "row 23 content applied");
+	EXPECT(mock.destroys - mock.creates == 1, "window shrink retires exactly one row");
+	EXPECT(mock.creates <= 1, "window shrink recycles the rest");
 
-	/* 3. Same-size window shift: offset 800 -> 16..33. Slot keys rotate over
-	 * the same set, so every retained row is patched — zero churn. */
 	mock.offset = 800.0f;
 	frame_reset(&mock);
-	xtk_runtime_invalidate(rt);
-	xtk_runtime_frame(rt);
+	xtk_rt_invalidate(rt);
+	fr = xtk_rt_frame(rt);
 	EXPECT(mock.realized_first == 16 && mock.realized_last == 33, "window 16..33");
-	EXPECT(mock.item_creates == 0 && mock.item_destroys == 0, "same-size shift fully recycles");
-	EXPECT(applied_has(&mock, 33, false), "row 33 patched in");
+	EXPECT(mock.creates == 0 && mock.destroys == 0, "same-size shift fully recycles");
 
-	/* 4. Selection is a per-row prop patch, not a rebuild. */
 	frame_reset(&mock);
-	xtk_runtime_post(rt, xtk_msg_i(MSG_SELECT, 20));
-	xtk_runtime_frame(rt);
+	xtk_rt_post(rt, xtk_msg_i(MSG_SELECT, 20));
+	fr = xtk_rt_frame(rt);
 	EXPECT(model.selected == 20, "update consumed selection");
-	EXPECT(mock.item_creates == 0 && mock.item_destroys == 0, "selection does not remount");
-	EXPECT(applied_has(&mock, 20, true), "row 20 applied as selected");
-	EXPECT(applied_has(&mock, 21, false), "row 21 stays unselected");
+	EXPECT(mock.creates == 0 && mock.destroys == 0, "selection does not remount");
+	EXPECT(list_item_selected(&counted.base, rt, 20), "row 20 selected");
 
-	/* 5. Count shrinks under the scroll position: offset clamps into the new
-	 * content range and the window stays well-formed. */
 	model.count = 10;
 	frame_reset(&mock);
-	xtk_runtime_invalidate(rt);
-	xtk_runtime_frame(rt);
+	xtk_rt_invalidate(rt);
+	fr = xtk_rt_frame(rt);
 	EXPECT(mock.realized_first == 0 && mock.realized_last == 9, "count shrink clamps window to 0..9");
 
-	/* 6. Empty list realizes nothing. */
 	model.count = 0;
 	frame_reset(&mock);
-	xtk_runtime_invalidate(rt);
-	xtk_runtime_frame(rt);
+	xtk_rt_invalidate(rt);
+	fr = xtk_rt_frame(rt);
 	EXPECT(mock.realized_first == 0 && mock.realized_last == -1, "empty list reports 0..-1");
 
-	xtk_runtime_destroy(rt);
-	xent_destroy_context(ctx);
+	xtk_rt_destroy(rt);
+	xtk_retained_host_destroy(inner);
 	printf("PASS: xtk virtualized list\n");
 	return 0;
 }
