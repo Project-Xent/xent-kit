@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: xent-kit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: xent-kit
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+          build-cache: true
+          project-path: xent-kit
+
+      - name: Install canonical formatter
+        run: pip install clang-format==22.1.2
+
+      - name: Verify generated controls
+        working-directory: xent-kit
+        run: |
+          xmake gen-controls
+          git diff --exit-code
+
+      - name: Check formatting
+        working-directory: xent-kit
+        shell: pwsh
+        run: |
+          $files = git ls-files -- '*.c' '*.h' '*.ispc' |
+            Where-Object { $_ -notmatch '^(thirdparty|microsoft-ui-xaml)/' }
+          if (-not $files) {
+            throw "No source files found"
+          }
+          clang-format --dry-run --Werror --style=file -- $files
+
+      - name: Check out coordinated dependencies
+        shell: pwsh
+        run: |
+          function Clone-Dependency($repo) {
+            $remote = "https://github.com/Project-Xent/$repo.git"
+            $branch = "${{ github.head_ref || github.ref_name }}"
+            $match = git ls-remote --heads $remote "refs/heads/$branch"
+            if ($match) {
+              git clone --depth 1 --branch $branch $remote $repo
+            } else {
+              git clone --depth 1 $remote $repo
+            }
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to clone $repo"
+            }
+          }
+          Clone-Dependency xent-core
+
+      - name: Configure
+        working-directory: xent-kit
+        run: xmake f -m debug
+
+      - name: Test
+        working-directory: xent-kit
+        run: xmake test
+
+      - name: Check patch whitespace
+        working-directory: xent-kit
+        run: git diff --check
