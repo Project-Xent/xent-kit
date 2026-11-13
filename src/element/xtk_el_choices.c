@@ -31,6 +31,20 @@ XtkEl *xtk_combo(XtkUi *ui, char const *placeholder, XtkComboDesc desc) {
 	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.nitem ? desc.nitem : 1));
 	if (!items) return NULL;
 	for (int i = 0; i < desc.nitem; i++) items [i] = xtk_strdup(ui, desc.items [i]);
+	desc.items   = items;
+	desc.content = xtk_strdup(ui, desc.content);
+	if (!XTK_EL_STORE(el, desc)) return NULL;
+	return el;
+}
+
+XtkEl *xtk_looping_selector(XtkUi *ui, XtkLoopingDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_LOOPING, NULL);
+	if (!el) return NULL;
+	if (desc.nitem < 0) desc.nitem = 0;
+	char const **items
+	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.nitem ? desc.nitem : 1));
+	if (!items) return NULL;
+	for (int i = 0; i < desc.nitem; i++) items [i] = xtk_strdup(ui, desc.items [i]);
 	desc.items = items;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
@@ -45,27 +59,6 @@ XtkEl *xtk_number(XtkUi *ui, XtkNumberDesc desc) {
 	return el;
 }
 
-XtkEl *xtk_dropdown(XtkUi *ui, char const *label, XtkDropdownDesc desc) {
-	XtkEl *el = xtk_el_new(ui, XTK_CTRL_DROPDOWN, label);
-	if (!el) return NULL;
-	desc.icon = xtk_strdup(ui, desc.icon);
-	if (desc.nitem < 0) desc.nitem = 0;
-	XtkMenuItemDesc *items = ( XtkMenuItemDesc * ) xtk_arena_alloc(
-	  xtk_ui_arena(ui), sizeof(XtkMenuItemDesc) * ( size_t ) (desc.nitem ? desc.nitem : 1)
-	);
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) {
-		items [i]       = desc.items [i];
-		items [i].label = xtk_strdup(ui, items [i].label);
-		items [i].icon  = xtk_strdup(ui, items [i].icon);
-	}
-	desc.items = items;
-	if (!XTK_EL_STORE(el, desc)) return NULL;
-	XtkEl *flyout = menu_flyout_el(ui, NULL, desc.items, desc.nitem);
-	if (!flyout || !xtk_el_set_children(el, &flyout, 1)) return NULL;
-	return el;
-}
-
 static XtkMenuItemDesc const *menu_items_dup(XtkUi *ui, XtkMenuItemDesc const *items, int count) {
 	XtkMenuItemDesc *copy = ( XtkMenuItemDesc * ) xtk_arena_alloc(
 	  xtk_ui_arena(ui), sizeof(XtkMenuItemDesc) * ( size_t ) (count ? count : 1)
@@ -77,6 +70,18 @@ static XtkMenuItemDesc const *menu_items_dup(XtkUi *ui, XtkMenuItemDesc const *i
 		copy [i].icon  = xtk_strdup(ui, copy [i].icon);
 	}
 	return copy;
+}
+
+XtkEl *xtk_dropdown(XtkUi *ui, char const *label, XtkDropdownDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_DROPDOWN, label);
+	if (!el) return NULL;
+	desc.icon = xtk_strdup(ui, desc.icon);
+	if (desc.nitem < 0) desc.nitem = 0;
+	desc.items = menu_items_dup(ui, desc.items, desc.nitem);
+	if (!desc.items || !XTK_EL_STORE(el, desc)) return NULL;
+	XtkEl *flyout = menu_flyout_el(ui, NULL, desc.items, desc.nitem);
+	if (!flyout || !xtk_el_set_children(el, &flyout, 1)) return NULL;
+	return el;
 }
 
 static XtkEl *split_el(XtkUi *ui, XtkCtrlType type, char const *label, XtkSplitDesc desc) {
@@ -94,8 +99,6 @@ static XtkEl *split_el(XtkUi *ui, XtkCtrlType type, char const *label, XtkSplitD
 
 XtkEl *xtk_split(XtkUi *ui, char const *label, XtkSplitDesc desc) { return split_el(ui, XTK_CTRL_SPLIT, label, desc); }
 
-/* ToggleSplitButton shares XtkSplitDesc; the .checked/.on_toggle fields drive
- * the primary-zone toggle instead of .click. */
 XtkEl *xtk_togglesplit(XtkUi *ui, char const *label, XtkSplitDesc desc) {
 	return split_el(ui, XTK_CTRL_TOGGLESPLIT, label, desc);
 }

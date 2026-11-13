@@ -35,89 +35,89 @@ XtkLocalId xtk_scroll_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps c
 }
 
 bool xtk_scroll_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_scroll_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_scroll_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_scroll_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_SHRINK, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
 bool xtk_scroll_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_scroll_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_scroll_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_scroll_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_scroll_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_scroll_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_scroll_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ORIENTATION, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ORIENTATION, value, change);
 }
 
 bool xtk_scroll_setitems(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_ITEMS, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_ITEMS, value, change);
 }
 
 bool xtk_scroll_setjustify(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_JUSTIFY_CONTENT, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_JUSTIFY_CONTENT, value, change);
 }
 
 bool xtk_scroll_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GAP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GAP, value, change);
 }
 
 bool xtk_scroll_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_LEFT, value, change);
 }
 
 bool xtk_scroll_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_TOP, value, change);
 }
 
 bool xtk_scroll_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_RIGHT, value, change);
 }
 
 bool xtk_scroll_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_BOTTOM, value, change);
 }
 
 bool xtk_scroll_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_FILL, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_FILL, value, change);
 }
 
 bool xtk_scroll_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_FIT_WIDTH, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_FIT_WIDTH, value, change);
 }
 
 bool xtk_scroll_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_FIT_HEIGHT, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_FIT_HEIGHT, value, change);
 }
 
 bool xtk_scroll_setwrap(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_WRAP, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_WRAP, value, change);
 }

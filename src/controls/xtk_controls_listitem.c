@@ -29,59 +29,59 @@ XtkLocalId xtk_listitem_create(XtkTxn *txn, XtkNodeRef parent, XtkItemProps cons
 }
 
 bool xtk_listitem_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_listitem_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_listitem_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_listitem_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_listitem_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_listitem_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_listitem_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_listitem_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_listitem_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_listitem_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_listitem_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_ICON, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_ICON, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_listitem_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_ENABLED, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_ENABLED, value, change);
 }
 
 bool xtk_listitem_setselected(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_SELECTED, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_SELECTED, value, change);
 }
 
 bool xtk_listitem_setexpanded(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_EXPANDED, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_EXPANDED, value, change);
 }
 
 XtkSubRef xtk_listitem_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

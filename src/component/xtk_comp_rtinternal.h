@@ -1,7 +1,7 @@
 #ifndef XTK_COMPONENT_RUNTIME_INTERNAL_H
 #define XTK_COMPONENT_RUNTIME_INTERNAL_H
 
-#include "xtk_component_internal.h"
+#include "xtk_comp_internal.h"
 
 enum
 {

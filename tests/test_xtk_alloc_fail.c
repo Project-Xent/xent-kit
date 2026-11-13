@@ -2,8 +2,8 @@
 #include <xtk/xtk_reconcile.h>
 #include "xtk_retained.h"
 
-#include "xtk_alloc_internal.h"
-#include "runtime/xtk_runtime_internal.h"
+#include <xtk/xtk_alloc.h>
+#include "runtime/xtk_rt_internal.h"
 #include "reconcile/xtk_reconcile_internal.h"
 
 #include <stdio.h>
@@ -97,7 +97,7 @@ static int test_batch_result_failures(void) {
 	for (uint64_t fail_at = 1u; fail_at <= 3u; fail_at++) {
 		xtk_alloc_test_reset();
 		xtk_alloc_fail_at(fail_at);
-		XtkBatchResult *result = xtk_batch_result_create(1u, 1u);
+		XtkBatchResult *result = xtk_batchresult_create(1u, 1u);
 		EXPECT(!result, "result allocation reports injected failure");
 		EXPECT(xtk_alloc_test_stats().failures == 1u, "result failure counted once");
 	}

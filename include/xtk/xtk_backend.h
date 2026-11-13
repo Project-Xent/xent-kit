@@ -9,11 +9,6 @@
 
 #include <xent/xent_display.h>
 
-
-/* Backend implementation ABI. Not for application includes.
- * Replay immutable XentDl; resolve XentResourceId cookies;
- * expose typed capabilities without string service registries. */
-
 typedef struct XtkBackend XtkBackend;
 
 typedef struct XtkBackendVtable {
@@ -27,6 +22,5 @@ struct XtkBackend {
 	XtkBackendVtable const *vt;
 	void                   *impl;
 };
-
 
 #endif

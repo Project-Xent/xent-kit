@@ -22,45 +22,45 @@ XtkLocalId xtk_image_create(XtkTxn *txn, XtkNodeRef parent, XtkImageProps const 
 }
 
 bool xtk_image_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_image_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_image_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_image_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_image_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_image_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_image_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_image_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_image_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_image_setsrc(XtkScene *scene, XtkCtrl control, XtkResource value, XtkChangeStamp change) {
-	return xtk_control_set_resource(scene, control, XTK_PROP_IMAGE_SOURCE, value, change);
+	return xtk_ctrl_setresource(scene, control, XTK_PROP_IMAGE_SOURCE, value, change);
 }
 
 bool xtk_image_setfit(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_IMAGE_STRETCH, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_IMAGE_STRETCH, value, change);
 }

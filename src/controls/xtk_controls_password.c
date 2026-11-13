@@ -28,53 +28,53 @@ XtkLocalId xtk_password_create(XtkTxn *txn, XtkNodeRef parent, XtkInputProps con
 }
 
 bool xtk_password_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_password_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_password_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_password_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_password_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_password_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_password_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_password_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_password_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_password_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_password_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_ENABLED, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_ENABLED, value, change);
 }
 
 bool xtk_password_setplaceholder(
   XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
 ) {
-	return xtk_control_set_string(scene, control, XTK_PROP_PLACEHOLDER, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_PLACEHOLDER, data, xtk_controls_text_len(data, len), change);
 }
 
 XtkSubRef xtk_password_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

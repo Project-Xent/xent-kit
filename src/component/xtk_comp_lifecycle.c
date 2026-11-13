@@ -1,4 +1,4 @@
-#include "xtk_component_runtime_internal.h"
+#include "xtk_comp_rtinternal.h"
 
 void xtk_comp_unmount(XtkCompRt *rt, XtkHost *host, XentCtx *ctx, XtkCtrl control) {
 	XtkCompInst *in = rt ? xtk_comp_find_instance(rt, control) : NULL;
@@ -17,7 +17,6 @@ uint32_t xtk_comp_dispatch(XtkCompRt *rt, XtkHost *host, XentCtx *ctx, XtkCtrl t
 	if (!rt || !event || target == XTK_CTRL_INVALID) return XTK_EVENT_CONTINUE;
 	XtkCompInst *in = xtk_comp_find_instance(rt, target);
 	if (!in && event->target != XTK_CTRL_INVALID) {
-		/* Walk up: event may target a node under content/impl root. */
 		XentNodeId n = ( XentNodeId ) target;
 		while (n != XENT_NODE_INVALID && !in) {
 			in = xtk_comp_find_instance(rt, ( XtkCtrl ) n);

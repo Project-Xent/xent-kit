@@ -49,91 +49,91 @@ XtkLocalId xtk_teachtip_create(XtkTxn *txn, XtkNodeRef parent, XtkTeachingTipPro
 }
 
 bool xtk_teachtip_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_teachtip_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_teachtip_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_teachtip_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_SHRINK, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
 bool xtk_teachtip_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_teachtip_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_teachtip_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_teachtip_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_teachtip_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_teachtip_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_teachtip_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_teachtip_setsubtitle(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_SUBTITLE, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_SUBTITLE, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_teachtip_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_ICON, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_ICON, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_teachtip_setaction(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_ACTION_TEXT, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_ACTION_TEXT, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_teachtip_setactionaccent(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_ACTION_ACCENT, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_ACTION_ACCENT, value, change);
 }
 
 bool xtk_teachtip_setclose(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_CLOSE_TEXT, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_CLOSE_TEXT, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_teachtip_setplacement(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_PLACEMENT, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_PLACEMENT, value, change);
 }
 
 bool xtk_teachtip_setuntargeted(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_UNTARGETED, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_UNTARGETED, value, change);
 }
 
 bool xtk_teachtip_setlightdismiss(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_LIGHT_DISMISS, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_LIGHT_DISMISS, value, change);
 }
 
 bool xtk_teachtip_settail(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_TAIL_VISIBILITY, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_TAIL_VISIBILITY, value, change);
 }
 
 bool xtk_teachtip_setplacementmargin(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PLACEMENT_MARGIN, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PLACEMENT_MARGIN, value, change);
 }
 
 bool xtk_teachtip_setopen(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_OPEN, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_OPEN, value, change);
 }
 
 XtkSubRef xtk_teachtip_onclose(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

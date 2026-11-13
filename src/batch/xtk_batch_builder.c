@@ -140,7 +140,7 @@ void xtk_batch_free(XtkBatch *batch) {
 	xtk_alloc_free(batch);
 }
 
-XtkBatchResult *xtk_batch_result_create(uint32_t control_count, uint32_t subscription_count) {
+XtkBatchResult *xtk_batchresult_create(uint32_t control_count, uint32_t subscription_count) {
 	XtkBatchResult *result = ( XtkBatchResult * ) xtk_alloc_zero(1, sizeof(*result));
 	if (!result) return NULL;
 	if (control_count)
@@ -148,7 +148,7 @@ XtkBatchResult *xtk_batch_result_create(uint32_t control_count, uint32_t subscri
 	if (subscription_count)
 		result->subscriptions = ( XtkSubMapping * ) xtk_alloc_zero(subscription_count, sizeof(*result->subscriptions));
 	if ((control_count && !result->controls) || (subscription_count && !result->subscriptions)) {
-		xtk_batch_result_destroy(result);
+		xtk_batchresult_destroy(result);
 		return NULL;
 	}
 	result->control_count      = control_count;
@@ -156,7 +156,7 @@ XtkBatchResult *xtk_batch_result_create(uint32_t control_count, uint32_t subscri
 	return result;
 }
 
-void xtk_batch_result_destroy(XtkBatchResult *result) {
+void xtk_batchresult_destroy(XtkBatchResult *result) {
 	if (!result) return;
 	xtk_alloc_free(result->controls);
 	xtk_alloc_free(result->subscriptions);
@@ -209,7 +209,7 @@ static bool set_prop_value(XtkBatch *batch, XtkBatchOp *op, XtkValue const *valu
 }
 
 bool xtk_batch_set(XtkBatch *batch, XtkNodeRef target, XtkPropertyId id, XtkValue value, XtkChangeStamp change) {
-	if (id == XTK_PROP_ID_INVALID || !xtk_batch_value_ok(&value) || !xtk_change_stamp_valid(change)) return false;
+	if (id == XTK_PROP_ID_INVALID || !xtk_batch_value_ok(&value) || !xtk_changestamp_valid(change)) return false;
 	XtkBatchOp *op = batch_push(batch, XTK_BATCH_OP_SET_PROP);
 	if (!op) return false;
 	op->u.set_prop.target       = target;

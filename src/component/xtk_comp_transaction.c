@@ -1,4 +1,4 @@
-#include "xtk_component_runtime_internal.h"
+#include "xtk_comp_rtinternal.h"
 
 #include <string.h>
 

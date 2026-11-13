@@ -2,7 +2,7 @@
 #include <xtk/xtk_catalog.h>
 #include <xtk/xtk_reconcile.h>
 
-#include "xtk_alloc_internal.h"
+#include <xtk/xtk_alloc.h>
 #include "xtk_retained.h"
 
 #include <inttypes.h>
@@ -246,7 +246,7 @@ static XtkCtrl *canvas_mount(WorkHost *host, XtkCtrl *canvas) {
 		*canvas = result_control(result, root);
 		for (uint32_t i = 0; i < CANVAS_ITEMS; i++) controls [i] = result_control(result, locals [i]);
 	}
-	xtk_batch_result_destroy(result);
+	xtk_batchresult_destroy(result);
 	xtk_batch_free(batch);
 	return controls;
 }
@@ -274,7 +274,7 @@ static bool canvas_patch(WorkHost *host, XtkCtrl const *controls, uint32_t revis
 	XtkBatchResult *result = commit_batch(&host->base, batch);
 	xtk_batch_free(batch);
 	if (!result) return false;
-	xtk_batch_result_destroy(result);
+	xtk_batchresult_destroy(result);
 	return true;
 }
 
@@ -311,7 +311,7 @@ static int run_canvas(void) {
 	if (!drop || !xtk_batch_drop(drop, xtk_ref_existing(canvas))) valid = false;
 	XtkBatchResult *result = drop ? commit_batch(&host.base, drop) : NULL;
 	if (!result) valid = false;
-	xtk_batch_result_destroy(result);
+	xtk_batchresult_destroy(result);
 	xtk_batch_free(drop);
 	xtk_alloc_free(controls);
 	xtk_retained_host_destroy(inner);

@@ -7,9 +7,6 @@
 
 typedef struct XtkNode XtkNode;
 
-/** out_old[i] = old index for next child i, or -1 for CREATE. Returns false on OOM. */
-bool                   xtk_plan_match_positional(XtkNode const *old_node, XtkEl const *next_el, int *out_old);
-
 typedef struct XtkKeyedMatch {
 	int  *old;
 	bool *move;
@@ -20,7 +17,6 @@ typedef struct XtkKeyedMatch {
 
 bool xtk_plan_match_keyed(XtkNode const *old_node, XtkEl const *next_el, XtkScratch *scratch, XtkKeyedMatch *match);
 
-/** Same-type check used by matchers. */
 bool xtk_plan_same_type(XtkNode const *old_node, XtkEl const *next_el);
 
 #endif

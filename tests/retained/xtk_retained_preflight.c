@@ -24,12 +24,12 @@ static XtkPropertyKind value_property_kind(XtkValueKind kind) {
 }
 
 static bool standard_property_ok(XtkCtrlId control, XtkPropPatch const *patch) {
-	XtkPropDesc const *property = xtk_catalog_control_property(control, patch->id);
+	XtkPropDesc const *property = xtk_catalog_ctrlprop(control, patch->id);
 	return property && property->kind == value_property_kind(patch->value.kind);
 }
 
 static bool event_phases_ok(XtkEventId event, uint32_t phases) {
-	if (!xtk_event_phases_valid(phases)) return false;
+	if (!xtk_event_phasesvalid(phases)) return false;
 	XtkEventDesc const *descriptor = xtk_catalog_event(event);
 	if (!descriptor) return true;
 	uint32_t allowed = XTK_EVENT_PHASE_MASK_TARGET;
@@ -82,15 +82,15 @@ static XtkBatchError pf_ref(PreflightCtx *ctx, XtkNodeRef ref, bool allow_none) 
 	if (ref.kind == XTK_REF_NONE) return allow_none ? XTK_BATCH_OK : XTK_BATCH_ERR_INVALID_LOCAL;
 	if (ref.kind == XTK_REF_EXISTING) {
 		if (ref.u.existing == XTK_CTRL_INVALID
-			|| !retained_host_live(ctx->R, ref.u.existing)
-			|| pf_destroyed(ctx, ref.u.existing))
+		    || !retained_host_live(ctx->R, ref.u.existing)
+		    || pf_destroyed(ctx, ref.u.existing))
 			return XTK_BATCH_ERR_INVALID_HANDLE;
 		return XTK_BATCH_OK;
 	}
 	if (ref.kind != XTK_REF_LOCAL) return XTK_BATCH_ERR_INVALID_LOCAL;
 	if (ref.u.local >= ctx->batch->next_local
-		|| !ctx->locals [ref.u.local].defined
-		|| ctx->locals [ref.u.local].destroyed)
+	    || !ctx->locals [ref.u.local].defined
+	    || ctx->locals [ref.u.local].destroyed)
 		return XTK_BATCH_ERR_INVALID_LOCAL;
 	return XTK_BATCH_OK;
 }
@@ -111,7 +111,7 @@ static bool prop_id_in_control(XtkCtrlDesc const *desc, XtkPropertyId id) {
 }
 
 static XtkBatchError pf_component_patch(XtkCompType const *type, XtkPropPatch const *patch) {
-	if (!value_ok(&patch->value) || !xtk_change_stamp_valid(patch->change)) return XTK_BATCH_ERR_INVALID_VALUE;
+	if (!value_ok(&patch->value) || !xtk_changestamp_valid(patch->change)) return XTK_BATCH_ERR_INVALID_VALUE;
 	if (patch->id == XTK_PROP_COMPONENT_PROPS) {
 		if (patch->value.kind != XTK_VALUE_BYTES) return XTK_BATCH_ERR_INVALID_VALUE;
 		if (patch->value.u.bytes.len != ( uint32_t ) type->props_size) return XTK_BATCH_ERR_INVALID_VALUE;
@@ -126,15 +126,15 @@ static XtkBatchError pf_component_patch(XtkCompType const *type, XtkPropPatch co
 static XtkBatchError pf_create_type(PreflightCtx *ctx, XtkCtrlId id, XtkCompType const **out) {
 	*out = NULL;
 	if (xtk_catalog_standard(id)) return XTK_BATCH_OK;
-	if (!xtk_ctrl_is_component(id) || !ctx->R->comp) return XTK_BATCH_ERR_VALIDATION;
+	if (!xtk_ctrl_iscomp(id) || !ctx->R->comp) return XTK_BATCH_ERR_VALIDATION;
 	*out = xtk_comp_lookup(ctx->R->comp, id);
 	return *out ? XTK_BATCH_OK : XTK_BATCH_ERR_VALIDATION;
 }
 
 static XtkBatchError pf_create_patch(XtkBatchCreate const *op, XtkCompType const *ctype, XtkPropPatch const *patch) {
 	if (ctype) return pf_component_patch(ctype, patch);
-	if (!xtk_catalog_control_property(op->type, patch->id)) return XTK_BATCH_ERR_INVALID_PROPERTY;
-	if (!value_ok(&patch->value) || !xtk_change_stamp_valid(patch->change)) return XTK_BATCH_ERR_INVALID_VALUE;
+	if (!xtk_catalog_ctrlprop(op->type, patch->id)) return XTK_BATCH_ERR_INVALID_PROPERTY;
+	if (!value_ok(&patch->value) || !xtk_changestamp_valid(patch->change)) return XTK_BATCH_ERR_INVALID_VALUE;
 	return standard_property_ok(op->type, patch) ? XTK_BATCH_OK : XTK_BATCH_ERR_INVALID_PROPERTY;
 }
 
@@ -167,15 +167,15 @@ static XtkBatchError pf_set_prop(PreflightCtx *ctx, uint32_t op_index) {
 	XtkBatchSetProp const *op  = &ctx->batch->ops [op_index].u.set_prop;
 	XtkBatchError          err = pf_ref(ctx, op->target, false);
 	if (err != XTK_BATCH_OK) return err;
-	if (op->patch.id == XTK_PROP_ID_INVALID || !value_ok(&op->patch.value) || !xtk_change_stamp_valid(op->patch.change))
+	if (op->patch.id == XTK_PROP_ID_INVALID || !value_ok(&op->patch.value) || !xtk_changestamp_valid(op->patch.change))
 		return XTK_BATCH_ERR_INVALID_VALUE;
 	XtkCtrlId type = pf_ref_type(ctx, op->target);
-	if (xtk_ctrl_is_component(type)) {
+	if (xtk_ctrl_iscomp(type)) {
 		XtkCompType const *ctype = ctx->R->comp ? xtk_comp_lookup(ctx->R->comp, type) : NULL;
 		if (!ctype) return XTK_BATCH_ERR_VALIDATION;
 		return pf_component_patch(ctype, &op->patch);
 	}
-	if (!xtk_catalog_control_property(type, op->patch.id)) return XTK_BATCH_ERR_INVALID_PROPERTY;
+	if (!xtk_catalog_ctrlprop(type, op->patch.id)) return XTK_BATCH_ERR_INVALID_PROPERTY;
 	if (xtk_catalog_standard(type) && !standard_property_ok(type, &op->patch)) return XTK_BATCH_ERR_INVALID_PROPERTY;
 	return XTK_BATCH_OK;
 }
@@ -198,7 +198,7 @@ static XtkBatchError pf_subscribe(PreflightCtx *ctx, uint32_t op_index) {
 	if (!op->fn || !event_phases_ok(op->event, op->phases) || op->token >= ctx->batch->next_sub)
 		return XTK_BATCH_ERR_VALIDATION;
 	XtkCtrlId type = pf_ref_type(ctx, op->target);
-	if (xtk_catalog_standard(type) && !xtk_catalog_control_event(type, op->event)) return XTK_BATCH_ERR_VALIDATION;
+	if (xtk_catalog_standard(type) && !xtk_catalog_ctrlevent(type, op->event)) return XTK_BATCH_ERR_VALIDATION;
 	return XTK_BATCH_OK;
 }
 

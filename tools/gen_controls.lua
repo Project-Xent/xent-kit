@@ -47,7 +47,7 @@ end
 
 local function struct_fields(group)
   local lines = {
-    "\tuint64_t       set; /* presence mask: bit i = props[i] */",
+    "\tuint64_t       set;",
     "\tXtkChangeStamp stamp;",
   }
   for _, prop in ipairs(catalog.props[group]) do
@@ -55,7 +55,7 @@ local function struct_fields(group)
     if kind == "string" then
       add(lines,
         "\tchar const    *" .. name .. ";",
-        "\tuint32_t       " .. name .. "_len; /* 0 => strlen(" .. name .. ") when " .. name .. " != NULL */")
+        "\tuint32_t       " .. name .. "_len;")
     else
       add(lines, string.format("\t%-14s %s;", catalog.kinds[kind].ctype, name))
     end
@@ -100,13 +100,15 @@ local function event_decl(control, event)
     .. "(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);"
 end
 
+local function supports_prop(control, prop)
+
+  return not prop[4] or prop[4] == control.token
+end
+
 local function header()
   local lines = {
     "#ifndef XTK_CONTROLS_H",
     "#define XTK_CONTROLS_H",
-    "",
-    "/* Typed conveniences over the standard catalog + txn protocol.",
-    " * Generated from tools/catalog.lua. */",
     "",
     "#include \"xtk_catalog.h\"",
     "#include \"xtk_scene.h\"",
@@ -121,7 +123,9 @@ local function header()
   end
   for _, control in ipairs(catalog.controls) do
     if control.group then
-      for _, prop in ipairs(catalog.props[control.group]) do add(lines, setter_decl(control, prop)) end
+      for _, prop in ipairs(catalog.props[control.group]) do
+        if supports_prop(control, prop) then add(lines, setter_decl(control, prop)) end
+      end
     end
     for _, event in ipairs(control.events) do add(lines, event_decl(control, event)) end
   end
@@ -160,7 +164,9 @@ local function create_fn(control)
     "\tuint32_t     count = 0u;",
     "\tXtkChangeStamp change = props->stamp;",
   }
-  for bit, prop in ipairs(props) do add(lines, append_line(bit - 1, prop)) end
+  for bit, prop in ipairs(props) do
+    if supports_prop(control, prop) then add(lines, append_line(bit - 1, prop)) end
+  end
   add(lines, "\treturn xtk_txn_create(txn, " .. enum .. ", parent, xtk_ref_none(), patches, count);", "}")
   return join(lines)
 end
@@ -197,7 +203,7 @@ local function source(control)
   local chunks = {'#include "xtk_controls_internal.h"', "", create_fn(control)}
   if control.group then
     for _, prop in ipairs(catalog.props[control.group]) do
-      add(chunks, "", setter_fn(control, prop))
+      if supports_prop(control, prop) then add(chunks, "", setter_fn(control, prop)) end
     end
   end
   for _, event in ipairs(control.events) do add(chunks, "", event_fn(control, event)) end
@@ -306,7 +312,8 @@ end
 local function format(paths)
   local formatter = os.getenv("CLANG_FORMAT") or "clang-format"
   local version = os.iorunv(formatter, {"--version"})
-  assert(version:find("version 22.1.2", 1, true), "clang-format 22.1.2 required: " .. version)
+  local major = tonumber(version:match("version (%d+)%."))
+  assert(major and major >= 22, "clang-format 22+ required: " .. version)
   local args = {"--style=file", "-i"}
   for _, pathname in ipairs(paths) do args[#args + 1] = pathname end
   os.execv(formatter, args)

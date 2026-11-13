@@ -35,89 +35,89 @@ XtkLocalId xtk_splitpane_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProp
 }
 
 bool xtk_splitpane_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_splitpane_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_splitpane_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_splitpane_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_SHRINK, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
 bool xtk_splitpane_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_splitpane_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_splitpane_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_splitpane_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_splitpane_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_splitpane_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_splitpane_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ORIENTATION, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ORIENTATION, value, change);
 }
 
 bool xtk_splitpane_setitems(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_ITEMS, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_ITEMS, value, change);
 }
 
 bool xtk_splitpane_setjustify(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_JUSTIFY_CONTENT, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_JUSTIFY_CONTENT, value, change);
 }
 
 bool xtk_splitpane_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GAP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GAP, value, change);
 }
 
 bool xtk_splitpane_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_LEFT, value, change);
 }
 
 bool xtk_splitpane_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_TOP, value, change);
 }
 
 bool xtk_splitpane_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_RIGHT, value, change);
 }
 
 bool xtk_splitpane_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_PADDING_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_PADDING_BOTTOM, value, change);
 }
 
 bool xtk_splitpane_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_FILL, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_FILL, value, change);
 }
 
 bool xtk_splitpane_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_FIT_WIDTH, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_FIT_WIDTH, value, change);
 }
 
 bool xtk_splitpane_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_FIT_HEIGHT, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_FIT_HEIGHT, value, change);
 }
 
 bool xtk_splitpane_setwrap(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_WRAP, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_WRAP, value, change);
 }

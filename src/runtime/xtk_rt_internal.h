@@ -30,13 +30,12 @@ struct XtkRt {
 	bool               force;
 	bool               frame_pending;
 	bool               in_frame;
+	void const        *owner_thread;
 	uint64_t           frame_sequence;
 
 	struct XtkScratch *scratch;
 	struct XtkScratch *plan_scratch;
 	XtkBatch          *batch_cache;
 };
-
-XtkPostStatus xtk_runtime_post_string(XtkRt *rt, XtkMsg msg, char const *data, uint32_t len);
 
 #endif

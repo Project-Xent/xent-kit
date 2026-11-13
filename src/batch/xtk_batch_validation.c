@@ -11,7 +11,7 @@ bool xtk_batch_value_ok(XtkValue const *v) {
 }
 
 bool xtk_batch_prop_ok(XtkPropPatch const *prop) {
-	return prop->id != XTK_PROP_ID_INVALID && xtk_batch_value_ok(&prop->value) && xtk_change_stamp_valid(prop->change);
+	return prop->id != XTK_PROP_ID_INVALID && xtk_batch_value_ok(&prop->value) && xtk_changestamp_valid(prop->change);
 }
 
 bool xtk_batch_props_ok(XtkPropPatch const *props, uint32_t count) {
@@ -39,12 +39,12 @@ XtkPropertyKind xtk_batch_prop_kind(XtkValueKind kind) {
 }
 
 bool xtk_batch_stdprop_ok(XtkCtrlId control, XtkPropPatch const *patch) {
-	XtkPropDesc const *property = xtk_catalog_control_property(control, patch->id);
+	XtkPropDesc const *property = xtk_catalog_ctrlprop(control, patch->id);
 	return property && property->kind == xtk_batch_prop_kind(patch->value.kind);
 }
 
 bool xtk_batch_phases_ok(XtkEventId event, uint32_t phases) {
-	if (!xtk_event_phases_valid(phases)) return false;
+	if (!xtk_event_phasesvalid(phases)) return false;
 	XtkEventDesc const *descriptor = xtk_catalog_event(event);
 	if (!descriptor) return true;
 	uint32_t allowed = XTK_EVENT_PHASE_MASK_TARGET;

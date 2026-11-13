@@ -1,9 +1,9 @@
 #include <xtk/xtk_reconcile.h>
 #include "xtk_retained.h"
 
-#include "xtk_alloc_internal.h"
+#include <xtk/xtk_alloc.h>
 #include "xtk_internal.h"
-#include "runtime/xtk_runtime_internal.h"
+#include "runtime/xtk_rt_internal.h"
 #include "reconcile/xtk_scratch.h"
 
 #include <inttypes.h>
@@ -76,8 +76,8 @@ static void noop_update(void *model, XtkMsg msg) {
 static int workload_count(Workload workload, bool changed, int nitem) {
 	if (!changed) return nitem;
 	if (workload == WORKLOAD_KEYED_APPEND
-		|| workload == WORKLOAD_KEYED_PREPEND
-		|| workload == WORKLOAD_KEYED_MIDDLE_INSERT)
+	    || workload == WORKLOAD_KEYED_PREPEND
+	    || workload == WORKLOAD_KEYED_MIDDLE_INSERT)
 		return nitem + ITEM_DELTA;
 	if (workload == WORKLOAD_KEYED_DELETE) return nitem - ITEM_DELTA;
 	return nitem;
@@ -323,9 +323,9 @@ static int run_workload(Workload workload, int nitem, int depth) {
 	  " plan_capacity=%zu match_capacity=%zu\n",
 	  workload_name(workload), nitem, depth,
 	  workload == WORKLOAD_KEYED_APPEND
-		  || workload == WORKLOAD_KEYED_PREPEND
-		  || workload == WORKLOAD_KEYED_MIDDLE_INSERT
-		  || workload == WORKLOAD_KEYED_DELETE
+	      || workload == WORKLOAD_KEYED_PREPEND
+	      || workload == WORKLOAD_KEYED_MIDDLE_INSERT
+	      || workload == WORKLOAD_KEYED_DELETE
 		? ITEM_DELTA
 		: 0,
 	  iterations, elapsed, elapsed / ( uint64_t ) iterations, allocations.attempts, fixture.host.counts.creates,

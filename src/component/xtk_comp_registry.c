@@ -1,4 +1,4 @@
-#include "xtk_component_runtime_internal.h"
+#include "xtk_comp_rtinternal.h"
 
 XtkCompRt *xtk_comp_create(void) { return ( XtkCompRt * ) xtk_alloc_zero(1, sizeof(XtkCompRt)); }
 
@@ -20,7 +20,7 @@ void xtk_comp_destroy(XtkCompRt *rt) {
 
 bool xtk_comp_register(XtkCompRt *rt, XtkCompType const *type) {
 	if (!rt || !type || !type->control) return false;
-	if (!xtk_ctrl_is_component(type->control->id)) return false;
+	if (!xtk_ctrl_iscomp(type->control->id)) return false;
 	if (!type->ops.prepare_mount || !type->ops.commit_mount || !type->ops.abort || !type->ops.unmount) return false;
 	if (type->ops.prepare_update && (!type->ops.commit_update)) return false;
 	for (uint32_t i = 0; i < rt->type_count; i++)

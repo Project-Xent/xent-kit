@@ -1,7 +1,3 @@
-/**
- * @file xtk_internal.h
- * @brief XTK internals: frame arenas and builder helpers.
- */
 #ifndef XTK_INTERNAL_H
 #define XTK_INTERNAL_H
 
@@ -121,7 +117,6 @@ struct XtkNode *xtk_ui_find_region(XtkUi const *ui, uint64_t id, uint64_t revisi
 #define XTK_EL_DETAIL(el_, t) (( t * ) xtk_el_detail((el_), sizeof(t)))
 #define XTK_EL_STORE(el_, v_) xtk_el_detail_set((el_), &(v_), sizeof(v_))
 
-/** Discard the transient frame after a failed transaction. */
 void   xtk_ui_abort_candidate(XtkUi *ui);
 
 XtkEl *xtk_el_new(XtkUi *ui, XtkCtrlId type, char const *text);

@@ -7,7 +7,7 @@
 #include "xtk_retained.h"
 #include <xtk/xtk_alloc.h>
 #include <xtk/xtk_comp_rt.h>
-#include "component/xtk_component_internal.h"
+#include "component/xtk_comp_internal.h"
 
 #include <string.h>
 #include <xent/xent.h>
@@ -130,8 +130,6 @@ static bool inline retained_host_live(Retained const *R, XtkCtrl control) {
 	return control != XTK_CTRL_INVALID && xent_node_valid(R->ctx, retained_as_node(control));
 }
 
-/* --- props ---------------------------------------------------------------- */
-
 void             retained_value_clear(XtkValue *v);
 bool             retained_value_clone(XtkValue *dst, XtkValue const *src);
 PropEntry       *retained_prop_find(Retained *R, XtkCtrl control, XtkPropertyId id);
@@ -143,15 +141,11 @@ bool             retained_apply_prop(Prepare *P, XtkCtrl control, XtkPropPatch c
 void             retained_rollback_prop(Retained *R, UndoProp *prop);
 bool             retained_value_to_view(XtkValue const *v, XtkValueView *out);
 
-/* --- events --------------------------------------------------------------- */
-
 void             retained_clear_control_subs(Retained *R, XtkCtrl control);
 bool             retained_apply_subscribe(Prepare *P, XtkBatchSubscribe const *op);
 bool             retained_apply_unsubscribe(Prepare *P, XtkSubId id);
 void             retained_rollback_sub(Retained *R, UndoSub const *sub);
 uint32_t         retained_dispatch_at(Retained *R, XtkEvent *event);
-
-/* --- txn / invalidation --------------------------------------------------- */
 
 bool             retained_types_set(Retained *R, XentNodeId node, XtkCtrlId type);
 XtkCtrlId        retained_types_get(Retained const *R, XentNodeId node);
@@ -175,8 +169,6 @@ bool               xtk_retained_register_component(XtkHost *host, XtkCompType co
 bool               xtk_retained_set_providers(XtkHost *host, XtkProviderDesc const *providers, uint32_t count);
 XtkCtrl            xtk_retained_component_content_root(XtkHost const *host, XtkCtrl control);
 XtkCtrl            xtk_retained_component_impl_root(XtkHost const *host, XtkCtrl control);
-
-/* --- query ---------------------------------------------------------------- */
 
 bool               retained_host_is_live(XtkHost const *host, XtkCtrl control);
 uint64_t           retained_host_revision(XtkHost const *host);

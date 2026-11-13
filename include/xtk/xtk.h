@@ -1,49 +1,3 @@
-/**
- * @file xtk.h
- * @brief XTK — application declarative API (Elm-style view description).
- *
- * Header split (v0.3.0 contracts):
- * - xtk.h              application / declarative conveniences (this file)
- * - xtk_msg.h          Elm message + update/view runtime protocol
- * - xtk_scene.h        scene context, scoped batches, typed property ops
- * - xtk_cells.h        restricted Component-owned leaf-property cells
- * - xtk_controls.h     catalog-backed typed control conveniences
- * - xtk_alloc.h        kit-wide allocator
- * - xtk_comp_rt.h      Component runtime a batch host drives
- * - xtk_host.h         advanced retained host + batch commit
- * - xtk_component.h    Component-author lifecycle
- * - xtk_backend.h      backend replay / capability ABI
- * - xtk_descriptor.h   control/property/event/a11y/capability descriptors
- * - xtk_batch.h        validation + atomic commit semantics
- *
- * Each frame the app's view function builds a throwaway XtkEl description
- * tree from per-frame arena memory; the reconciler diffs it against retained
- * node state and applies the changes to retained controls. Interaction
- * never calls back into user code directly: controls post XtkMsg values that
- * the app's update function consumes before the next view pass.
- *
- * Conventions:
- * - Descriptor structs use designated initializers; zero is always a sensible
- *   default (e.g. `.disabled = false`, `.size = 0` meaning 14dp text).
- * - Children are compound-literal arrays terminated by XTK_END. NULL entries
- *   are skipped, so `cond ? xtk_text(...) : NULL` is conditional rendering.
- * - Every string passed in is copied into the frame arena immediately;
- *   callers may pass stack buffers. Element pointers are only valid until
- *   the next frame begins.
- *
- * @code
- * XtkEl *view(XtkUi *ui, Model const *m) {
- *     return xtk_scroll(ui, (XtkEl *[]) {
- *       xtk_column(ui, (XtkStackDesc) {.gap = 12, .padding = {32, 32, 32, 32}}, (XtkEl *[]) {
- *         xtk_text(ui, "Counter", (XtkTextDesc) {.size = 24}),
- *         xtk_text(ui, xtk_fmt(ui, "Count: %d", m->count), (XtkTextDesc) {0}),
- *         xtk_button(ui, "Increment", (XtkButtonDesc) {.click = xtk_msg(MSG_INCREMENT)}),
- *         m->count > 0 ? xtk_button(ui, "Reset", (XtkButtonDesc) {.click = xtk_msg(MSG_RESET)}) : NULL,
- *         XTK_END }),
- *       XTK_END });
- * }
- * @endcode
- */
 #ifndef XTK_H
 #define XTK_H
 
@@ -52,7 +6,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <xent/xent.h>
-
 
 typedef XtkEl *(*XtkRegionBuildFn)(XtkUi *ui, void *ctx);
 
@@ -73,82 +26,100 @@ typedef struct XtkKey {
 	} value;
 } XtkKey;
 
-/**
- * @brief Children-array terminator. NULL cannot terminate because NULL
- * entries inside the array mean "render nothing" (conditional rendering).
- */
 extern XtkEl *const XTK_END;
 
-/**
- * @brief Build a children-array literal without writing the trailing XTK_END:
- * `xtk_column(ui, desc, xtk_kids(a, b, c))`. Empty is fine: `xtk_kids()`.
- */
 #define xtk_kids(...) (( XtkEl *[] ) {__VA_ARGS__ __VA_OPT__(, ) XTK_END})
 
-/* -------------------------------------------------------------------------
- * Descriptors (all fields optional; zero = default)
- * ---------------------------------------------------------------------- */
-
 typedef struct XtkTextDesc {
-	float         size;   /**< Font size in DIPs; 0 = 14. */
-	XtkFontWeight weight; /**< 0 = regular. */
-	XtkTextAlign  align;  /**< 0 = left. */
-	XtkColor      color;  /**< 0 alpha = theme default. */
+	float         size;
+	XtkFontWeight weight;
+	XtkTextAlign  align;
+	XtkColor      color;
+	uint32_t      max_lines;
+	XtkTextTrim   trim;
+	bool          nowrap;
+	bool          selectable;
 } XtkTextDesc;
 
 typedef struct XtkButtonDesc {
-	XtkButtonStyle style; /**< 0 = standard. */
+	XtkButtonStyle style;
 	bool           disabled;
-	char const    *icon;  /**< Segoe Fluent Icons name, or NULL. */
+	char const    *icon;
 	XtkMsg         click;
 } XtkButtonDesc;
 
 typedef struct XtkToggleDesc {
 	bool   checked;
 	bool   disabled;
-	XtkMsg change; /**< Delivered with .b = the new checked state. */
+	bool   indeterminate;
+	bool   three_state;
+	XtkMsg change;
+	XtkMsg change_state;
 } XtkToggleDesc;
 
 typedef struct XtkSliderDesc {
 	float            min;
-	float            max;            /**< 0 (with min 0) = 100. */
+	float            max;
 	float            value;
-	float            step;           /**< Snap grid (WinUI StepFrequency); 0 = the WinUI default of 1. */
-	float            tick;           /**< Tick mark interval (WinUI TickFrequency); 0 = no ticks. */
-	XtkTickPlacement tick_placement; /**< Zero = XTK_TICK_INLINE, the WinUI default. */
-	bool             snap_to_ticks;  /**< Snap the value to tick multiples instead of step multiples. */
-	float            small_change;   /**< Arrow-key delta; 0 = the WinUI default of 1. */
-	float            large_change;   /**< PageUp/Down delta; 0 = the WinUI default of 10. */
+	float            step;
+	float            tick;
+	XtkTickPlacement tick_placement;
+	bool             snap_to_ticks;
+	float            small_change;
+	float            large_change;
 	bool             disabled;
-	XtkMsg           change;         /**< Delivered with .f = the new value. */
+	bool             vertical;
+	bool             range;
+	float            range_start;
+	float            range_end;
+	XtkMsg           change;
+	XtkMsg           change_range;
 } XtkSliderDesc;
 
+typedef struct XtkScrollBarDesc {
+	bool   horizontal;
+	double min;
+	double max;
+	double value;
+	double viewport;
+	double small_change;
+	double large_change;
+	bool   disabled;
+	XtkMsg change;
+} XtkScrollBarDesc;
+
 typedef struct XtkTextBoxDesc {
-	char const *content; /**< NULL = uncontrolled (keep what the user typed). */
+	char const *content;
 	bool        disabled;
-	XtkMsg      change;  /**< Delivered with .ptr = transient UTF-8 text (copy to keep). */
+	bool        multiline;
+	bool        readonly;
+	XtkMsg      change;
 } XtkTextBoxDesc;
 
 typedef struct XtkProgressDesc {
-	float value;
-	float min;
-	float max; /**< 0 = 100. */
-	bool  indeterminate;
+	float            value;
+	float            min;
+	float            max;
+	bool             indeterminate;
+	XtkProgressState state;
+	bool             inactive;
+	XentInsets       padding;
+	float            border_width;
 } XtkProgressDesc;
 
 typedef struct XtkBadgeDesc {
-	XtkBadgeMode mode; /**< 0 = dot. */
+	XtkBadgeMode mode;
 	int32_t      value;
-	char const  *icon; /**< Icon name for XTK_BADGE_ICON. */
+	char const  *icon;
 } XtkBadgeDesc;
 
 typedef struct XtkImageDesc {
-	XtkResource     source;  /**< Backend-neutral image resource cookie. */
-	XtkImageStretch stretch; /**< 0 = none; XTK_IMAGE_UNIFORM recommended. */
+	XtkResource     source;
+	XtkImageStretch stretch;
 } XtkImageDesc;
 
 typedef struct XtkHyperlinkDesc {
-	char const *url; /**< Opened on click; NULL = message only. */
+	char const *url;
 	bool        disabled;
 	XtkMsg      click;
 } XtkHyperlinkDesc;
@@ -156,234 +127,255 @@ typedef struct XtkHyperlinkDesc {
 typedef struct XtkStackDesc {
 	float           gap;
 	XentInsets      padding;
-	XentFlexAlign   align;   /**< Cross-axis alignment; 0 = start. */
-	XentFlexJustify justify; /**< Main-axis distribution; 0 = start. */
-	bool            fill;    /**< Fill the main axis instead of hugging content. */
+	XentFlexAlign   align;
+	XentFlexJustify justify;
+	bool            fill;
 	XentFlexWrap    wrap;
 } XtkStackDesc;
 
-typedef struct XtkComboDesc {
-	char const *const *items;  /**< UTF-8 item strings (copied into the arena). */
+typedef struct XtkLoopingDesc {
+	char const *const *items;
 	int                nitem;
-	int                sel;    /**< -1 = show the placeholder. */
-	XtkMsg             select; /**< Delivered with .i = the selected index. */
+	int                sel;
+	float              itemh;
+	float              itemw;
+	bool               loop;
+	bool               disabled;
+	XtkMsg             select;
+} XtkLoopingDesc;
+
+typedef enum XtkClock
+{
+	XTK_CLOCK_SYSTEM = 0,
+	XTK_CLOCK_12H,
+	XTK_CLOCK_24H,
+} XtkClock;
+
+static int32_t inline xtk_date(int year, int month, int day) { return year * 10000 + month * 100 + day; }
+
+typedef struct XtkDatePickerDesc {
+	char const *header;
+	int32_t     date;
+	int         minyear;
+	int         maxyear;
+	bool        disabled;
+	XtkMsg      change;
+} XtkDatePickerDesc;
+
+typedef struct XtkTimePickerDesc {
+	char const *header;
+	bool        has_time;
+	int32_t     minutes;
+	XtkClock    clock;
+	int         step;
+	bool        disabled;
+	XtkMsg      change;
+} XtkTimePickerDesc;
+
+typedef enum XtkCalendarMode
+{
+	XTK_CALENDAR_SINGLE = 0,
+	XTK_CALENDAR_NONE,
+	XTK_CALENDAR_MULTIPLE,
+} XtkCalendarMode;
+
+typedef struct XtkCalendarDesc {
+	int32_t         date;
+	XtkCalendarMode mode;
+	int32_t         mindate;
+	int32_t         maxdate;
+	int             firstday;
+	bool            disabled;
+	XtkMsg          select;
+} XtkCalendarDesc;
+
+typedef enum XtkSpectrum
+{
+	XTK_SPECTRUM_HUE_SATURATION = 0,
+	XTK_SPECTRUM_HUE_VALUE,
+	XTK_SPECTRUM_SATURATION_VALUE,
+} XtkSpectrum;
+
+typedef struct XtkColorPickerDesc {
+	XtkColor    color;
+	bool        alpha;
+	bool        morebutton;
+	XtkSpectrum spectrum;
+	bool        disabled;
+	XtkMsg      change;
+} XtkColorPickerDesc;
+
+typedef struct XtkComboDesc {
+	char const *const *items;
+	int                nitem;
+	int                sel;
+	bool               editable;
+	char const        *content;
+	XtkMsg             select;
+	XtkMsg             submit;
 } XtkComboDesc;
 
 typedef struct XtkExpanderDesc {
 	bool   expanded;
-	float  w;        /**< Explicit control width in DIPs; 0 = auto. */
-	float  contenth; /**< Explicit content-region height; 0 = content-sized. */
-	XtkMsg toggle;   /**< Delivered with .b = the new expanded state. */
+	float  w;
+	float  contenth;
+	XtkMsg toggle;
 } XtkExpanderDesc;
 
 typedef struct XtkInfoBarDesc {
-	XtkInfoBarSeverity severity; /**< 0 = informational. */
+	XtkInfoBarSeverity severity;
 	bool               closable;
-	char const        *message;  /**< Body text; set by xtk_infobar. */
-	XtkMsg             close;    /**< Close button; hide by not rendering the bar. */
+	char const        *message;
+	XtkMsg             close;
 } XtkInfoBarDesc;
 
 typedef struct XtkNumberDesc {
 	double min;
-	double max;  /**< 0 (with min 0) = 100. */
-	double step; /**< Spin/wheel increment; 0 = 1. */
+	double max;
+	double step;
 	double value;
 	bool   disabled;
-	bool   hide_spin; /**< Hide the +/- spin buttons. */
-	XtkMsg change;    /**< Delivered with .d = the new value. */
+	bool   hide_spin;
+	XtkMsg change;
 } XtkNumberDesc;
 
 typedef struct XtkMenuItemDesc {
-	char const *label; /**< NULL = separator. */
-	char const *icon;  /**< Segoe Fluent Icons name, or NULL. */
+	char const *label;
+	char const *icon;
 	bool        disabled;
 	XtkMsg      click;
 } XtkMenuItemDesc;
 
 typedef struct XtkDropdownDesc {
-	XtkButtonStyle         style; /**< 0 = standard. */
+	XtkButtonStyle         style;
 	bool                   disabled;
-	char const            *icon;  /**< Segoe Fluent Icons name, or NULL. */
-	XtkMenuItemDesc const *items; /**< Menu shown on invoke (copied into the arena). */
+	char const            *icon;
+	XtkMenuItemDesc const *items;
 	int                    nitem;
 } XtkDropdownDesc;
 
 typedef struct XtkSplitDesc {
 	bool                   disabled;
-	char const            *icon;    /**< Segoe Fluent Icons name, or NULL. */
-	XtkMsg                 click;   /**< Primary (left) zone. */
-	XtkMenuItemDesc const *items;   /**< Secondary-zone menu (copied into the arena). */
+	char const            *icon;
+	XtkMsg                 click;
+	XtkMenuItemDesc const *items;
 	int                    nitem;
-	bool                   checked; /**< ToggleSplitButton only: current toggle state. */
-	XtkMsg                 toggle;  /**< ToggleSplitButton only: delivered with .b = new checked. */
+	bool                   checked;
+	XtkMsg                 toggle;
 } XtkSplitDesc;
 
 typedef struct XtkTabDesc {
-	char const *icon; /**< Segoe Fluent Icons name, or NULL. */
+	char const *icon;
 	char const *label;
 } XtkTabDesc;
 
-/**
- * @brief TabView. Tabs are mount-time (key the element by the tab list to
- * change it); the element's children render in the selected tab's content
- * region and follow the selection — render them from the model, exactly like
- * a nav view page. Closing is model-driven: the close button only posts
- * close; remove the tab from the model and remount via the key.
- */
 typedef struct XtkTabViewDesc {
-	XtkTabDesc const *tabs; /**< Copied into the arena. */
+	XtkTabDesc const *tabs;
 	int               ntab;
 	int               sel;
-	XtkMsg            select; /**< Delivered with .i = the tab index. */
-	XtkMsg            close;  /**< Close button; .i = the tab index. */
-	XtkMsg            add;    /**< (+) button; tag 0 hides it. */
+	XtkMsg            select;
+	XtkMsg            close;
+	XtkMsg            add;
 } XtkTabViewDesc;
 
 typedef struct XtkMenuDesc {
-	char const            *title; /**< Top-level menu caption (File, Edit, ...). */
+	char const            *title;
 	XtkMenuItemDesc const *items;
 	int                    nitem;
 } XtkMenuDesc;
 
-/** @brief Menu bar. The menu set is mount-time; item messages stay live. */
 typedef struct XtkMenuBarDesc {
-	XtkMenuDesc const *menus; /**< Copied into the arena. */
+	XtkMenuDesc const *menus;
 	int                nmenu;
 } XtkMenuBarDesc;
 
-/**
- * @brief ContentDialog (modal). Controlled by .open: shown while true, hidden
- * while false. Any button (or Escape) closes the retained dialog and posts
- * on_result — set the model's open flag false there. The element's children
- * fill the dialog body. App-hosted only (headless runtimes skip it).
- */
 typedef struct XtkDialogDesc {
 	bool        open;
-	char const *primary;   /**< Accent button label; NULL omits it. */
-	char const *secondary; /**< NULL omits it. */
-	char const *close;     /**< NULL omits it. */
-	float       w;         /**< Card width, clamped to [320, 548]; 0 = 400. */
-	float       contenth;  /**< Body region height; 0 = 120. */
-	XtkMsg      result;    /**< Delivered with .i = XtkDialogResult. */
+	char const *primary;
+	char const *secondary;
+	char const *close;
+	float       w;
+	float       contenth;
+	XtkMsg      result;
 } XtkDialogDesc;
 
-/** @brief WinUI ListViewBase SelectionMode. Zero = Single. */
 typedef enum XtkListSelMode
 {
-	XTK_LIST_SELECT_SINGLE = 0, /**< One selected item; selection follows focus. */
-	XTK_LIST_SELECT_NONE,       /**< No selection; clicks still post on_invoke-style selects. */
-	XTK_LIST_SELECT_MULTIPLE,   /**< Checkbox-style toggling; focus moves don't select. */
-	XTK_LIST_SELECT_EXTENDED,   /**< Ctrl/Shift ranges with an anchor (desktop default). */
+	XTK_LIST_SELECT_SINGLE = 0,
+	XTK_LIST_SELECT_NONE,
+	XTK_LIST_SELECT_MULTIPLE,
+	XTK_LIST_SELECT_EXTENDED,
 } XtkListSelMode;
 
-/** @brief Which items-host flavor a synthesized row belongs to (chrome + interactivity). */
 typedef enum XtkListKind
 {
-	XTK_LIST_KIND_LIST = 0, /**< ListViewItem chrome (pill + subtle fill). */
-	XTK_LIST_KIND_LIST_BOX, /**< ListBoxItem chrome (filled selection). */
-	XTK_LIST_KIND_GRID,     /**< GridViewItem chrome (border + corner check). */
-	XTK_LIST_KIND_REPEATER, /**< No chrome, not interactive (pure layout). */
-	XTK_LIST_KIND_ITEMS,    /**< ItemContainer chrome (3px accent border + inner ring); interactive. */
+	XTK_LIST_KIND_LIST = 0,
+	XTK_LIST_KIND_LIST_BOX,
+	XTK_LIST_KIND_GRID,
+	XTK_LIST_KIND_REPEATER,
+	XTK_LIST_KIND_ITEMS,
 } XtkListKind;
 
-/**
- * @brief Virtualized items host shared by ListView / ListBox / GridView /
- * ItemsRepeater. The view function never builds all rows: the reconciler
- * realizes only the cells intersecting the scroll viewport (plus overscan)
- * by calling @c item per visible index, and recycles the retained controls
- * as the window shifts (slot-keyed identity), so a million-row list costs
- * a viewport's worth of nodes.
- *
- * Cells are uniform (@c itemh; 0 = 40). Grids wrap indices across
- * @c columns (0 = auto from viewport width / itemw). In Single mode
- * selection is model-driven (@c selected + select .i); Multiple and
- * Extended selection sets are control-retained (anchors, Ctrl/Shift) and
- * select posts the lead index after each change.
- */
 typedef struct XtkListDesc {
-	int            nitem;                                    /**< Total item count. */
-	float          itemh;                                    /**< Uniform cell height in DIPs; 0 = 40. */
-	float          itemw;                                    /**< Grid cell width; 0 on lists = full row. */
-	int            ncol;                                     /**< Grid columns; 0 = auto from width. Lists: 1. */
-	int            overscan;                                 /**< Extra rows realized beyond the viewport; 0 = 4. */
-	XtkEl         *(*item)(XtkUi *ui, void *env, int index); /**< Build cell @p index (called per realized cell). */
-	void          *env;                                      /**< Passed through to @c item. */
-	XtkListSelMode sel_mode;                                 /**< 0 = Single. */
-	int            sel;                                      /**< Single mode: selected index; -1 = none. */
-	XtkMsg         select;                                   /**< Delivered with .i = the lead selected index. */
-	/* ItemsView extensions (harmless zero-defaults for the other list flavors): */
-	float          gap;                  /**< Inter-cell gap (DIP); folded into the cell pitch. */
-	bool           item_invoked_enabled; /**< ItemsView: raise on_invoke on release/Enter/Space when mode == None. */
-	XtkMsg         invoke;               /**< ItemsView ItemInvoked; delivered with .i = index. */
+	int            nitem;
+	float          itemh;
+	float          itemw;
+	int            ncol;
+	int            overscan;
+	XtkEl         *(*item)(XtkUi *ui, void *env, int index);
+	void          *env;
+	XtkListSelMode sel_mode;
+	int            sel;
+	XtkMsg         select;
+	float          gap;
+	bool           item_invoked_enabled;
+	XtkMsg         invoke;
 } XtkListDesc;
 
-/**
- * @brief Synthesized per-cell wrapper (reconciler-internal; public so the
- * backend can read placement/selection when applying props and wiring
- * clicks). x/y/w/h are content-space placement computed by the reconciler;
- * w == 0 means "full host width" (single-column rows).
- */
 typedef struct XtkListItemDesc {
-	int         index;    /**< Item index this wrapper currently presents. */
-	XtkListKind kind;     /**< Chrome/interactivity flavor. */
-	bool        selected; /**< Single mode: item is the selected entry. */
-	bool        multi;    /**< Multiple mode: show the checkbox + content shift. */
-	bool        expanded; /**< TREE_ITEM: descendants visible. */
-	char const *icon;     /**< TREE_ITEM: Segoe Fluent Icons name, or NULL. */
-	float       x, y;     /**< Content-space slot origin. */
-	float       w, h;     /**< Cell size; w 0 = full host width. */
+	int         index;
+	XtkListKind kind;
+	bool        selected;
+	bool        multi;
+	bool        expanded;
+	char const *icon;
+	float       x, y;
+	float       w, h;
 } XtkListItemDesc;
 
-/** @brief WinUI ItemsView layout mode; maps onto the shared items-host spine. */
 typedef enum XtkItemsViewLayout
 {
-	XTK_ITEMS_LAYOUT_STACK_V = 0,  /**< Vertical list (default), single column. */
-	XTK_ITEMS_LAYOUT_STACK_H,      /**< Horizontal stack. */
-	XTK_ITEMS_LAYOUT_UNIFORM_GRID, /**< Fixed-size grid, columns auto from width. */
-	XTK_ITEMS_LAYOUT_FLOW,         /**< Wrapping rows (LinedFlowLayout-like). */
+	XTK_ITEMS_LAYOUT_STACK_V = 0,
+	XTK_ITEMS_LAYOUT_STACK_H,
+	XTK_ITEMS_LAYOUT_UNIFORM_GRID,
+	XTK_ITEMS_LAYOUT_FLOW,
 } XtkItemsViewLayout;
 
-/**
- * @brief WinUI ItemsView = ItemsRepeater(+Layout) + SelectionModel with the
- * ItemContainer wrapper. Thin config over the virtualized items host: the
- * builder maps @c layout onto the spine's column config and threads selection
- * + ItemInvoked through. Cells are realized by the reconciler exactly like
- * ListView/GridView (per-index @c item callback). SelectionMode mirrors
- * XtkListSelMode; when it is None, taps raise @c on_invoke instead of selecting.
- */
 typedef struct XtkItemsViewDesc {
-	int                nitem;    /**< Total item count. */
-	float              itemh;    /**< Uniform cell height (DIP); 0 = 40. */
-	float              itemw;    /**< Cell width for grid/flow (DIP); 0 on stack = full row. */
-	int                ncol;     /**< Grid columns; 0 = auto from width. */
-	int                overscan; /**< Extra rows realized beyond the viewport; 0 = 4. */
-	float              gap;      /**< Gap between cells (DIP). */
-	XtkEl             *(*item)(XtkUi *ui, void *env, int index); /**< Build cell @p index. */
-	void              *env;                                      /**< Passed through to @c item. */
-	XtkItemsViewLayout layout;                                   /**< 0 = vertical stack. */
-	XtkListSelMode     selection_mode;       /**< 0 = Single; ItemsView commonly uses None/Extended. */
-	int                sel;                  /**< Single mode: selected index; -1 = none. */
-	bool               item_invoked_enabled; /**< Raise on_invoke on tap/Enter (see mode gating). */
-	XtkMsg             select;               /**< .i = lead selected index. */
-	XtkMsg             invoke;               /**< .i = invoked index. */
+	int                nitem;
+	float              itemh;
+	float              itemw;
+	int                ncol;
+	int                overscan;
+	float              gap;
+	XtkEl             *(*item)(XtkUi *ui, void *env, int index);
+	void              *env;
+	XtkItemsViewLayout layout;
+	XtkListSelMode     selection_mode;
+	int                sel;
+	bool               item_invoked_enabled;
+	XtkMsg             select;
+	XtkMsg             invoke;
 } XtkItemsViewDesc;
 
-/** @brief Grid column count for a given content width (shared with backends). */
-int xtk_list_auto_columns(float cross, float itemw, int explicit_columns);
+int xtk_list_autocolumns(float cross, float itemw, int explicit_columns);
 
-/**
- * @brief FlipView: one viewport-sized page at a time. The element's
- * children are the pages (mount-time set, like TabView); selection is
- * controlled — navigation posts select and the model drives selected.
- * Adjacent moves animate; longer jumps snap (WinUI behavior).
- */
 typedef struct XtkFlipDesc {
 	int    sel;
-	bool   vertical; /**< Vertical paging (default horizontal). */
-	XtkMsg select;   /**< Delivered with .i = the new page index. */
+	bool   vertical;
+	XtkMsg select;
 } XtkFlipDesc;
 
-/** @brief PipsPager Previous/Next button visibility. */
 typedef enum XtkPipsNavVis
 {
 	XTK_PIPS_NAV_COLLAPSED = 0,
@@ -391,166 +383,129 @@ typedef enum XtkPipsNavVis
 	XTK_PIPS_NAV_ON_HOVER,
 } XtkPipsNavVis;
 
-/**
- * @brief AutoSuggestBox: a TextBox with a suggestions popup. Elm round trip:
- * typing posts on_text (UserInput only); the app recomputes .suggestions in
- * its model; the next frame's desc carries them and the control opens the
- * list (closing it when the list is empty or focus leaves). Down/Up preview
- * suggestions into the box (posting on_chosen); Enter or the query button
- * posts query; Escape restores the typed text and closes.
- */
 typedef struct XtkAutoSuggestDesc {
-	char const        *content;     /**< Controlled text; NULL = uncontrolled. */
-	char const *const *suggestions; /**< Current suggestion strings (copied). */
+	char const        *content;
+	char const *const *suggestions;
 	int                nitem;
-	char const        *query_icon;  /**< Segoe Fluent Icons name; NULL hides the button. */
+	char const        *query_icon;
 	bool               disabled;
-	XtkMsg             on_text;     /**< .ptr = transient UTF-8 (user input only). */
-	XtkMsg             query;       /**< .ptr = transient query text; .i = chosen index or -1. */
-	XtkMsg             on_chosen;   /**< .i = previewed suggestion index. */
+	XtkMsg             on_text;
+	XtkMsg             query;
+	XtkMsg             on_chosen;
 } XtkAutoSuggestDesc;
 
-/** @brief PagerControl display mode (how the current page is presented). */
 typedef enum XtkPagerDisplayMode
 {
-	XTK_PAGER_DISPLAY_AUTO = 0,     /**< NumberPanel. */
-	XTK_PAGER_DISPLAY_NUMBER_PANEL, /**< Numbered buttons with ellipsis. */
-	XTK_PAGER_DISPLAY_NUMBER_TEXT,  /**< "prefix n suffix N" label. */
+	XTK_PAGER_DISPLAY_AUTO = 0,
+	XTK_PAGER_DISPLAY_NUMBER_PANEL,
+	XTK_PAGER_DISPLAY_NUMBER_TEXT,
 } XtkPagerDisplayMode;
 
-/** @brief PagerControl per-button (First/Previous/Next/Last) visibility. */
 typedef enum XtkPagerButtonVis
 {
-	XTK_PAGER_BUTTON_AUTO = 0,    /**< Visible; disabled at the relevant edge. */
-	XTK_PAGER_BUTTON_ALWAYS,      /**< Always visible and enabled. */
-	XTK_PAGER_BUTTON_HIDDEN_EDGE, /**< Hidden at the relevant edge, visible otherwise. */
-	XTK_PAGER_BUTTON_NONE,        /**< Collapsed. */
+	XTK_PAGER_BUTTON_AUTO = 0,
+	XTK_PAGER_BUTTON_ALWAYS,
+	XTK_PAGER_BUTTON_HIDDEN_EDGE,
+	XTK_PAGER_BUTTON_NONE,
 } XtkPagerButtonVis;
 
-/** @brief PagerControl (numeric/arrow pager; distinct from the dot PipsPager). */
 typedef struct XtkPagerDesc {
-	int                 nitem;        /**< NumberOfPages (>= 1). */
-	int                 sel;          /**< SelectedPageIndex (0-based). */
-	XtkPagerDisplayMode display_mode; /**< 0 = Auto (NumberPanel). */
-	XtkPagerButtonVis   first_button; /**< 0 = Auto. */
-	XtkPagerButtonVis   prev_button;  /**< 0 = Auto. */
-	XtkPagerButtonVis   next_button;  /**< 0 = Auto. */
-	XtkPagerButtonVis   last_button;  /**< 0 = Auto. */
-	char const         *prefix;       /**< NUMBER_TEXT leading label (e.g. "Page"). */
-	char const         *suffix;       /**< NUMBER_TEXT infix before the total (e.g. "of"). */
-	XtkMsg              select;       /**< Delivered with .i = the new page index. */
+	int                 nitem;
+	int                 sel;
+	XtkPagerDisplayMode display_mode;
+	XtkPagerButtonVis   first_button;
+	XtkPagerButtonVis   prev_button;
+	XtkPagerButtonVis   next_button;
+	XtkPagerButtonVis   last_button;
+	char const         *prefix;
+	char const         *suffix;
+	XtkMsg              select;
 } XtkPagerDesc;
 
-/** @brief PipsPager (dot pager; pairs naturally with a FlipView). */
 typedef struct XtkPipsDesc {
-	int           nitem;       /**< NumberOfPages. */
-	int           sel;         /**< SelectedPageIndex. */
-	int           max_visible; /**< Visible pips cap; 0 = 5. */
+	int           nitem;
+	int           sel;
+	int           max_visible;
 	bool          vertical;
-	XtkPipsNavVis nav;         /**< Previous/Next buttons. */
-	XtkMsg        select;      /**< Delivered with .i = the new page index. */
+	XtkPipsNavVis nav;
+	XtkMsg        select;
 } XtkPipsDesc;
 
-/**
- * @brief BreadcrumbBar. Crumbs are plain strings. Every crumb, including the
- * current location, posts ItemClicked. When narrower than the crumbs, leading
- * crumbs collapse into an ellipsis that opens a flyout of the hidden ones.
- */
 typedef struct XtkBreadcrumbDesc {
-	char const *const *items; /**< Crumb labels, root first (arena-copied). */
+	char const *const *items;
 	int                nitem;
 	bool               disabled;
-	XtkMsg             click; /**< Delivered with .i = clicked crumb index (ellipsis never posts). */
+	XtkMsg             click;
 } XtkBreadcrumbDesc;
 
-/** @brief One SelectorBar item. */
 typedef struct XtkSelectorItem {
-	char const *text; /**< Label (arena-copied); may be NULL for icon-only. */
-	char const *icon; /**< Segoe Fluent Icons name, or NULL. */
+	char const *text;
+	char const *icon;
 	bool        disabled;
 } XtkSelectorItem;
 
-/**
- * @brief SelectorBar: a horizontal single-select pill strip (mount-time items,
- * like NavView/TabView). Selection + select stay live.
- */
 typedef struct XtkSelectorBarDesc {
-	XtkSelectorItem const *items;  /**< Copied into the arena. */
+	XtkSelectorItem const *items;
 	int                    nitem;
-	int                    sel;    /**< Selected index; -1 = none. */
-	XtkMsg                 select; /**< Delivered with .i = the selected index. */
+	int                    sel;
+	XtkMsg                 select;
 } XtkSelectorBarDesc;
 
-/**
- * @brief RatingControl: a star strip. value < 0 = unset; fractional values
- * render partial fills. Leaf control (no children).
- */
 typedef struct XtkRatingDesc {
-	double      value;             /**< Current rating; < 0 = unset. */
-	int         max_rating;        /**< Stars; 0 = 5. */
-	double      placeholder_value; /**< Placeholder fill while unset; < 0 = none. */
-	int         initial_set_value; /**< First keyboard step from unset; 0 = 1. */
-	bool        is_clear_enabled;  /**< Re-click current rating clears. */
-	bool        is_read_only;      /**< No hover/commit. */
-	char const *caption;           /**< Trailing text (arena-copied); NULL = none. */
-	XtkMsg      change;            /**< Delivered with .d = value (-1 unset), .i = star count. */
+	double      value;
+	int         max_rating;
+	double      placeholder_value;
+	int         initial_set_value;
+	bool        is_clear_enabled;
+	bool        is_read_only;
+	char const *caption;
+	XtkMsg      change;
 } XtkRatingDesc;
 
-/** @brief One RadioButtons item. */
 typedef struct XtkRadioItem {
-	char const *label;    /**< Item text (arena-copied). */
-	bool        disabled; /**< Per-item disable. */
+	char const *label;
+	bool        disabled;
 } XtkRadioItem;
 
-/**
- * @brief RadioButtons group (mount-time items, like NavView/TabView). Single
- * selection across the group; arrows move focus and select unless Ctrl held.
- */
 typedef struct XtkRadioButtonsDesc {
-	char const         *header;      /**< Optional group header (NULL = none). */
-	XtkRadioItem const *items;       /**< Copied into the arena. */
+	char const         *header;
+	XtkRadioItem const *items;
 	int                 nitem;
-	int                 sel;         /**< Selected index; -1 = none. */
-	int                 max_columns; /**< 0/1 = single column (column-major grid). */
-	bool                disabled;    /**< Whole-group disable. */
-	XtkMsg              select;      /**< Delivered with .i = the selected index. */
+	int                 sel;
+	int                 max_columns;
+	bool                disabled;
+	XtkMsg              select;
 } XtkRadioButtonsDesc;
 
 typedef enum XtkNavKind
 {
-	XTK_NAV_ITEM = 0, /**< Selectable menu item. */
-	XTK_NAV_HEADER,   /**< Section caption (not selectable). */
+	XTK_NAV_ITEM = 0,
+	XTK_NAV_HEADER,
 	XTK_NAV_SEPARATOR,
-	XTK_NAV_FOOTER,   /**< Selectable footer item (e.g. Settings). */
-	XTK_NAV_CHILD,    /**< Child of the nearest preceding XTK_NAV_ITEM; the parent
-	                      grows a chevron and expands inline (one level deep). */
+	XTK_NAV_FOOTER,
+	XTK_NAV_CHILD,
 } XtkNavKind;
 
 typedef struct XtkNavItemDesc {
 	XtkNavKind  kind;
-	char const *icon;  /**< Segoe Fluent Icons name, or NULL. */
-	char const *label; /**< Display text (header caption for XTK_NAV_HEADER). */
+	char const *icon;
+	char const *label;
 } XtkNavItemDesc;
 
-/**
- * @brief NavigationView spine. The item list is applied at mount only (the
- * retained control has no item-removal API); selection and the message stay
- * live. The element's children fill the content host beside the pane.
- */
 typedef enum XtkPullDirection
 {
-	XTK_PULL_TOP_TO_BOTTOM = 0, /**< Default: pull down from the top edge. */
-	XTK_PULL_LEFT_TO_RIGHT,     /**< Pull right from the left edge. */
-	XTK_PULL_RIGHT_TO_LEFT,     /**< Pull left from the right edge. */
-	XTK_PULL_BOTTOM_TO_TOP,     /**< Pull up from the bottom edge. */
+	XTK_PULL_TOP_TO_BOTTOM = 0,
+	XTK_PULL_LEFT_TO_RIGHT,
+	XTK_PULL_RIGHT_TO_LEFT,
+	XTK_PULL_BOTTOM_TO_TOP,
 } XtkPullDirection;
 
 typedef struct XtkRefreshDesc {
-	XtkPullDirection direction;       /**< Pull edge; 0 = TopToBottom. */
-	float            visualizer_size; /**< DIP; 0 = default 100. */
-	float            threshold_ratio; /**< Fraction to trigger; 0 = default 0.8. */
-	bool             is_refreshing;   /**< Keep the spinner spinning; clear to end. */
-	XtkMsg           on_refresh;      /**< Delivered with .i = direction. */
+	XtkPullDirection direction;
+	float            visualizer_size;
+	float            threshold_ratio;
+	bool             is_refreshing;
+	XtkMsg           on_refresh;
 } XtkRefreshDesc;
 
 typedef enum XtkTreeSelMode
@@ -565,6 +520,7 @@ typedef struct XtkTreeNodeDesc {
 	char const                   *icon;
 	bool                          expanded;
 	bool                          disabled;
+	bool                          checked;
 	struct XtkTreeNodeDesc const *children;
 	int32_t                       child_count;
 } XtkTreeNodeDesc;
@@ -573,7 +529,7 @@ typedef struct XtkTreeDesc {
 	XtkTreeNodeDesc const *roots;
 	int32_t                nroot;
 	XtkTreeSelMode         sel_mode;
-	int32_t                sel; /**< Single mode: selected flat index; -1 = none. */
+	int32_t                sel;
 	float                  rowh;
 	XtkMsg                 invoke;
 	XtkMsg                 expand;
@@ -581,131 +537,86 @@ typedef struct XtkTreeDesc {
 } XtkTreeDesc;
 
 typedef struct XtkNavDesc {
-	XtkNavItemDesc const *items;            /**< Copied into the arena. */
+	XtkNavItemDesc const *items;
 	int                   nitem;
-	int                   sel;              /**< Index into items[] (headers/separators count). */
-	bool                  window_title_bar; /**< Extend into the OS title bar; the nav top strip owns it. */
-	char const           *app_title;        /**< App title shown in the integrated title bar, or NULL. */
-	XtkMsg                select;           /**< Delivered with .i = the selected item index. */
+	int                   sel;
+	bool                  window_title_bar;
+	char const           *app_title;
+	XtkMsg                select;
 } XtkNavDesc;
 
-/**
- * @brief TeachingTip. Declared as a child of the element it targets (the
- * parent el is the anchor); set .untargeted for a window-relative tip
- * (24px edge margins). Controlled by .open: the retained control plays the
- * expand/contract animation on change. Close is model-driven: every close
- * affordance posts close with the reason — set the model's open flag
- * false there. Children are reserved for the main content region (not yet
- * realized by the fluxent backend).
- */
 typedef struct XtkTeachingTipDesc {
-	bool                    open;             /**< Show/hide (retained anim runs on change). */
-	char const             *subtitle;         /**< NULL/"" hides the subtitle row. */
-	char const             *icon;             /**< Segoe Fluent Icons name, or NULL. */
-	char const             *action_text;      /**< NULL omits the action button. */
-	bool                    action_accent;    /**< Accent-style the action button. */
-	char const             *close_text;       /**< NULL = header X instead of footer Close. */
-	XtkTeachingTipPlacement placement;        /**< Preferred; 0 = Auto. */
-	bool                    untargeted;       /**< Ignore the parent anchor; window-relative. */
-	bool                    light_dismiss;    /**< Outside press dismisses; acrylic bg; no X. */
-	int8_t                  tail;             /**< 0 Auto (targeted only), 1 Visible, 2 Collapsed. */
-	float                   placement_margin; /**< Extra gap to the target/window edge. */
-	XtkMsg                  on_action;        /**< Action button click (tip stays open). */
-	XtkMsg                  close;            /**< Delivered with .i = XtkTeachingTipCloseReason. */
+	bool                    open;
+	char const             *subtitle;
+	char const             *icon;
+	char const             *action_text;
+	bool                    action_accent;
+	char const             *close_text;
+	XtkTeachingTipPlacement placement;
+	bool                    untargeted;
+	bool                    light_dismiss;
+	int8_t                  tail;
+	float                   placement_margin;
+	XtkMsg                  on_action;
+	XtkMsg                  close;
 } XtkTeachingTipDesc;
 
-/**
- * @brief PersonPicture — a circular avatar showing a photo, initials, or a
- * placeholder glyph, with an optional top-right badge. Leaf (no children).
- */
 typedef struct XtkPersonPictureDesc {
-	char const *display_name; /**< Derives initials when @c initials is NULL. */
-	char const *initials;     /**< Explicit initials override. */
-	XtkResource image;        /**< Profile-photo resource cookie, or XTK_RESOURCE_INVALID. */
-	char const *badge_glyph;  /**< Segoe Fluent Icons name for the badge, or NULL. */
-	int32_t     badge_number; /**< Badge count (capped "99+"); <= 0 hides it. */
-	float       size;         /**< Diameter (DIP); 0 = default 72. */
-	bool        is_group;     /**< Group placeholder (People glyph). */
+	char const *display_name;
+	char const *initials;
+	XtkResource image;
+	char const *badge_glyph;
+	int32_t     badge_number;
+	float       size;
+	bool        is_group;
 } XtkPersonPictureDesc;
 
-/** @brief SplitView pane display mode. */
 typedef enum XtkSplitViewDisplayMode
 {
-	XTK_SPLITVIEW_INLINE = 0,      /**< Pane pushes content; 0 width when closed. */
-	XTK_SPLITVIEW_COMPACT_INLINE,  /**< Closed shows a compact strip; pushes content. */
-	XTK_SPLITVIEW_OVERLAY,         /**< Pane floats over content; 0 width when closed. */
-	XTK_SPLITVIEW_COMPACT_OVERLAY, /**< Compact strip always; pane floats over content. */
+	XTK_SPLITVIEW_INLINE = 0,
+	XTK_SPLITVIEW_COMPACT_INLINE,
+	XTK_SPLITVIEW_OVERLAY,
+	XTK_SPLITVIEW_COMPACT_OVERLAY,
 } XtkSplitViewDisplayMode;
 
-/** @brief SplitView pane placement. */
 typedef enum XtkSplitViewPanePlacement
 {
 	XTK_SPLITVIEW_LEFT = 0,
 	XTK_SPLITVIEW_RIGHT,
 } XtkSplitViewPanePlacement;
 
-/**
- * @brief SplitView — a collapsible side pane beside main content. Built from a
- * pane element and a content element; controlled by .pane_open (the model owns
- * the toggle, e.g. a button or a TitleBar pane-toggle).
- */
 typedef struct XtkSplitViewDesc {
 	bool                      pane_open;
 	XtkSplitViewDisplayMode   display_mode;
 	XtkSplitViewPanePlacement pane_placement;
-	float                     open_pane_length;    /**< 0 = default 320. */
-	float                     compact_pane_length; /**< 0 = default 48. */
+	float                     open_pane_length;
+	float                     compact_pane_length;
 } XtkSplitViewDesc;
 
-/**
- * @brief TitleBar — a WinUI 3 TitleBar band: optional back and pane-toggle
- * buttons, an icon, and a title/subtitle. Title comes from the builder's
- * @c title argument. Leaf (no children).
- */
 typedef struct XtkTitleBarDesc {
-	char const *subtitle;         /**< NULL/"" hides the subtitle. */
-	char const *icon;             /**< Segoe Fluent Icons name, or NULL. */
+	char const *subtitle;
+	char const *icon;
 	bool        show_back;
-	bool        back_disabled;    /**< Show the back button greyed/disabled. */
+	bool        back_disabled;
 	bool        show_pane_toggle;
-	bool        integrate_window; /**< Report drag/passthrough regions to the window. */
+	bool        integrate_window;
 	XtkMsg      on_back;
 	XtkMsg      on_pane_toggle;
 } XtkTitleBarDesc;
 
-/* -------------------------------------------------------------------------
- * Frame context
- * ---------------------------------------------------------------------- */
-
-/** @brief Create a build context (owns one transient frame arena). */
 XENT_NODISCARD XtkUi  *xtk_ui_create(void);
 
-/** @brief Destroy the build context and its arenas. */
 void                   xtk_ui_destroy(XtkUi *ui);
 
-/**
- * @brief Begin a transient frame.
- *
- * Resets the transient frame arena and composition. Element pointers live
- * through reconcile and must not be retained by callers.
- */
 void                   xtk_ui_begin(XtkUi *ui);
 
-/** @brief Copy a string into the frame arena (NULL passes through). */
 XENT_NODISCARD char   *xtk_strdup(XtkUi *ui, char const *s);
 
-/** @brief printf into the frame arena — for transient labels. */
 XENT_NODISCARD char   *xtk_fmt(XtkUi *ui, char const *fmt, ...);
 
-/** Build once, then reuse the retained subtree while this identity remains mounted. */
 XENT_NODISCARD XtkEl  *xtk_static_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx);
 
-/** Rebuild only when revision changes; unchanged descendants are neither built nor diffed. */
 XENT_NODISCARD XtkEl  *xtk_memo_region(XtkUi *ui, uint64_t id, uint64_t revision, XtkRegionBuildFn build, void *ctx);
-
-/* -------------------------------------------------------------------------
- * Builders
- * ---------------------------------------------------------------------- */
 
 XtkEl                 *xtk_text(XtkUi *ui, char const *content, XtkTextDesc desc);
 XtkEl                 *xtk_button(XtkUi *ui, char const *label, XtkButtonDesc desc);
@@ -713,6 +624,7 @@ XtkEl                 *xtk_checkbox(XtkUi *ui, char const *label, XtkToggleDesc 
 XtkEl                 *xtk_radio(XtkUi *ui, char const *label, XtkToggleDesc desc);
 XtkEl                 *xtk_switch(XtkUi *ui, XtkToggleDesc desc);
 XtkEl                 *xtk_slider(XtkUi *ui, XtkSliderDesc desc);
+XtkEl                 *xtk_scroll_bar(XtkUi *ui, XtkScrollBarDesc desc);
 XtkEl                 *xtk_textbox(XtkUi *ui, char const *placeholder, XtkTextBoxDesc desc);
 XtkEl                 *xtk_password(XtkUi *ui, char const *placeholder, XtkTextBoxDesc desc);
 XtkEl                 *xtk_progress(XtkUi *ui, XtkProgressDesc desc);
@@ -724,6 +636,11 @@ XtkEl                 *xtk_divider(XtkUi *ui);
 XtkEl                 *xtk_spacer(XtkUi *ui);
 XtkEl                 *xtk_repeat(XtkUi *ui, char const *label, XtkButtonDesc desc);
 XtkEl                 *xtk_combo(XtkUi *ui, char const *placeholder, XtkComboDesc desc);
+XtkEl                 *xtk_looping_selector(XtkUi *ui, XtkLoopingDesc desc);
+XtkEl                 *xtk_date_picker(XtkUi *ui, XtkDatePickerDesc desc);
+XtkEl                 *xtk_time_picker(XtkUi *ui, XtkTimePickerDesc desc);
+XtkEl                 *xtk_calendar_view(XtkUi *ui, XtkCalendarDesc desc);
+XtkEl                 *xtk_color_picker(XtkUi *ui, XtkColorPickerDesc desc);
 XtkEl                 *xtk_infobar(XtkUi *ui, char const *title, char const *message, XtkInfoBarDesc desc);
 XtkEl                 *xtk_number(XtkUi *ui, XtkNumberDesc desc);
 XtkEl                 *xtk_dropdown(XtkUi *ui, char const *label, XtkDropdownDesc desc);
@@ -759,31 +676,17 @@ XtkEl                 *xtk_splitview(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pa
 XtkEl                 *xtk_titlebar(XtkUi *ui, char const *title, XtkTitleBarDesc desc);
 XtkEl                 *xtk_refresh(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []);
 
-/**
- * @brief Allocate a children buffer for loop-built lists: capacity + 1 slots,
- * NULL-filled with XTK_END pre-placed in the last slot. Fill any subset of
- * [0..capacity); remaining NULL slots are skipped like conditionals.
- */
 XENT_NODISCARD XtkEl **xtk_children_alloc(XtkUi *ui, int capacity);
 
-/* -------------------------------------------------------------------------
- * Modifiers (return the same element)
- * ---------------------------------------------------------------------- */
-
-/** @brief Stable identity for keyed reconciliation (list items). */
 XtkEl                 *xtk_keyed(XtkUi *ui, char const *key, XtkEl *el);
-/** @brief Allocation-free scalar identity for keyed reconciliation. */
 XtkEl                 *xtk_keyed_u64(XtkEl *el, uint64_t key);
 
-/** @brief Attach a hover tooltip to any element. */
 XtkEl                 *xtk_tooltip(XtkUi *ui, XtkEl *el, char const *text);
 
-/** @brief Explicit size; pass NAN to keep an axis automatic. */
 XtkEl                 *xtk_sized(XtkEl *el, float width, float height);
 
 XtkEl                 *xtk_grow(XtkEl *el, float grow);
 XtkEl                 *xtk_align(XtkEl *el, XentFlexAlign align_self);
 XtkEl                 *xtk_margin(XtkEl *el, XentInsets margin);
-
 
 #endif

@@ -46,7 +46,7 @@ static bool create_node(Prepare *P, XtkCtrlId type, XtkLocalId local, XentNodeId
 	XentNodeId node = xent_node_create(P->R->ctx);
 	if (node == XENT_NODE_INVALID) return false;
 	if (!retained_types_set(P->R, node, type)
-		|| !retained_undo_push(P, (Undo) {.kind = UNDO_CREATE, .u.created = node}))
+	    || !retained_undo_push(P, (Undo) {.kind = UNDO_CREATE, .u.created = node}))
 	{
 		xent_node_destroy(P->R->ctx, node);
 		return false;
@@ -71,7 +71,7 @@ static bool create_child_root(Prepare *P, XentNodeId parent, XentNodeId *out) {
 	XentNodeId node = xent_node_create(P->R->ctx);
 	if (node == XENT_NODE_INVALID) return false;
 	if (!retained_types_set(P->R, node, XTK_CTRL_CONTAINER)
-		|| !retained_undo_push(P, (Undo) {.kind = UNDO_CREATE, .u.created = node}))
+	    || !retained_undo_push(P, (Undo) {.kind = UNDO_CREATE, .u.created = node}))
 	{
 		xent_node_destroy(P->R->ctx, node);
 		return false;
@@ -125,7 +125,7 @@ static bool apply_create_component(Prepare *P, XtkBatchCreate const *op, XtkLoca
 }
 
 static bool apply_create(Prepare *P, XtkBatchCreate const *op, XtkLocalId local) {
-	if (xtk_ctrl_is_component(op->type)) return apply_create_component(P, op, local);
+	if (xtk_ctrl_iscomp(op->type)) return apply_create_component(P, op, local);
 	XentNodeId node;
 	if (!create_node(P, op->type, local, &node)) return false;
 	if (!place_refs(P, op->parent, op->before, node)) return false;
@@ -161,7 +161,7 @@ static bool apply_set_prop(Prepare *P, XtkBatchOp const *op) {
 	XtkCtrl target = XTK_CTRL_INVALID;
 	if (!retained_resolve_ref(P, op->u.set_prop.target, &ok, &target) || !ok) return false;
 	XtkCtrlId type = retained_types_get(P->R, retained_as_node(target));
-	if (op->u.set_prop.patch.id == XTK_PROP_COMPONENT_PROPS && xtk_ctrl_is_component(type)) {
+	if (op->u.set_prop.patch.id == XTK_PROP_COMPONENT_PROPS && xtk_ctrl_iscomp(type)) {
 		XtkValue const *v = &op->u.set_prop.patch.value;
 		return xtk_comp_prepupd(P->R->comp, &P->R->host, P->R->ctx, target, v->u.bytes.data, v->u.bytes.len)
 		    == XTK_COMPONENT_OK;
@@ -224,7 +224,7 @@ static void fill_mappings(Prepare const *P, XtkBatchResult *result) {
 static XtkBatchResult *fill_result(Prepare *P) {
 	uint32_t creates = 0u, subs = 0u;
 	count_result_slots(P->batch, &creates, &subs);
-	XtkBatchResult *result = xtk_batch_result_create(creates, subs);
+	XtkBatchResult *result = xtk_batchresult_create(creates, subs);
 	if (!result) return NULL;
 	fill_mappings(P, result);
 	return result;

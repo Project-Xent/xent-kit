@@ -1,7 +1,3 @@
-/**
- * @file xtk_reconcile.h
- * @brief Declarative runtime: one message drain, one view, one Host batch.
- */
 #ifndef XTK_RECONCILE_H
 #define XTK_RECONCILE_H
 
@@ -31,6 +27,7 @@ typedef enum XtkPostStatus
 	XTK_POST_INVALID_MESSAGE,
 	XTK_POST_FULL,
 	XTK_POST_OOM,
+	XTK_POST_WRONG_THREAD,
 } XtkPostStatus;
 
 typedef enum XtkIdentityError
@@ -107,23 +104,19 @@ typedef struct XtkVirtualRange {
 typedef struct XtkRtCfg {
 	void *ctx;
 	void  (*request_frame)(void *ctx);
-	/* Optional. arg is the host sidecar attached as node ext; the node binding is kit-owned. */
 	void  (*node_cleanup)(void *ctx, XentNodeId id, void *arg);
-	/* General virtual-region seam. The runtime queries host geometry, then
-	 * publishes the child window it materialized; neither callback is tied to
-	 * a control type or item representation. */
 	bool  (*viewport)(void *ctx, XentNodeId id, XtkViewport *out);
 	void  (*virtual_range)(void *ctx, XentNodeId id, XtkVirtualRange const *range);
-	void  (*on_diagnostic)(void *ctx, XtkFrameResult const *result); /* optional notify only */
+	void  (*on_diagnostic)(void *ctx, XtkFrameResult const *result);
 } XtkRtCfg;
 
 XtkRt *xtk_rt_create(
   XtkHost *host, XtkRtCfg const *cfg, XentNodeId host_root, void *model, XtkUpdateFn update, XtkViewFn view
 );
-/** Destroy after an atomic Host unmount; false leaves the runtime intact for retry. */
 bool              xtk_rt_destroy(XtkRt *rt);
 XtkFrameResult    xtk_rt_frame(XtkRt *rt);
 XtkPostStatus     xtk_rt_post(XtkRt *rt, XtkMsg msg);
+XtkPostStatus     xtk_rt_poststring(XtkRt *rt, XtkMsg msg, char const *data, uint32_t len);
 void              xtk_rt_invalidate(XtkRt *rt);
 
 XtkOverflowStatus xtk_rt_overflow(XtkRt const *rt);

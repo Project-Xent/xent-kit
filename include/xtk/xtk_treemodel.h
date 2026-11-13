@@ -1,5 +1,5 @@
-#ifndef XTK_TREE_MODEL_H
-#define XTK_TREE_MODEL_H
+#ifndef XTK_TREEMODEL_H
+#define XTK_TREEMODEL_H
 
 #include "xtk.h"
 
@@ -11,6 +11,7 @@ enum
 	XTK_TREE_MODEL_VERSION  = 1u,
 	XTK_TREE_MODEL_EXPANDED = 1u << 0,
 	XTK_TREE_MODEL_DISABLED = 1u << 1,
+	XTK_TREE_MODEL_CHECKED  = 1u << 2,
 };
 
 typedef struct XtkTreeModelView {
@@ -26,9 +27,9 @@ typedef struct XtkTreeModelItemView {
 	char const *icon;
 } XtkTreeModelItemView;
 
-uint32_t xtk_tree_model_size(XtkTreeDesc const *desc);
-bool     xtk_tree_model_write(XtkTreeDesc const *desc, void *data, uint32_t size);
-bool     xtk_tree_model_open(void const *data, uint32_t size, XtkTreeModelView *out);
-bool     xtk_tree_model_item(XtkTreeModelView const *model, uint32_t index, XtkTreeModelItemView *out);
+uint32_t xtk_treemodel_size(XtkTreeDesc const *desc);
+bool     xtk_treemodel_write(XtkTreeDesc const *desc, void *data, uint32_t size);
+bool     xtk_treemodel_open(void const *data, uint32_t size, XtkTreeModelView *out);
+bool     xtk_treemodel_item(XtkTreeModelView const *model, uint32_t index, XtkTreeModelItemView *out);
 
 #endif

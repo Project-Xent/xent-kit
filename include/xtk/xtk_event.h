@@ -6,7 +6,6 @@
 
 #include "xtk_descriptor.h"
 
-
 typedef uint64_t XtkSourceId;
 
 #define XTK_SOURCE_INVALID (( XtkSourceId ) 0)
@@ -16,7 +15,7 @@ typedef struct XtkChangeStamp {
 	uint64_t    revision;
 } XtkChangeStamp;
 
-static bool inline xtk_change_stamp_valid(XtkChangeStamp change) {
+static bool inline xtk_changestamp_valid(XtkChangeStamp change) {
 	return (change.source == XTK_SOURCE_INVALID) == (change.revision == 0u);
 }
 
@@ -43,9 +42,6 @@ typedef enum XtkEventPhaseMask
 	XTK_EVENT_PHASE_MASK_ALL = XTK_EVENT_PHASE_MASK_CAPTURE | XTK_EVENT_PHASE_MASK_TARGET | XTK_EVENT_PHASE_MASK_BUBBLE,
 } XtkEventPhaseMask;
 
-/* Capture visits root through target parent, target visits only target, and
- * bubble visits target parent through root. Subscriptions at each node run in
- * successful commit order. */
 typedef enum XtkEventDisposition
 {
 	XTK_EVENT_CONTINUE         = 0,
@@ -54,10 +50,6 @@ typedef enum XtkEventDisposition
 	XTK_EVENT_STOP_PROPAGATION = 1u << 2,
 	XTK_EVENT_STOP_IMMEDIATE   = 1u << 3,
 } XtkEventDisposition;
-
-/* HANDLED accumulates without stopping routing. PREVENT_DEFAULT suppresses
- * the host default action. STOP_PROPAGATION finishes the current target;
- * STOP_IMMEDIATE also skips remaining callbacks on that target. */
 
 typedef struct XtkEventPayload {
 	XtkEventPayloadKind kind;
@@ -89,6 +81,11 @@ typedef struct XtkEventPayload {
 			int32_t index;
 			bool    value;
 		} index_bool;
+
+		struct {
+			float start;
+			float end;
+		} range;
 	} u;
 } XtkEventPayload;
 
@@ -99,18 +96,15 @@ typedef struct XtkEvent {
 	XtkCtrl         current_target;
 	XtkEventPhase   phase;
 	XtkEventCause   cause;
-	uint64_t        trace_id;
 	uint64_t        scene_revision;
 	XtkChangeStamp  change;
 	XtkEventPayload payload;
 } XtkEvent;
 
-/* Event and borrowed payload storage are immutable and call-scoped. */
 typedef uint32_t (*XtkEventFn)(void *arg, XtkEvent const *event);
 
-static bool inline xtk_event_phases_valid(uint32_t phases) {
+static bool inline xtk_event_phasesvalid(uint32_t phases) {
 	return phases != 0u && (phases & ~( uint32_t ) XTK_EVENT_PHASE_MASK_ALL) == 0u;
 }
-
 
 #endif

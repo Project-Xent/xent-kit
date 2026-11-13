@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_combo_create(XtkTxn *txn, XtkNodeRef parent, XtkComboProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_COMBO, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [13];
+	XtkPropPatch   patches [14];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -22,60 +22,67 @@ XtkLocalId xtk_combo_create(XtkTxn *txn, XtkNodeRef parent, XtkComboProps const 
 	  change
 	);
 	xtk_controls_append_i32(patches, &count, (props->set >> 11u) & 1u, XTK_PROP_SELECTED_INDEX, props->sel, change);
-	xtk_controls_append_i32(patches, &count, (props->set >> 12u) & 1u, XTK_PROP_ITEM_COUNT, props->nitem, change);
+	xtk_controls_append_string(
+	  patches, &count, (props->set >> 12u) & 1u, XTK_PROP_TEXT, props->text, props->text_len, change
+	);
+	xtk_controls_append_bool(patches, &count, (props->set >> 13u) & 1u, XTK_PROP_IS_EDITABLE, props->editable, change);
 	return xtk_txn_create(txn, XTK_CTRL_COMBO, parent, xtk_ref_none(), patches, count);
 }
 
 bool xtk_combo_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_combo_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_combo_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_combo_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_combo_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_combo_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_combo_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_combo_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_combo_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_combo_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
-	return xtk_control_set_bool(scene, control, XTK_PROP_ENABLED, value, change);
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_ENABLED, value, change);
 }
 
 bool xtk_combo_setplaceholder(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_PLACEHOLDER, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_PLACEHOLDER, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_combo_setsel(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
-	return xtk_control_set_i32(scene, control, XTK_PROP_SELECTED_INDEX, value, change);
+	return xtk_ctrl_seti32(scene, control, XTK_PROP_SELECTED_INDEX, value, change);
 }
 
-bool xtk_combo_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
-	return xtk_control_set_i32(scene, control, XTK_PROP_ITEM_COUNT, value, change);
+bool xtk_combo_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TEXT, data, xtk_controls_text_len(data, len), change);
+}
+
+bool xtk_combo_seteditable(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_IS_EDITABLE, value, change);
 }
 
 XtkSubRef xtk_combo_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
@@ -84,4 +91,8 @@ XtkSubRef xtk_combo_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void
 
 XtkSubRef xtk_combo_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
 	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_combo_onsubmit(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_SUBMIT_STRING, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

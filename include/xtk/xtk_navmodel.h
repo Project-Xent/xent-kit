@@ -1,5 +1,5 @@
-#ifndef XTK_NAV_MODEL_H
-#define XTK_NAV_MODEL_H
+#ifndef XTK_NAVMODEL_H
+#define XTK_NAVMODEL_H
 
 #include "xtk.h"
 
@@ -27,9 +27,9 @@ typedef struct XtkNavModelItemView {
 	char const *label;
 } XtkNavModelItemView;
 
-uint32_t xtk_nav_model_size(XtkNavDesc const *desc);
-bool     xtk_nav_model_write(XtkNavDesc const *desc, void *data, uint32_t size);
-bool     xtk_nav_model_open(void const *data, uint32_t size, XtkNavModelView *out);
-bool     xtk_nav_model_item(XtkNavModelView const *model, uint32_t index, XtkNavModelItemView *out);
+uint32_t xtk_navmodel_size(XtkNavDesc const *desc);
+bool     xtk_navmodel_write(XtkNavDesc const *desc, void *data, uint32_t size);
+bool     xtk_navmodel_open(void const *data, uint32_t size, XtkNavModelView *out);
+bool     xtk_navmodel_item(XtkNavModelView const *model, uint32_t index, XtkNavModelItemView *out);
 
 #endif

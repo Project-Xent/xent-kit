@@ -19,7 +19,6 @@ XtkEl *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []) {
 	return stack(ui, XTK_CTRL_CONTAINER, true, desc, children);
 }
 
-/* A zero desc means "default WinUI card chrome", not a zero-padded card. */
 XtkEl *xtk_card(XtkUi *ui, XtkStackDesc desc, XtkEl *children []) {
 	XentInsets const none = {0};
 	if (memcmp(&desc.padding, &none, sizeof(none)) == 0) desc.padding = (XentInsets) {16.0f, 16.0f, 16.0f, 16.0f};

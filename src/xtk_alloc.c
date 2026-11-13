@@ -1,4 +1,4 @@
-#include "xtk_alloc_internal.h"
+#include <xtk/xtk_alloc.h>
 
 #include <stdbool.h>
 #include <stddef.h>

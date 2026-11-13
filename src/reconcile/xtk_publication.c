@@ -167,7 +167,7 @@ static bool unmount_commit(XtkRt *rt, XtkBatch *batch) {
 	}
 	XtkBatchResult *result = rt->host->vt->commit(rt->host, prep, &d);
 	if (!result) return false;
-	xtk_batch_result_destroy(result);
+	xtk_batchresult_destroy(result);
 	return true;
 }
 

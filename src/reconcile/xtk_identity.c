@@ -13,7 +13,7 @@ XtkSiblingMode xtk_sibling_mode(XtkEl const *parent) {
 
 typedef struct KeySlot {
 	uint32_t hash;
-	int      index; /* child index + 1; 0 = empty */
+	int      index;
 } KeySlot;
 
 enum

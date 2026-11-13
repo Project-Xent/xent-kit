@@ -9,11 +9,6 @@
 #include "xtk_event.h"
 #include "xtk_types.h"
 
-
-/* Frozen batch wire protocol for the retained host.
- * Host implementors must not invent parallel shapes; extend only by adding
- * op kinds / value kinds with explicit version bumps. */
-
 typedef uint64_t XtkSubId;
 typedef uint32_t XtkLocalId;
 typedef uint32_t XtkSubRef;
@@ -22,13 +17,11 @@ typedef uint32_t XtkSubRef;
 #define XTK_LOCAL_INVALID        (( XtkLocalId ) UINT32_MAX)
 #define XTK_SUB_TOKEN_INVALID    (( XtkSubRef ) UINT32_MAX)
 
-/* ---- Node references: live handle vs batch-local creation token -------- */
-
 typedef enum XtkNodeRefKind
 {
 	XTK_REF_NONE = 0,
-	XTK_REF_EXISTING, /* committed XtkCtrl from a prior successful commit */
-	XTK_REF_LOCAL,    /* XtkLocalId assigned by an earlier CREATE in this batch */
+	XTK_REF_EXISTING,
+	XTK_REF_LOCAL,
 } XtkNodeRefKind;
 
 typedef struct XtkNodeRef {
@@ -51,8 +44,6 @@ static XtkNodeRef inline xtk_ref_local(XtkLocalId local) {
 	return ( XtkNodeRef ) {.kind = XTK_REF_LOCAL, .u.local = local};
 }
 
-/* ---- Typed property values (batch-owned when copied) ------------------- */
-
 typedef enum XtkValueKind
 {
 	XTK_VALUE_NONE = 0,
@@ -62,8 +53,8 @@ typedef enum XtkValueKind
 	XTK_VALUE_F64,
 	XTK_VALUE_ENUM,
 	XTK_VALUE_COLOR,
-	XTK_VALUE_STRING,   /* UTF-8; storage owned by the batch after append */
-	XTK_VALUE_RESOURCE, /* opaque cookie; always retained by the host on commit */
+	XTK_VALUE_STRING,
+	XTK_VALUE_RESOURCE,
 	XTK_VALUE_BYTES,
 } XtkValueKind;
 
@@ -80,14 +71,14 @@ typedef struct XtkValue {
 		XtkColor color;
 
 		struct {
-			char    *data; /* batch-owned copy, NUL-terminated; NULL only if len==0 */
-			uint32_t len;  /* bytes without trailing NUL */
+			char    *data;
+			uint32_t len;
 		} string;
 
-		XtkResource resource; /* host retains on commit; no borrow encoding on the wire */
+		XtkResource resource;
 
 		struct {
-			uint8_t *data; /* batch-owned copy; NULL only if len==0 */
+			uint8_t *data;
 			uint32_t len;
 		} bytes;
 	} u;
@@ -99,16 +90,14 @@ typedef struct XtkPropPatch {
 	XtkChangeStamp change;
 } XtkPropPatch;
 
-/* ---- Operations -------------------------------------------------------- */
-
 typedef enum XtkBatchOpKind
 {
 	XTK_BATCH_OP_CREATE = 1,
 	XTK_BATCH_OP_DESTROY,
 	XTK_BATCH_OP_SET_PROP,
-	XTK_BATCH_OP_INSERT,   /* place child under parent before sibling (append if before=NONE) */
-	XTK_BATCH_OP_MOVE,     /* reorder under the same parent */
-	XTK_BATCH_OP_REPARENT, /* change parent + optional before sibling */
+	XTK_BATCH_OP_INSERT,
+	XTK_BATCH_OP_MOVE,
+	XTK_BATCH_OP_REPARENT,
 	XTK_BATCH_OP_SUBSCRIBE,
 	XTK_BATCH_OP_UNSUBSCRIBE,
 } XtkBatchOpKind;
@@ -131,10 +120,10 @@ typedef enum XtkBatchError
 
 typedef struct XtkBatchCreate {
 	XtkCtrlId     type;
-	XtkNodeRef    parent; /* NONE = root/orphan slot defined by host scene */
-	XtkNodeRef    before; /* NONE = append as last child */
-	XtkLocalId    local;  /* assigned by builder; used as XTK_REF_LOCAL */
-	XtkPropPatch *props;  /* batch-owned array */
+	XtkNodeRef    parent;
+	XtkNodeRef    before;
+	XtkLocalId    local;
+	XtkPropPatch *props;
 	uint32_t      prop_count;
 } XtkBatchCreate;
 
@@ -144,38 +133,38 @@ typedef struct XtkBatchDestroy {
 
 typedef struct XtkBatchSetProp {
 	XtkNodeRef   target;
-	XtkPropPatch patch; /* value storage owned by batch when STRING/BYTES */
+	XtkPropPatch patch;
 } XtkBatchSetProp;
 
 typedef struct XtkBatchInsert {
 	XtkNodeRef parent;
 	XtkNodeRef child;
-	XtkNodeRef before; /* NONE = append */
+	XtkNodeRef before;
 } XtkBatchInsert;
 
 typedef struct XtkBatchMove {
-	XtkNodeRef parent; /* must be the current parent after preflight */
+	XtkNodeRef parent;
 	XtkNodeRef child;
-	XtkNodeRef before; /* NONE = move to end */
+	XtkNodeRef before;
 } XtkBatchMove;
 
 typedef struct XtkBatchReparent {
 	XtkNodeRef child;
 	XtkNodeRef new_parent;
-	XtkNodeRef before; /* NONE = append under new_parent */
+	XtkNodeRef before;
 } XtkBatchReparent;
 
 typedef struct XtkBatchSubscribe {
 	XtkNodeRef target;
 	XtkEventId event;
-	uint32_t   phases; /* XtkEventPhaseMask */
+	uint32_t   phases;
 	XtkEventFn fn;
 	void      *arg;
-	XtkSubRef  token; /* assigned by builder; resolved in XtkBatchResult on commit */
+	XtkSubRef  token;
 } XtkBatchSubscribe;
 
 typedef struct XtkBatchUnsubscribe {
-	XtkSubId id; /* committed id only; not a batch-local token */
+	XtkSubId id;
 } XtkBatchUnsubscribe;
 
 typedef struct XtkBatchOp {
@@ -198,10 +187,10 @@ typedef struct XtkBatch {
 	XtkBatchOp *ops;
 	uint32_t    count;
 	uint32_t    capacity;
-	uint32_t    next_local; /* next XtkLocalId to assign (0..) */
-	uint32_t    next_sub;   /* next XtkSubRef to assign (0..) */
-	uint64_t    revision;   /* scene revision observed at batch begin */
-	bool        sealed;     /* true after successful structural preflight */
+	uint32_t    next_local;
+	uint32_t    next_sub;
+	uint64_t    revision;
+	bool        sealed;
 } XtkBatch;
 
 typedef struct XtkControlMapping {
@@ -220,44 +209,16 @@ typedef struct XtkBatchDiag {
 } XtkBatchDiag;
 
 typedef struct XtkBatchResult {
-	XtkControlMapping *controls;      /* one per CREATE, in CREATE op order */
+	XtkControlMapping *controls;
 	uint32_t           control_count;
-	XtkSubMapping     *subscriptions; /* one per SUBSCRIBE, in op order */
+	XtkSubMapping     *subscriptions;
 	uint32_t           subscription_count;
 } XtkBatchResult;
 
-/* ---- Commit phases (Host) ----------------------------------------------
- *
- * 1. begin: capture scene revision into batch.revision.
- * 2. build: append ops; CREATE assigns local ids; SUBSCRIBE assigns sub tokens.
- *    STRING/BYTES values are copied into batch-owned storage at append time.
- *    Append rejects invalid kinds and len>0 with NULL data (batch unchanged).
- *    Synchronous convenience APIs that commit before return may use borrow
- *    only when explicitly documented; the batch builder path always copies.
- *    RESOURCE values are always retained by the host; borrow is not
- *    expressible on this wire format.
- * 3. preflight: pure validation of live handles + intra-batch local refs,
- *    property kinds, and topology constraints. No mutation. Sets sealed.
- *    Fails with STALE_REVISION if the scene advanced since begin.
- * 4. prepare: backend may allocate; host builds an owned XtkPrepare. Caller
- *    consumes it exactly once through commit or abort.
- * 5. commit: consumes prepare, applies every op, then backend-commits.
- *    Host apply failure => full host rollback before returning.
- *    Backend failure after host apply => host rollback; backend must undo prepare.
- *    On full success, the owned result maps each CREATE local and SUBSCRIBE
- *    token to committed handles. Destroy it with xtk_batch_result_destroy.
- *    Declarative "previous" / scene revision advances only after full success.
- *
- * Failure boundary: any error leaves the live tree, subscriptions, and
- * declarative previous state identical to pre-commit. The pointer-free
- * diagnostic names the first rejected operation when applicable. Commit
- * returns no result on failure.
- */
-
 XtkBatch       *xtk_batch_alloc(uint64_t revision);
 void            xtk_batch_free(XtkBatch *batch);
-XtkBatchResult *xtk_batch_result_create(uint32_t control_count, uint32_t subscription_count);
-void            xtk_batch_result_destroy(XtkBatchResult *result);
+XtkBatchResult *xtk_batchresult_create(uint32_t control_count, uint32_t subscription_count);
+void            xtk_batchresult_destroy(XtkBatchResult *result);
 
 XtkLocalId      xtk_batch_create(
   XtkBatch *batch, XtkCtrlId type, XtkNodeRef parent, XtkNodeRef before, XtkPropPatch const *props, uint32_t prop_count
@@ -270,8 +231,6 @@ bool      xtk_batch_reparent(XtkBatch *batch, XtkNodeRef child, XtkNodeRef new_p
 XtkSubRef xtk_batch_on(XtkBatch *batch, XtkNodeRef target, XtkEventId event, uint32_t phases, XtkEventFn fn, void *arg);
 bool      xtk_batch_off(XtkBatch *batch, XtkSubId id);
 
-/* Structural preflight: local-ref resolution and op shape only (no live host). */
 XtkBatchError xtk_batch_preflight(XtkBatch *batch, XtkBatchDiag *diagnostic);
-
 
 #endif

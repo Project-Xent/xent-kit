@@ -3,10 +3,6 @@
 
 #include "xtk_descriptor.h"
 
-/* Standard control ids are exactly XtkCtrlType values in [1, TYPE_COUNT).
- * Aggregate standard properties use a named, versioned schema; arbitrary
- * pointers, callbacks, and backend-private structures never cross the batch. */
-
 typedef enum XtkStackDirection
 {
 	XTK_STACK_COLUMN = 0,
@@ -61,7 +57,6 @@ typedef enum XtkStandardPropertyId
 	XTK_PROP_SELECTED_INDEX,
 	XTK_PROP_SELECTED,
 	XTK_PROP_ITEM_COUNT,
-	/* NUL-delimited UTF-8 strings. Empty bytes encode an empty list. */
 	XTK_PROP_ITEMS,
 	XTK_PROP_ITEM_HEIGHT,
 	XTK_PROP_ITEM_WIDTH,
@@ -80,9 +75,7 @@ typedef enum XtkStandardPropertyId
 	XTK_PROP_VISUALIZER_SIZE,
 	XTK_PROP_THRESHOLD_RATIO,
 	XTK_PROP_REFRESHING,
-	/* Versioned NavigationView mount model; see xtk_nav_model.h. */
 	XTK_PROP_NAV_MODEL,
-	/* Opaque Component props blob (BYTES); length must equal registered props_size. */
 	XTK_PROP_COMPONENT_PROPS,
 	XTK_PROP_TICK_FREQUENCY,
 	XTK_PROP_TICK_PLACEMENT,
@@ -127,6 +120,36 @@ typedef enum XtkStandardPropertyId
 	XTK_PROP_INITIAL_VALUE,
 	XTK_PROP_URL,
 	XTK_PROP_ADD_VISIBLE,
+	XTK_PROP_VIEWPORT_SIZE,
+	XTK_PROP_INDICATOR_MODE,
+	XTK_PROP_SHOULD_LOOP,
+	XTK_PROP_IS_THREE_STATE,
+	XTK_PROP_PROGRESS_STATE,
+	XTK_PROP_IS_RANGE,
+	XTK_PROP_RANGE_START,
+	XTK_PROP_RANGE_END,
+	XTK_PROP_IS_EDITABLE,
+	XTK_PROP_HEADER,
+	XTK_PROP_DATE,
+	XTK_PROP_TIME,
+	XTK_PROP_MIN_YEAR,
+	XTK_PROP_MAX_YEAR,
+	XTK_PROP_MIN_DATE,
+	XTK_PROP_MAX_DATE,
+	XTK_PROP_FIRST_DAY,
+	XTK_PROP_CLOCK,
+	XTK_PROP_MINUTE_INCREMENT,
+	XTK_PROP_COLOR,
+	XTK_PROP_ALPHA_ENABLED,
+	XTK_PROP_MORE_BUTTON_VISIBLE,
+	XTK_PROP_SPECTRUM,
+	XTK_PROP_PROGRESS_ACTIVE,
+	XTK_PROP_PROGRESS_BORDER_WIDTH,
+	XTK_PROP_MULTILINE,
+	XTK_PROP_MAX_LINES,
+	XTK_PROP_TEXT_TRIM,
+	XTK_PROP_TEXT_WRAP,
+	XTK_PROP_SELECTABLE,
 	XTK_PROP_STANDARD_COUNT,
 } XtkStandardPropertyId;
 
@@ -146,6 +169,11 @@ typedef enum XtkStandardEventId
 	XTK_EVENT_REFRESH,
 	XTK_EVENT_TREE_EXPAND,
 	XTK_EVENT_TREE_SELECT,
+	XTK_EVENT_CHANGE_I32,
+	XTK_EVENT_CHANGE_RANGE,
+	XTK_EVENT_SUBMIT_STRING,
+	XTK_EVENT_VALUE_CHANGED,
+	XTK_EVENT_DATE_SELECT,
 	XTK_EVENT_STANDARD_COUNT,
 } XtkStandardEventId;
 
@@ -158,9 +186,8 @@ typedef enum XtkStandardResourceTypeId
 XtkCtrlDesc const  *xtk_catalog_control(XtkCtrlId id);
 XtkPropDesc const  *xtk_catalog_property(XtkPropertyId id);
 XtkEventDesc const *xtk_catalog_event(XtkEventId id);
-XtkPropDesc const  *xtk_catalog_control_property(XtkCtrlId control, XtkPropertyId property);
-XtkEventDesc const *xtk_catalog_control_event(XtkCtrlId control, XtkEventId event);
+XtkPropDesc const  *xtk_catalog_ctrlprop(XtkCtrlId control, XtkPropertyId property);
+XtkEventDesc const *xtk_catalog_ctrlevent(XtkCtrlId control, XtkEventId event);
 bool                xtk_catalog_standard(XtkCtrlId id);
-
 
 #endif

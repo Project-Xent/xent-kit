@@ -10,10 +10,6 @@
 
 #include <xent/xent.h>
 
-
-/* Component-author ABI. Ops never receive backend render objects.
- * Failible work runs in prepare_*; commit_* must not fail; abort frees prepare. */
-
 typedef struct XtkUi       XtkUi;
 typedef struct XtkEl       XtkEl;
 typedef struct XtkCompHost XtkCompHost;
@@ -44,9 +40,9 @@ typedef struct XtkCompOps {
 
 typedef struct XtkCompType {
 	uint32_t           abi_version;
-	XtkCtrlDesc const *control;                                              /* id >= XTK_CTRL_ID_COMPONENT_BASE */
+	XtkCtrlDesc const *control;
 	size_t             props_size;
-	void               (*copy_props)(XtkUi *ui, void *dst, void const *src); /* NULL => memcpy */
+	void               (*copy_props)(XtkUi *ui, void *dst, void const *src);
 	XtkCompOps         ops;
 } XtkCompType;
 
@@ -59,15 +55,14 @@ typedef struct XtkProviderDesc {
 	XtkProviderId id;
 	uint32_t      abi_version;
 	size_t        iface_size;
-	void const   *iface; /* borrowed for the duration of the Component op */
+	void const   *iface;
 } XtkProviderDesc;
 
-XtkCtrl     xtk_component_control(XtkCompHost const *host);
-XtkCtrl     xtk_component_content_root(XtkCompHost const *host);
-XtkCtrl     xtk_component_impl_root(XtkCompHost const *host);
-XentCtx    *xtk_component_context(XtkCompHost const *host);
-XtkHost    *xtk_component_host(XtkCompHost const *host);
-void const *xtk_component_query_provider(XtkCompHost const *host, XtkProviderId id, size_t minimum_size);
-
+XtkCtrl     xtk_comp_control(XtkCompHost const *host);
+XtkCtrl     xtk_comp_contentroot(XtkCompHost const *host);
+XtkCtrl     xtk_comp_implroot(XtkCompHost const *host);
+XentCtx    *xtk_comp_context(XtkCompHost const *host);
+XtkHost    *xtk_comp_host(XtkCompHost const *host);
+void const *xtk_comp_queryprovider(XtkCompHost const *host, XtkProviderId id, size_t minimum_size);
 
 #endif

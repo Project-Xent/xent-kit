@@ -16,31 +16,9 @@ static bool same_key(XtkNode const *old_node, XtkEl const *next_el) {
 	return xtk_key_present(&old_node->key) && xtk_key_equal(&old_node->key, &XTK_EL_DATA(next_el)->key);
 }
 
-bool xtk_plan_match_positional(XtkNode const *old_node, XtkEl const *next_el, int *out_old) {
-	int old_n  = old_node ? old_node->child_count : 0;
-	int new_n  = XTK_EL_DATA(next_el)->child_count;
-	int shared = old_n < new_n ? old_n : new_n;
-
-	for (int i = 0; i < new_n; i++) out_old [i] = -1;
-
-	int prefix = 0;
-	while (prefix < shared && xtk_plan_same_type(old_node->children [prefix], xtk_el_child(next_el, prefix))) prefix++;
-	int suffix = 0;
-	while (prefix + suffix < shared
-		   && xtk_plan_same_type(old_node->children [shared - 1 - suffix], xtk_el_child(next_el, shared - 1 - suffix)))
-		suffix++;
-
-	for (int i = 0; i < prefix; i++) out_old [i] = i;
-	for (int i = 0; i < suffix; i++) out_old [shared - 1 - i] = shared - 1 - i;
-
-	for (int i = prefix; i < shared - suffix; i++)
-		out_old [i] = xtk_plan_same_type(old_node->children [i], xtk_el_child(next_el, i)) ? i : -1;
-	return true;
-}
-
 typedef struct Slot {
 	uint32_t hash;
-	int      old_index; /* +1; 0 empty */
+	int      old_index;
 } Slot;
 
 static int lis_bisect(int const *seq, int const *tails, int len, int value) {
@@ -75,32 +53,6 @@ static int lis_length(int const *seq, int n, XtkScratch *scratch, bool *in_lis) 
 		at          = pred [at];
 	}
 	return len;
-}
-
-static int keyed_prefix(XtkNode const *old_node, XtkEl const *next_el, int old_n, int new_n, int *out_old) {
-	int n     = 0;
-	int limit = old_n < new_n ? old_n : new_n;
-	while (n < limit) {
-		if (!same_key(old_node->children [n], xtk_el_child(next_el, n))) break;
-		if (!xtk_plan_same_type(old_node->children [n], xtk_el_child(next_el, n))) break;
-		out_old [n] = n;
-		n++;
-	}
-	return n;
-}
-
-static int keyed_suffix(XtkNode const *old_node, XtkEl const *next_el, int old_n, int new_n, int prefix, int *out_old) {
-	int n     = 0;
-	int limit = (old_n - prefix) < (new_n - prefix) ? (old_n - prefix) : (new_n - prefix);
-	while (n < limit) {
-		int oi = old_n - 1 - n;
-		int ni = new_n - 1 - n;
-		if (!same_key(old_node->children [oi], xtk_el_child(next_el, ni))) break;
-		if (!xtk_plan_same_type(old_node->children [oi], xtk_el_child(next_el, ni))) break;
-		out_old [ni] = oi;
-		n++;
-	}
-	return n;
 }
 
 static uint32_t hash_cap(int old_mid) {
@@ -148,160 +100,137 @@ static bool keyed_scratch_ensure(XtkScratch *scratch, int old_n, int new_n) {
 	return xtk_scratch_ensure(scratch, scratch->used + size);
 }
 
-static void hash_insert_old(Slot *slots, uint32_t cap, XtkNode const *old_node, int prefix, int old_mid) {
-	uint32_t mask = cap - 1u;
-	for (int i = 0; i < old_mid; i++) {
-		int           oi  = prefix + i;
-		XtkKey const *key = &old_node->children [oi]->key;
-		uint32_t      h   = xtk_key_hash(key);
-		uint32_t      s   = h & mask;
-		while (slots [s].old_index != 0) s = (s + 1u) & mask;
-		slots [s].hash      = h;
-		slots [s].old_index = oi + 1;
-	}
+typedef struct Keyed {
+	XtkNode const *old;
+	XtkEl const   *next;
+	XtkScratch    *scratch;
+	XtkKeyedMatch *match;
+	bool          *claimed;
+	int            old_n, new_n, prefix, suffix;
+} Keyed;
+
+static bool keyed_pair(Keyed const *k, int oi, int ni) {
+	XtkNode const *old  = k->old->children [oi];
+	XtkEl const   *next = xtk_el_child(k->next, ni);
+	return same_key(old, next) && xtk_plan_same_type(old, next);
 }
 
-static int hash_lookup(Slot const *slots, uint32_t cap, XtkNode const *old_node, XtkEl const *want, XtkKey const *key) {
-	uint32_t h    = xtk_key_hash(key);
-	uint32_t mask = cap - 1u;
-	uint32_t s    = h & mask;
-	while (slots [s].old_index != 0) {
+static void keyed_claim(Keyed *k, int oi, int ni) {
+	k->match->old [ni] = oi;
+	k->claimed [oi]    = true;
+}
+
+static void keyed_affixes(Keyed *k) {
+	int limit = k->old_n < k->new_n ? k->old_n : k->new_n;
+	while (k->prefix < limit && keyed_pair(k, k->prefix, k->prefix)) keyed_claim(k, k->prefix, k->prefix), k->prefix++;
+	limit -= k->prefix;
+	while (k->suffix < limit && keyed_pair(k, k->old_n - 1 - k->suffix, k->new_n - 1 - k->suffix))
+		keyed_claim(k, k->old_n - 1 - k->suffix, k->new_n - 1 - k->suffix), k->suffix++;
+}
+
+static int keyed_lookup(Keyed const *k, Slot const *slots, uint32_t mask, int ni) {
+	XtkEl const *want = xtk_el_child(k->next, ni);
+	uint32_t     h    = xtk_key_hash(&XTK_EL_DATA(want)->key);
+	for (uint32_t s = h & mask; slots [s].old_index != 0; s = (s + 1u) & mask) {
 		int oi = slots [s].old_index - 1;
-		if (slots [s].hash == h && same_key(old_node->children [oi], want)) return oi;
-		s = (s + 1u) & mask;
+		if (slots [s].hash == h && same_key(k->old->children [oi], want)) return oi;
 	}
 	return -1;
 }
 
-static bool match_mid_hashed(
-  XtkNode const *old_node, XtkEl const *next_el, XtkScratch *scratch, int prefix, int old_mid, int new_mid,
-  int *out_old, bool *claimed
-) {
-	uint32_t cap = hash_cap(old_mid);
-	if (!cap) return false;
-	Slot *slots = ( Slot * ) xtk_scratch_reserve(scratch, sizeof(Slot) * cap, _Alignof(Slot));
+static Slot *keyed_index(Keyed const *k, int old_mid, uint32_t *cap) {
+	*cap        = hash_cap(old_mid);
+	Slot *slots = *cap ? ( Slot * ) xtk_scratch_reserve(k->scratch, sizeof(Slot) * *cap, _Alignof(Slot)) : NULL;
+	if (!slots) return NULL;
+	memset(slots, 0, sizeof(Slot) * *cap);
+	uint32_t mask = *cap - 1u;
+	for (int oi = k->prefix; oi < k->prefix + old_mid; oi++) {
+		uint32_t h = xtk_key_hash(&k->old->children [oi]->key);
+		uint32_t s = h & mask;
+		while (slots [s].old_index != 0) s = (s + 1u) & mask;
+		slots [s] = (Slot) {.hash = h, .old_index = oi + 1};
+	}
+	return slots;
+}
+
+static bool keyed_middle(Keyed *k) {
+	int old_mid = k->old_n - k->prefix - k->suffix;
+	if (old_mid <= 0) return true;
+	uint32_t cap;
+	Slot    *slots = keyed_index(k, old_mid, &cap);
 	if (!slots) return false;
-	memset(slots, 0, sizeof(Slot) * cap);
-	hash_insert_old(slots, cap, old_node, prefix, old_mid);
-
-	for (int i = 0; i < new_mid; i++) {
-		int ni = prefix + i;
-		int found
-		  = hash_lookup(slots, cap, old_node, xtk_el_child(next_el, ni), &XTK_EL_DATA(xtk_el_child(next_el, ni))->key);
-		if (found < 0 || !xtk_plan_same_type(old_node->children [found], xtk_el_child(next_el, ni))) {
-			out_old [ni] = -1;
-			continue;
-		}
-		if (claimed [found]) return false;
-		claimed [found] = true;
-		out_old [ni]    = found;
+	for (int ni = k->prefix; ni < k->new_n - k->suffix; ni++) {
+		int oi = keyed_lookup(k, slots, cap - 1u, ni);
+		if (oi < 0 || !xtk_plan_same_type(k->old->children [oi], xtk_el_child(k->next, ni))) continue;
+		if (k->claimed [oi]) return false;
+		keyed_claim(k, oi, ni);
 	}
 	return true;
 }
 
-static bool mark_moves(
-  XtkScratch *scratch, int *out_old, bool *out_move, int *moves_needed, int prefix, int new_mid, int *seq, int *seq_new
-) {
-	int matched = 0;
-	for (int i = 0; i < new_mid; i++) {
-		int ni = prefix + i;
-		if (out_old [ni] < 0) continue;
-		seq [matched]     = out_old [ni];
-		seq_new [matched] = ni;
-		matched++;
-	}
-	if (matched <= 0) return true;
-
-	bool *in_lis = ( bool * ) xtk_scratch_reserve(scratch, sizeof(bool) * ( size_t ) matched, _Alignof(bool));
+static bool keyed_mark_moves(Keyed *k, int const *seq, int const *seq_new, int matched) {
+	bool *in_lis = ( bool * ) xtk_scratch_reserve(k->scratch, sizeof(bool) * ( size_t ) matched, _Alignof(bool));
 	if (!in_lis) return false;
-	size_t lis_mark = xtk_scratch_mark(scratch);
-	int    lis      = lis_length(seq, matched, scratch, in_lis);
+	size_t mark = xtk_scratch_mark(k->scratch);
+	int    lis  = lis_length(seq, matched, k->scratch, in_lis);
+	xtk_scratch_rewind(k->scratch, mark);
 	if (lis < 0) return false;
-	*moves_needed = matched - lis;
+	k->match->moves_needed = matched - lis;
 	for (int i = 0; i < matched; i++)
-		if (!in_lis [i]) out_move [seq_new [i]] = true;
-	xtk_scratch_rewind(scratch, lis_mark);
+		if (!in_lis [i]) k->match->move [seq_new [i]] = true;
 	return true;
 }
 
-static void claim_affix(bool *claimed, int old_n, int prefix, int suffix) {
-	if (!claimed) return;
-	for (int i = 0; i < prefix; i++) claimed [i] = true;
-	for (int i = 0; i < suffix; i++) claimed [old_n - 1 - i] = true;
-}
-
-static bool *claim_alloc(XtkScratch *scratch, int old_n) {
-	if (old_n <= 0) return NULL;
-	bool *claimed = ( bool * ) xtk_scratch_reserve(scratch, sizeof(bool) * ( size_t ) old_n, _Alignof(bool));
-	if (!claimed) return NULL;
-	memset(claimed, 0, sizeof(bool) * ( size_t ) old_n);
-	return claimed;
-}
-
-static bool match_mid_and_moves(
-  XtkNode const *old_node, XtkEl const *next_el, XtkScratch *scratch, int prefix, int old_mid, int new_mid,
-  int *out_old, bool *out_move, bool *claimed, int *moves_needed
-) {
-	if (old_mid > 0 && !match_mid_hashed(old_node, next_el, scratch, prefix, old_mid, new_mid, out_old, claimed))
-		return false;
+static bool keyed_moves(Keyed *k) {
+	int new_mid = k->new_n - k->prefix - k->suffix;
 	if (new_mid <= 0) return true;
-	int *seq     = ( int * ) xtk_scratch_reserve(scratch, sizeof(int) * ( size_t ) new_mid, _Alignof(int));
-	int *seq_new = ( int * ) xtk_scratch_reserve(scratch, sizeof(int) * ( size_t ) new_mid, _Alignof(int));
+	int *seq     = ( int * ) xtk_scratch_reserve(k->scratch, sizeof(int) * ( size_t ) new_mid, _Alignof(int));
+	int *seq_new = ( int * ) xtk_scratch_reserve(k->scratch, sizeof(int) * ( size_t ) new_mid, _Alignof(int));
 	if (!seq || !seq_new) return false;
-	return mark_moves(scratch, out_old, out_move, moves_needed, prefix, new_mid, seq, seq_new);
-}
-
-static void keyed_init_outputs(int new_n, int *out_old, bool *out_move, int *retire_count, int *moves_needed) {
-	*retire_count = 0;
-	*moves_needed = 0;
-	for (int i = 0; i < new_n; i++) {
-		out_old [i]  = -1;
-		out_move [i] = false;
+	int matched = 0;
+	for (int ni = k->prefix; ni < k->prefix + new_mid; ni++) {
+		if (k->match->old [ni] < 0) continue;
+		seq [matched]       = k->match->old [ni];
+		seq_new [matched++] = ni;
 	}
+	return matched == 0 || keyed_mark_moves(k, seq, seq_new, matched);
 }
 
-static bool keyed_outputs_alloc(XtkScratch *scratch, int old_n, int new_n, XtkKeyedMatch *match) {
-	if (new_n > 0) {
-		match->old  = ( int * ) xtk_scratch_reserve(scratch, sizeof(int) * ( size_t ) new_n, _Alignof(int));
-		match->move = ( bool * ) xtk_scratch_reserve(scratch, sizeof(bool) * ( size_t ) new_n, _Alignof(bool));
-		if (!match->old || !match->move) return false;
+static bool keyed_outputs(Keyed *k) {
+	XtkKeyedMatch *m = k->match;
+	if (k->new_n > 0) {
+		m->old  = ( int * ) xtk_scratch_reserve(k->scratch, sizeof(int) * ( size_t ) k->new_n, _Alignof(int));
+		m->move = ( bool * ) xtk_scratch_reserve(k->scratch, sizeof(bool) * ( size_t ) k->new_n, _Alignof(bool));
+		if (!m->old || !m->move) return false;
+		for (int i = 0; i < k->new_n; i++) m->old [i] = -1;
+		memset(m->move, 0, sizeof(bool) * ( size_t ) k->new_n);
 	}
-	if (old_n <= 0) return true;
-	match->retire = ( int * ) xtk_scratch_reserve(scratch, sizeof(int) * ( size_t ) old_n, _Alignof(int));
-	return match->retire != NULL;
-}
-
-static void collect_unclaimed(bool const *claimed, int old_n, int *retire, int *retire_count) {
-	for (int i = 0; i < old_n; i++)
-		if (!claimed [i]) retire [(*retire_count)++] = i;
+	if (k->old_n <= 0) return true;
+	m->retire = ( int * ) xtk_scratch_reserve(k->scratch, sizeof(int) * ( size_t ) k->old_n, _Alignof(int));
+	return m->retire != NULL;
 }
 
 bool xtk_plan_match_keyed(XtkNode const *old_node, XtkEl const *next_el, XtkScratch *scratch, XtkKeyedMatch *match) {
-	int old_n = old_node ? old_node->child_count : 0;
-	int new_n = XTK_EL_DATA(next_el)->child_count;
-	*match    = (XtkKeyedMatch) {0};
-	if (!keyed_scratch_ensure(scratch, old_n, new_n)) return false;
-	if (!keyed_outputs_alloc(scratch, old_n, new_n, match)) return false;
-	keyed_init_outputs(new_n, match->old, match->move, &match->retire_count, &match->moves_needed);
-
-	int    prefix  = keyed_prefix(old_node, next_el, old_n, new_n, match->old);
-	int    suffix  = keyed_suffix(old_node, next_el, old_n, new_n, prefix, match->old);
-	int    old_mid = old_n - prefix - suffix;
-	int    new_mid = new_n - prefix - suffix;
-
-	size_t mark    = xtk_scratch_mark(scratch);
-	bool  *claimed = claim_alloc(scratch, old_n);
-	if (old_n > 0 && !claimed) return false;
-	claim_affix(claimed, old_n, prefix, suffix);
-
-	if (!match_mid_and_moves(
-		  old_node, next_el, scratch, prefix, old_mid, new_mid, match->old, match->move, claimed, &match->moves_needed
-		))
-	{
-		xtk_scratch_rewind(scratch, mark);
-		return false;
+	Keyed k = {
+	  .old     = old_node,
+	  .next    = next_el,
+	  .scratch = scratch,
+	  .match   = match,
+	  .old_n   = old_node ? old_node->child_count : 0,
+	  .new_n   = XTK_EL_DATA(next_el)->child_count,
+	};
+	*match = (XtkKeyedMatch) {0};
+	if (!keyed_scratch_ensure(scratch, k.old_n, k.new_n) || !keyed_outputs(&k)) return false;
+	size_t mark = xtk_scratch_mark(scratch);
+	if (k.old_n > 0) {
+		k.claimed = ( bool * ) xtk_scratch_reserve(scratch, sizeof(bool) * ( size_t ) k.old_n, _Alignof(bool));
+		if (!k.claimed) return false;
+		memset(k.claimed, 0, sizeof(bool) * ( size_t ) k.old_n);
 	}
-	collect_unclaimed(claimed, old_n, match->retire, &match->retire_count);
+	keyed_affixes(&k);
+	bool ok = keyed_middle(&k) && keyed_moves(&k);
+	for (int i = 0; ok && i < k.old_n; i++)
+		if (!k.claimed [i]) match->retire [match->retire_count++] = i;
 	xtk_scratch_rewind(scratch, mark);
-	return true;
+	return ok;
 }

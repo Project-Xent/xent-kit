@@ -79,7 +79,7 @@ static XtkFrameStatus txn_host_commit(XtkReconcileTxn *txn, XtkEl *next, XtkPlan
 
 	xtk_publication_verify_result(txn, root, result);
 	XtkNode *published = xtk_publication_resolve(root, result);
-	xtk_batch_result_destroy(result);
+	xtk_batchresult_destroy(result);
 
 	txn->rt->root = published;
 	bind_created_virtual_regions(txn->rt, root, published);

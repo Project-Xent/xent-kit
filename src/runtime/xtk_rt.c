@@ -1,15 +1,12 @@
-/**
- * @file xtk_runtime.c
- * @brief Message queue, frame pump, overflow reporting.
- */
 #include <xtk/xtk_reconcile.h>
 #include <xtk/xtk_alloc.h>
 
-#include "xtk_runtime_internal.h"
+#include "xtk_rt_internal.h"
 #include "../reconcile/xtk_reconcile_internal.h"
 #include "../reconcile/xtk_scratch.h"
 #include "batch/xtk_batch_internal.h"
 #include "xtk_internal.h"
+#include "../xtk_thread_internal.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -77,9 +74,15 @@ static XtkPostStatus queue_post(XtkRt *rt, XtkMsg msg, char *owned) {
 	return XTK_POST_ACCEPTED;
 }
 
-XtkPostStatus xtk_rt_post(XtkRt *rt, XtkMsg msg) { return queue_post(rt, msg, NULL); }
+static bool   post_thread_ok(XtkRt const *rt) { return rt->owner_thread == xtk_thread_token(); }
 
-XtkPostStatus xtk_runtime_post_string(XtkRt *rt, XtkMsg msg, char const *data, uint32_t len) {
+XtkPostStatus xtk_rt_post(XtkRt *rt, XtkMsg msg) {
+	if (rt && !post_thread_ok(rt)) return XTK_POST_WRONG_THREAD;
+	return queue_post(rt, msg, NULL);
+}
+
+XtkPostStatus xtk_rt_poststring(XtkRt *rt, XtkMsg msg, char const *data, uint32_t len) {
+	if (rt && !post_thread_ok(rt)) return XTK_POST_WRONG_THREAD;
 	if (!rt || msg.tag == 0 || (len > 0u && !data)) return XTK_POST_INVALID_MESSAGE;
 	if (rt->q_count >= XTK_QUEUE_CAP) {
 		note_drop(rt);
@@ -232,13 +235,14 @@ XtkRt *xtk_rt_create(
 		return NULL;
 	}
 
-	rt->host      = host;
-	rt->cfg       = *cfg;
-	rt->host_root = host_root;
-	rt->model     = model;
-	rt->update    = update;
-	rt->view      = view;
-	rt->force     = true;
+	rt->host         = host;
+	rt->cfg          = *cfg;
+	rt->host_root    = host_root;
+	rt->model        = model;
+	rt->update       = update;
+	rt->view         = view;
+	rt->force        = true;
+	rt->owner_thread = xtk_thread_token();
 	return rt;
 }
 

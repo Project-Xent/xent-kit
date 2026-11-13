@@ -18,8 +18,6 @@ XtkEl *xtk_list(XtkUi *ui, XtkListDesc desc) { return items_host(ui, XTK_CTRL_LI
 XtkEl *xtk_listbox(XtkUi *ui, XtkListDesc desc) { return items_host(ui, XTK_CTRL_LISTBOX, desc); }
 
 XtkEl *xtk_gridview(XtkUi *ui, XtkListDesc desc) {
-	/* GridView defaults to WinUI's 4px-gapped fixed cells; itemw is
-	 * required for wrapping — default to a square cell when omitted. */
 	if (desc.itemh <= 0.0f) desc.itemh = 104.0f;
 	if (desc.itemw <= 0.0f) desc.itemw = desc.itemh;
 	return items_host(ui, XTK_CTRL_GRIDVIEW, desc);
@@ -79,7 +77,7 @@ static XtkTreeNodeDesc const *tree_nodes_dup(XtkUi *ui, XtkTreeNodeDesc const *n
 XtkEl *xtk_tree(XtkUi *ui, XtkTreeDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_TREE, NULL);
 	if (!el) return NULL;
-	if (desc.rowh <= 0.0f) desc.rowh = 28.0f;
+	if (desc.rowh <= 0.0f) desc.rowh = 32.0f;
 	desc.roots = tree_nodes_dup(ui, desc.roots, desc.nroot);
 	if (!desc.roots) desc.nroot = 0;
 	if (!XTK_EL_STORE(el, desc)) return NULL;

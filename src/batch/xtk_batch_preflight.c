@@ -99,7 +99,7 @@ static XtkBatchError preflight_subscribe(XtkPreflightCtx *ctx, uint32_t i) {
 	if (!op->fn || !xtk_batch_phases_ok(op->event, op->phases) || op->token >= ctx->batch->next_sub)
 		return XTK_BATCH_ERR_VALIDATION;
 	XtkCtrlId type = local_ref_type(ctx, op->target);
-	if (xtk_catalog_standard(type) && !xtk_catalog_control_event(type, op->event)) return XTK_BATCH_ERR_VALIDATION;
+	if (xtk_catalog_standard(type) && !xtk_catalog_ctrlevent(type, op->event)) return XTK_BATCH_ERR_VALIDATION;
 	return XTK_BATCH_OK;
 }
 

@@ -1,16 +1,13 @@
 #ifndef XTK_CONTROLS_H
 #define XTK_CONTROLS_H
 
-/* Typed conveniences over the standard catalog + txn protocol.
- * Generated from tools/catalog.lua. */
-
 #include "xtk_catalog.h"
 #include "xtk_scene.h"
 
 #include <stdint.h>
 
 typedef struct XtkLayoutProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -22,7 +19,7 @@ typedef struct XtkLayoutProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 } XtkLayoutProps;
 
 #define XTK_LAYOUT_W_MASK      (1ull << 0u)
@@ -37,7 +34,7 @@ typedef struct XtkLayoutProps {
 #define XTK_LAYOUT_TIP_MASK    (1ull << 9u)
 
 typedef struct XtkContainerProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -49,7 +46,7 @@ typedef struct XtkContainerProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	uint32_t       dir;
 	uint32_t       items;
 	uint32_t       justify;
@@ -88,7 +85,7 @@ typedef struct XtkContainerProps {
 #define XTK_CONTAINER_WRAP_MASK    (1ull << 21u)
 
 typedef struct XtkTextProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -99,13 +96,17 @@ typedef struct XtkTextProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	float          fontsize;
 	uint32_t       fontweight;
 	uint32_t       textalign;
 	XtkColor       fg;
+	int32_t        maxlines;
+	uint32_t       trim;
+	bool           textwrap;
+	bool           selectable;
 } XtkTextProps;
 
 #define XTK_TEXT_W_MASK          (1ull << 0u)
@@ -122,9 +123,13 @@ typedef struct XtkTextProps {
 #define XTK_TEXT_FONTWEIGHT_MASK (1ull << 11u)
 #define XTK_TEXT_TEXTALIGN_MASK  (1ull << 12u)
 #define XTK_TEXT_FG_MASK         (1ull << 13u)
+#define XTK_TEXT_MAXLINES_MASK   (1ull << 14u)
+#define XTK_TEXT_TRIM_MASK       (1ull << 15u)
+#define XTK_TEXT_TEXTWRAP_MASK   (1ull << 16u)
+#define XTK_TEXT_SELECTABLE_MASK (1ull << 17u)
 
 typedef struct XtkButtonProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -135,12 +140,12 @@ typedef struct XtkButtonProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	char const    *icon;
-	uint32_t       icon_len; /* 0 => strlen(icon) when icon != NULL */
+	uint32_t       icon_len;
 	uint32_t       style;
 } XtkButtonProps;
 
@@ -159,7 +164,7 @@ typedef struct XtkButtonProps {
 #define XTK_BUTTON_STYLE_MASK   (1ull << 12u)
 
 typedef struct XtkToggleProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -170,9 +175,9 @@ typedef struct XtkToggleProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	bool           checked;
 } XtkToggleProps;
@@ -190,8 +195,44 @@ typedef struct XtkToggleProps {
 #define XTK_TOGGLE_ENABLED_MASK (1ull << 10u)
 #define XTK_TOGGLE_CHECKED_MASK (1ull << 11u)
 
+typedef struct XtkCheckBoxProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *text;
+	uint32_t       text_len;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	bool           checked;
+	bool           indeterminate;
+	bool           threestate;
+} XtkCheckBoxProps;
+
+#define XTK_CHECKBOX_W_MASK             (1ull << 0u)
+#define XTK_CHECKBOX_H_MASK             (1ull << 1u)
+#define XTK_CHECKBOX_GROW_MASK          (1ull << 2u)
+#define XTK_CHECKBOX_SELF_MASK          (1ull << 3u)
+#define XTK_CHECKBOX_ML_MASK            (1ull << 4u)
+#define XTK_CHECKBOX_MT_MASK            (1ull << 5u)
+#define XTK_CHECKBOX_MR_MASK            (1ull << 6u)
+#define XTK_CHECKBOX_MB_MASK            (1ull << 7u)
+#define XTK_CHECKBOX_TEXT_MASK          (1ull << 8u)
+#define XTK_CHECKBOX_TIP_MASK           (1ull << 9u)
+#define XTK_CHECKBOX_ENABLED_MASK       (1ull << 10u)
+#define XTK_CHECKBOX_CHECKED_MASK       (1ull << 11u)
+#define XTK_CHECKBOX_INDETERMINATE_MASK (1ull << 12u)
+#define XTK_CHECKBOX_THREESTATE_MASK    (1ull << 13u)
+
 typedef struct XtkSliderProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -202,7 +243,7 @@ typedef struct XtkSliderProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	float          min;
 	float          max;
@@ -213,6 +254,10 @@ typedef struct XtkSliderProps {
 	uint32_t       snapsto;
 	float          smallchange;
 	float          largechange;
+	uint32_t       dir;
+	bool           range;
+	float          rangestart;
+	float          rangeend;
 } XtkSliderProps;
 
 #define XTK_SLIDER_W_MASK           (1ull << 0u)
@@ -234,9 +279,13 @@ typedef struct XtkSliderProps {
 #define XTK_SLIDER_SNAPSTO_MASK     (1ull << 16u)
 #define XTK_SLIDER_SMALLCHANGE_MASK (1ull << 17u)
 #define XTK_SLIDER_LARGECHANGE_MASK (1ull << 18u)
+#define XTK_SLIDER_DIR_MASK         (1ull << 19u)
+#define XTK_SLIDER_RANGE_MASK       (1ull << 20u)
+#define XTK_SLIDER_RANGESTART_MASK  (1ull << 21u)
+#define XTK_SLIDER_RANGEEND_MASK    (1ull << 22u)
 
 typedef struct XtkInputProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -247,12 +296,12 @@ typedef struct XtkInputProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	char const    *placeholder;
-	uint32_t       placeholder_len; /* 0 => strlen(placeholder) when placeholder != NULL */
+	uint32_t       placeholder_len;
 } XtkInputProps;
 
 #define XTK_INPUT_W_MASK           (1ull << 0u)
@@ -268,8 +317,45 @@ typedef struct XtkInputProps {
 #define XTK_INPUT_ENABLED_MASK     (1ull << 10u)
 #define XTK_INPUT_PLACEHOLDER_MASK (1ull << 11u)
 
+typedef struct XtkTextBoxProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *text;
+	uint32_t       text_len;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	char const    *placeholder;
+	uint32_t       placeholder_len;
+	bool           multiline;
+	bool           readonly;
+} XtkTextBoxProps;
+
+#define XTK_TEXTBOX_W_MASK           (1ull << 0u)
+#define XTK_TEXTBOX_H_MASK           (1ull << 1u)
+#define XTK_TEXTBOX_GROW_MASK        (1ull << 2u)
+#define XTK_TEXTBOX_SELF_MASK        (1ull << 3u)
+#define XTK_TEXTBOX_ML_MASK          (1ull << 4u)
+#define XTK_TEXTBOX_MT_MASK          (1ull << 5u)
+#define XTK_TEXTBOX_MR_MASK          (1ull << 6u)
+#define XTK_TEXTBOX_MB_MASK          (1ull << 7u)
+#define XTK_TEXTBOX_TEXT_MASK        (1ull << 8u)
+#define XTK_TEXTBOX_TIP_MASK         (1ull << 9u)
+#define XTK_TEXTBOX_ENABLED_MASK     (1ull << 10u)
+#define XTK_TEXTBOX_PLACEHOLDER_MASK (1ull << 11u)
+#define XTK_TEXTBOX_MULTILINE_MASK   (1ull << 12u)
+#define XTK_TEXTBOX_READONLY_MASK    (1ull << 13u)
+
 typedef struct XtkImageProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -280,7 +366,7 @@ typedef struct XtkImageProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	XtkResource    src;
 	uint32_t       fit;
 } XtkImageProps;
@@ -298,7 +384,7 @@ typedef struct XtkImageProps {
 #define XTK_IMAGE_FIT_MASK  (1ull << 10u)
 
 typedef struct XtkProgressProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -309,11 +395,18 @@ typedef struct XtkProgressProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	float          min;
 	float          max;
 	float          value;
 	bool           indeterminate;
+	uint32_t       state;
+	bool           active;
+	float          pl;
+	float          pt;
+	float          pr;
+	float          pb;
+	float          border_width;
 } XtkProgressProps;
 
 #define XTK_PROGRESS_W_MASK             (1ull << 0u)
@@ -329,9 +422,16 @@ typedef struct XtkProgressProps {
 #define XTK_PROGRESS_MAX_MASK           (1ull << 10u)
 #define XTK_PROGRESS_VALUE_MASK         (1ull << 11u)
 #define XTK_PROGRESS_INDETERMINATE_MASK (1ull << 12u)
+#define XTK_PROGRESS_STATE_MASK         (1ull << 13u)
+#define XTK_PROGRESS_ACTIVE_MASK        (1ull << 14u)
+#define XTK_PROGRESS_PL_MASK            (1ull << 15u)
+#define XTK_PROGRESS_PT_MASK            (1ull << 16u)
+#define XTK_PROGRESS_PR_MASK            (1ull << 17u)
+#define XTK_PROGRESS_PB_MASK            (1ull << 18u)
+#define XTK_PROGRESS_BORDER_WIDTH_MASK  (1ull << 19u)
 
 typedef struct XtkNumberProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -342,7 +442,7 @@ typedef struct XtkNumberProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	double         value;
 	double         min;
@@ -368,7 +468,7 @@ typedef struct XtkNumberProps {
 #define XTK_NUMBER_HIDESPIN_MASK (1ull << 14u)
 
 typedef struct XtkItemProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -379,11 +479,11 @@ typedef struct XtkItemProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	char const    *icon;
-	uint32_t       icon_len; /* 0 => strlen(icon) when icon != NULL */
+	uint32_t       icon_len;
 	bool           enabled;
 	bool           selected;
 	bool           expanded;
@@ -405,7 +505,7 @@ typedef struct XtkItemProps {
 #define XTK_ITEM_EXPANDED_MASK (1ull << 13u)
 
 typedef struct XtkSelectionProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -416,7 +516,7 @@ typedef struct XtkSelectionProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	int32_t        sel;
 	int32_t        nitem;
@@ -435,8 +535,8 @@ typedef struct XtkSelectionProps {
 #define XTK_SELECTION_SEL_MASK     (1ull << 10u)
 #define XTK_SELECTION_NITEM_MASK   (1ull << 11u)
 
-typedef struct XtkListProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+typedef struct XtkNavProps {
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -447,7 +547,36 @@ typedef struct XtkListProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
+	bool           enabled;
+	int32_t        sel;
+} XtkNavProps;
+
+#define XTK_NAV_W_MASK       (1ull << 0u)
+#define XTK_NAV_H_MASK       (1ull << 1u)
+#define XTK_NAV_GROW_MASK    (1ull << 2u)
+#define XTK_NAV_SELF_MASK    (1ull << 3u)
+#define XTK_NAV_ML_MASK      (1ull << 4u)
+#define XTK_NAV_MT_MASK      (1ull << 5u)
+#define XTK_NAV_MR_MASK      (1ull << 6u)
+#define XTK_NAV_MB_MASK      (1ull << 7u)
+#define XTK_NAV_TIP_MASK     (1ull << 8u)
+#define XTK_NAV_ENABLED_MASK (1ull << 9u)
+#define XTK_NAV_SEL_MASK     (1ull << 10u)
+
+typedef struct XtkListProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
 	bool           enabled;
 	int32_t        sel;
 	int32_t        nitem;
@@ -475,7 +604,7 @@ typedef struct XtkListProps {
 #define XTK_LIST_MODE_MASK    (1ull << 15u)
 
 typedef struct XtkRadioGroupProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -486,7 +615,7 @@ typedef struct XtkRadioGroupProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	int32_t        sel;
 	int32_t        nitem;
@@ -508,7 +637,7 @@ typedef struct XtkRadioGroupProps {
 #define XTK_RADIOGROUP_NCOL_MASK    (1ull << 12u)
 
 typedef struct XtkTreeProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -519,7 +648,7 @@ typedef struct XtkTreeProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	int32_t        sel;
 	int32_t        nitem;
@@ -541,7 +670,7 @@ typedef struct XtkTreeProps {
 #define XTK_TREE_ITEMH_MASK   (1ull << 12u)
 
 typedef struct XtkComboProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -552,12 +681,14 @@ typedef struct XtkComboProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	char const    *placeholder;
-	uint32_t       placeholder_len; /* 0 => strlen(placeholder) when placeholder != NULL */
+	uint32_t       placeholder_len;
 	int32_t        sel;
-	int32_t        nitem;
+	char const    *text;
+	uint32_t       text_len;
+	bool           editable;
 } XtkComboProps;
 
 #define XTK_COMBO_W_MASK           (1ull << 0u)
@@ -572,10 +703,11 @@ typedef struct XtkComboProps {
 #define XTK_COMBO_ENABLED_MASK     (1ull << 9u)
 #define XTK_COMBO_PLACEHOLDER_MASK (1ull << 10u)
 #define XTK_COMBO_SEL_MASK         (1ull << 11u)
-#define XTK_COMBO_NITEM_MASK       (1ull << 12u)
+#define XTK_COMBO_TEXT_MASK        (1ull << 12u)
+#define XTK_COMBO_EDITABLE_MASK    (1ull << 13u)
 
 typedef struct XtkOverlayProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -586,9 +718,9 @@ typedef struct XtkOverlayProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           open;
 	bool           enabled;
 } XtkOverlayProps;
@@ -607,7 +739,7 @@ typedef struct XtkOverlayProps {
 #define XTK_OVERLAY_ENABLED_MASK (1ull << 11u)
 
 typedef struct XtkItemsViewProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -618,7 +750,7 @@ typedef struct XtkItemsViewProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	int32_t        sel;
 	int32_t        nitem;
@@ -648,7 +780,7 @@ typedef struct XtkItemsViewProps {
 #define XTK_ITEMSVIEW_INVOKED_MASK (1ull << 16u)
 
 typedef struct XtkExpanderProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -659,9 +791,9 @@ typedef struct XtkExpanderProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           expanded;
 	float          contenth;
 } XtkExpanderProps;
@@ -680,7 +812,7 @@ typedef struct XtkExpanderProps {
 #define XTK_EXPANDER_CONTENTH_MASK (1ull << 11u)
 
 typedef struct XtkInfoBarProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -691,11 +823,11 @@ typedef struct XtkInfoBarProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len;    /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *message;
-	uint32_t       message_len; /* 0 => strlen(message) when message != NULL */
+	uint32_t       message_len;
 	char const    *tip;
-	uint32_t       tip_len;     /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	uint32_t       severity;
 	bool           closable;
 } XtkInfoBarProps;
@@ -715,7 +847,7 @@ typedef struct XtkInfoBarProps {
 #define XTK_INFOBAR_CLOSABLE_MASK (1ull << 12u)
 
 typedef struct XtkRefreshProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -726,7 +858,7 @@ typedef struct XtkRefreshProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	uint32_t       direction;
 	float          visualizer;
 	float          threshold;
@@ -748,7 +880,7 @@ typedef struct XtkRefreshProps {
 #define XTK_REFRESH_REFRESHING_MASK (1ull << 12u)
 
 typedef struct XtkFlipProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -759,7 +891,7 @@ typedef struct XtkFlipProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	int32_t        sel;
 	uint32_t       dir;
 } XtkFlipProps;
@@ -777,7 +909,7 @@ typedef struct XtkFlipProps {
 #define XTK_FLIP_DIR_MASK  (1ull << 10u)
 
 typedef struct XtkPipsProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -788,7 +920,7 @@ typedef struct XtkPipsProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	int32_t        sel;
 	int32_t        nitem;
 	uint32_t       dir;
@@ -812,7 +944,7 @@ typedef struct XtkPipsProps {
 #define XTK_PIPS_NAV_MASK        (1ull << 13u)
 
 typedef struct XtkSuggestProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -823,14 +955,14 @@ typedef struct XtkSuggestProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	char const    *placeholder;
-	uint32_t       placeholder_len; /* 0 => strlen(placeholder) when placeholder != NULL */
+	uint32_t       placeholder_len;
 	char const    *icon;
-	uint32_t       icon_len;        /* 0 => strlen(icon) when icon != NULL */
+	uint32_t       icon_len;
 } XtkSuggestProps;
 
 #define XTK_SUGGEST_W_MASK           (1ull << 0u)
@@ -848,7 +980,7 @@ typedef struct XtkSuggestProps {
 #define XTK_SUGGEST_ICON_MASK        (1ull << 12u)
 
 typedef struct XtkBadgeProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -860,11 +992,11 @@ typedef struct XtkBadgeProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	uint32_t       badgemode;
 	int32_t        value;
 	char const    *icon;
-	uint32_t       icon_len; /* 0 => strlen(icon) when icon != NULL */
+	uint32_t       icon_len;
 } XtkBadgeProps;
 
 #define XTK_BADGE_W_MASK         (1ull << 0u)
@@ -882,7 +1014,7 @@ typedef struct XtkBadgeProps {
 #define XTK_BADGE_ICON_MASK      (1ull << 12u)
 
 typedef struct XtkDialogProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -894,15 +1026,15 @@ typedef struct XtkDialogProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len;       /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	char const    *text;
-	uint32_t       text_len;      /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *primary;
-	uint32_t       primary_len;   /* 0 => strlen(primary) when primary != NULL */
+	uint32_t       primary_len;
 	char const    *secondary;
-	uint32_t       secondary_len; /* 0 => strlen(secondary) when secondary != NULL */
+	uint32_t       secondary_len;
 	char const    *close;
-	uint32_t       close_len;     /* 0 => strlen(close) when close != NULL */
+	uint32_t       close_len;
 	float          contenth;
 	bool           open;
 } XtkDialogProps;
@@ -925,7 +1057,7 @@ typedef struct XtkDialogProps {
 #define XTK_DIALOG_OPEN_MASK      (1ull << 15u)
 
 typedef struct XtkTeachingTipProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -937,18 +1069,18 @@ typedef struct XtkTeachingTipProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len;      /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	char const    *text;
-	uint32_t       text_len;     /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *subtitle;
-	uint32_t       subtitle_len; /* 0 => strlen(subtitle) when subtitle != NULL */
+	uint32_t       subtitle_len;
 	char const    *icon;
-	uint32_t       icon_len;     /* 0 => strlen(icon) when icon != NULL */
+	uint32_t       icon_len;
 	char const    *action;
-	uint32_t       action_len;   /* 0 => strlen(action) when action != NULL */
+	uint32_t       action_len;
 	bool           actionaccent;
 	char const    *close;
-	uint32_t       close_len; /* 0 => strlen(close) when close != NULL */
+	uint32_t       close_len;
 	uint32_t       placement;
 	bool           untargeted;
 	bool           lightdismiss;
@@ -981,7 +1113,7 @@ typedef struct XtkTeachingTipProps {
 #define XTK_TEACHTIP_OPEN_MASK            (1ull << 21u)
 
 typedef struct XtkAvatarProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -993,14 +1125,14 @@ typedef struct XtkAvatarProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len;      /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	char const    *text;
-	uint32_t       text_len;     /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *initials;
-	uint32_t       initials_len; /* 0 => strlen(initials) when initials != NULL */
+	uint32_t       initials_len;
 	XtkResource    src;
 	char const    *badgeglyph;
-	uint32_t       badgeglyph_len; /* 0 => strlen(badgeglyph) when badgeglyph != NULL */
+	uint32_t       badgeglyph_len;
 	int32_t        badgevalue;
 	bool           group;
 } XtkAvatarProps;
@@ -1023,7 +1155,7 @@ typedef struct XtkAvatarProps {
 #define XTK_AVATAR_GROUP_MASK      (1ull << 15u)
 
 typedef struct XtkPagerProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -1035,7 +1167,7 @@ typedef struct XtkPagerProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	int32_t        sel;
 	int32_t        nitem;
 	uint32_t       display;
@@ -1044,9 +1176,9 @@ typedef struct XtkPagerProps {
 	uint32_t       next;
 	uint32_t       last;
 	char const    *prefix;
-	uint32_t       prefix_len; /* 0 => strlen(prefix) when prefix != NULL */
+	uint32_t       prefix_len;
 	char const    *suffix;
-	uint32_t       suffix_len; /* 0 => strlen(suffix) when suffix != NULL */
+	uint32_t       suffix_len;
 } XtkPagerProps;
 
 #define XTK_PAGER_W_MASK       (1ull << 0u)
@@ -1070,7 +1202,7 @@ typedef struct XtkPagerProps {
 #define XTK_PAGER_SUFFIX_MASK  (1ull << 18u)
 
 typedef struct XtkSplitViewProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -1082,19 +1214,14 @@ typedef struct XtkSplitViewProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	uint32_t       dir;
-	uint32_t       items;
-	uint32_t       justify;
 	float          gap;
 	float          pl;
 	float          pt;
 	float          pr;
 	float          pb;
 	bool           fill;
-	bool           fitw;
-	bool           fith;
-	uint32_t       wrap;
 	bool           open;
 	uint32_t       display;
 	uint32_t       placement;
@@ -1113,25 +1240,20 @@ typedef struct XtkSplitViewProps {
 #define XTK_SPLITVIEW_MB_MASK         (1ull << 8u)
 #define XTK_SPLITVIEW_TIP_MASK        (1ull << 9u)
 #define XTK_SPLITVIEW_DIR_MASK        (1ull << 10u)
-#define XTK_SPLITVIEW_ITEMS_MASK      (1ull << 11u)
-#define XTK_SPLITVIEW_JUSTIFY_MASK    (1ull << 12u)
-#define XTK_SPLITVIEW_GAP_MASK        (1ull << 13u)
-#define XTK_SPLITVIEW_PL_MASK         (1ull << 14u)
-#define XTK_SPLITVIEW_PT_MASK         (1ull << 15u)
-#define XTK_SPLITVIEW_PR_MASK         (1ull << 16u)
-#define XTK_SPLITVIEW_PB_MASK         (1ull << 17u)
-#define XTK_SPLITVIEW_FILL_MASK       (1ull << 18u)
-#define XTK_SPLITVIEW_FITW_MASK       (1ull << 19u)
-#define XTK_SPLITVIEW_FITH_MASK       (1ull << 20u)
-#define XTK_SPLITVIEW_WRAP_MASK       (1ull << 21u)
-#define XTK_SPLITVIEW_OPEN_MASK       (1ull << 22u)
-#define XTK_SPLITVIEW_DISPLAY_MASK    (1ull << 23u)
-#define XTK_SPLITVIEW_PLACEMENT_MASK  (1ull << 24u)
-#define XTK_SPLITVIEW_OPENLEN_MASK    (1ull << 25u)
-#define XTK_SPLITVIEW_COMPACTLEN_MASK (1ull << 26u)
+#define XTK_SPLITVIEW_GAP_MASK        (1ull << 11u)
+#define XTK_SPLITVIEW_PL_MASK         (1ull << 12u)
+#define XTK_SPLITVIEW_PT_MASK         (1ull << 13u)
+#define XTK_SPLITVIEW_PR_MASK         (1ull << 14u)
+#define XTK_SPLITVIEW_PB_MASK         (1ull << 15u)
+#define XTK_SPLITVIEW_FILL_MASK       (1ull << 16u)
+#define XTK_SPLITVIEW_OPEN_MASK       (1ull << 17u)
+#define XTK_SPLITVIEW_DISPLAY_MASK    (1ull << 18u)
+#define XTK_SPLITVIEW_PLACEMENT_MASK  (1ull << 19u)
+#define XTK_SPLITVIEW_OPENLEN_MASK    (1ull << 20u)
+#define XTK_SPLITVIEW_COMPACTLEN_MASK (1ull << 21u)
 
 typedef struct XtkTitleBarProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -1143,13 +1265,13 @@ typedef struct XtkTitleBarProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len;      /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	char const    *text;
-	uint32_t       text_len;     /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *subtitle;
-	uint32_t       subtitle_len; /* 0 => strlen(subtitle) when subtitle != NULL */
+	uint32_t       subtitle_len;
 	char const    *icon;
-	uint32_t       icon_len;     /* 0 => strlen(icon) when icon != NULL */
+	uint32_t       icon_len;
 	bool           showback;
 	bool           backdisabled;
 	bool           showtoggle;
@@ -1175,7 +1297,7 @@ typedef struct XtkTitleBarProps {
 #define XTK_TITLEBAR_INTEGRATE_MASK    (1ull << 16u)
 
 typedef struct XtkRatingProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -1187,11 +1309,11 @@ typedef struct XtkRatingProps {
 	float          mr;
 	float          mb;
 	char const    *tip;
-	uint32_t       tip_len; /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	double         value;
 	double         max;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	double         placeholder;
 	int32_t        initial;
 	bool           clear;
@@ -1217,7 +1339,7 @@ typedef struct XtkRatingProps {
 #define XTK_RATING_READONLY_MASK    (1ull << 16u)
 
 typedef struct XtkLinkProps {
-	uint64_t       set; /* presence mask: bit i = props[i] */
+	uint64_t       set;
 	XtkChangeStamp stamp;
 	float          w;
 	float          h;
@@ -1228,12 +1350,12 @@ typedef struct XtkLinkProps {
 	float          mr;
 	float          mb;
 	char const    *text;
-	uint32_t       text_len; /* 0 => strlen(text) when text != NULL */
+	uint32_t       text_len;
 	char const    *tip;
-	uint32_t       tip_len;  /* 0 => strlen(tip) when tip != NULL */
+	uint32_t       tip_len;
 	bool           enabled;
 	char const    *url;
-	uint32_t       url_len; /* 0 => strlen(url) when url != NULL */
+	uint32_t       url_len;
 } XtkLinkProps;
 
 #define XTK_LINK_W_MASK       (1ull << 0u)
@@ -1249,15 +1371,239 @@ typedef struct XtkLinkProps {
 #define XTK_LINK_ENABLED_MASK (1ull << 10u)
 #define XTK_LINK_URL_MASK     (1ull << 11u)
 
+typedef struct XtkScrollBarProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	uint32_t       dir;
+	double         min;
+	double         max;
+	double         value;
+	double         viewport;
+	float          smallchange;
+	float          largechange;
+	uint32_t       indicator;
+} XtkScrollBarProps;
+
+#define XTK_SCROLLBAR_W_MASK           (1ull << 0u)
+#define XTK_SCROLLBAR_H_MASK           (1ull << 1u)
+#define XTK_SCROLLBAR_GROW_MASK        (1ull << 2u)
+#define XTK_SCROLLBAR_SELF_MASK        (1ull << 3u)
+#define XTK_SCROLLBAR_ML_MASK          (1ull << 4u)
+#define XTK_SCROLLBAR_MT_MASK          (1ull << 5u)
+#define XTK_SCROLLBAR_MR_MASK          (1ull << 6u)
+#define XTK_SCROLLBAR_MB_MASK          (1ull << 7u)
+#define XTK_SCROLLBAR_TIP_MASK         (1ull << 8u)
+#define XTK_SCROLLBAR_ENABLED_MASK     (1ull << 9u)
+#define XTK_SCROLLBAR_DIR_MASK         (1ull << 10u)
+#define XTK_SCROLLBAR_MIN_MASK         (1ull << 11u)
+#define XTK_SCROLLBAR_MAX_MASK         (1ull << 12u)
+#define XTK_SCROLLBAR_VALUE_MASK       (1ull << 13u)
+#define XTK_SCROLLBAR_VIEWPORT_MASK    (1ull << 14u)
+#define XTK_SCROLLBAR_SMALLCHANGE_MASK (1ull << 15u)
+#define XTK_SCROLLBAR_LARGECHANGE_MASK (1ull << 16u)
+#define XTK_SCROLLBAR_INDICATOR_MASK   (1ull << 17u)
+
+typedef struct XtkLoopingProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	int32_t        nitem;
+	int32_t        sel;
+	float          itemh;
+	float          itemw;
+	bool           loop;
+} XtkLoopingProps;
+
+#define XTK_LOOPING_W_MASK       (1ull << 0u)
+#define XTK_LOOPING_H_MASK       (1ull << 1u)
+#define XTK_LOOPING_GROW_MASK    (1ull << 2u)
+#define XTK_LOOPING_SELF_MASK    (1ull << 3u)
+#define XTK_LOOPING_ML_MASK      (1ull << 4u)
+#define XTK_LOOPING_MT_MASK      (1ull << 5u)
+#define XTK_LOOPING_MR_MASK      (1ull << 6u)
+#define XTK_LOOPING_MB_MASK      (1ull << 7u)
+#define XTK_LOOPING_TIP_MASK     (1ull << 8u)
+#define XTK_LOOPING_ENABLED_MASK (1ull << 9u)
+#define XTK_LOOPING_NITEM_MASK   (1ull << 10u)
+#define XTK_LOOPING_SEL_MASK     (1ull << 11u)
+#define XTK_LOOPING_ITEMH_MASK   (1ull << 12u)
+#define XTK_LOOPING_ITEMW_MASK   (1ull << 13u)
+#define XTK_LOOPING_LOOP_MASK    (1ull << 14u)
+
+typedef struct XtkDatePickerProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	char const    *header;
+	uint32_t       header_len;
+	int32_t        date;
+	int32_t        minyear;
+	int32_t        maxyear;
+} XtkDatePickerProps;
+
+#define XTK_DATEPICKER_W_MASK       (1ull << 0u)
+#define XTK_DATEPICKER_H_MASK       (1ull << 1u)
+#define XTK_DATEPICKER_GROW_MASK    (1ull << 2u)
+#define XTK_DATEPICKER_SELF_MASK    (1ull << 3u)
+#define XTK_DATEPICKER_ML_MASK      (1ull << 4u)
+#define XTK_DATEPICKER_MT_MASK      (1ull << 5u)
+#define XTK_DATEPICKER_MR_MASK      (1ull << 6u)
+#define XTK_DATEPICKER_MB_MASK      (1ull << 7u)
+#define XTK_DATEPICKER_TIP_MASK     (1ull << 8u)
+#define XTK_DATEPICKER_ENABLED_MASK (1ull << 9u)
+#define XTK_DATEPICKER_HEADER_MASK  (1ull << 10u)
+#define XTK_DATEPICKER_DATE_MASK    (1ull << 11u)
+#define XTK_DATEPICKER_MINYEAR_MASK (1ull << 12u)
+#define XTK_DATEPICKER_MAXYEAR_MASK (1ull << 13u)
+
+typedef struct XtkTimePickerProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	char const    *header;
+	uint32_t       header_len;
+	int32_t        time;
+	uint32_t       clock;
+	int32_t        step;
+} XtkTimePickerProps;
+
+#define XTK_TIMEPICKER_W_MASK       (1ull << 0u)
+#define XTK_TIMEPICKER_H_MASK       (1ull << 1u)
+#define XTK_TIMEPICKER_GROW_MASK    (1ull << 2u)
+#define XTK_TIMEPICKER_SELF_MASK    (1ull << 3u)
+#define XTK_TIMEPICKER_ML_MASK      (1ull << 4u)
+#define XTK_TIMEPICKER_MT_MASK      (1ull << 5u)
+#define XTK_TIMEPICKER_MR_MASK      (1ull << 6u)
+#define XTK_TIMEPICKER_MB_MASK      (1ull << 7u)
+#define XTK_TIMEPICKER_TIP_MASK     (1ull << 8u)
+#define XTK_TIMEPICKER_ENABLED_MASK (1ull << 9u)
+#define XTK_TIMEPICKER_HEADER_MASK  (1ull << 10u)
+#define XTK_TIMEPICKER_TIME_MASK    (1ull << 11u)
+#define XTK_TIMEPICKER_CLOCK_MASK   (1ull << 12u)
+#define XTK_TIMEPICKER_STEP_MASK    (1ull << 13u)
+
+typedef struct XtkCalendarProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	int32_t        date;
+	uint32_t       mode;
+	int32_t        mindate;
+	int32_t        maxdate;
+	int32_t        firstday;
+} XtkCalendarProps;
+
+#define XTK_CALENDAR_W_MASK        (1ull << 0u)
+#define XTK_CALENDAR_H_MASK        (1ull << 1u)
+#define XTK_CALENDAR_GROW_MASK     (1ull << 2u)
+#define XTK_CALENDAR_SELF_MASK     (1ull << 3u)
+#define XTK_CALENDAR_ML_MASK       (1ull << 4u)
+#define XTK_CALENDAR_MT_MASK       (1ull << 5u)
+#define XTK_CALENDAR_MR_MASK       (1ull << 6u)
+#define XTK_CALENDAR_MB_MASK       (1ull << 7u)
+#define XTK_CALENDAR_TIP_MASK      (1ull << 8u)
+#define XTK_CALENDAR_ENABLED_MASK  (1ull << 9u)
+#define XTK_CALENDAR_DATE_MASK     (1ull << 10u)
+#define XTK_CALENDAR_MODE_MASK     (1ull << 11u)
+#define XTK_CALENDAR_MINDATE_MASK  (1ull << 12u)
+#define XTK_CALENDAR_MAXDATE_MASK  (1ull << 13u)
+#define XTK_CALENDAR_FIRSTDAY_MASK (1ull << 14u)
+
+typedef struct XtkColorPickerProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	uint32_t       self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           enabled;
+	XtkColor       color;
+	bool           alpha;
+	bool           morebutton;
+	uint32_t       spectrum;
+} XtkColorPickerProps;
+
+#define XTK_COLORPICKER_W_MASK          (1ull << 0u)
+#define XTK_COLORPICKER_H_MASK          (1ull << 1u)
+#define XTK_COLORPICKER_GROW_MASK       (1ull << 2u)
+#define XTK_COLORPICKER_SELF_MASK       (1ull << 3u)
+#define XTK_COLORPICKER_ML_MASK         (1ull << 4u)
+#define XTK_COLORPICKER_MT_MASK         (1ull << 5u)
+#define XTK_COLORPICKER_MR_MASK         (1ull << 6u)
+#define XTK_COLORPICKER_MB_MASK         (1ull << 7u)
+#define XTK_COLORPICKER_TIP_MASK        (1ull << 8u)
+#define XTK_COLORPICKER_ENABLED_MASK    (1ull << 9u)
+#define XTK_COLORPICKER_COLOR_MASK      (1ull << 10u)
+#define XTK_COLORPICKER_ALPHA_MASK      (1ull << 11u)
+#define XTK_COLORPICKER_MOREBUTTON_MASK (1ull << 12u)
+#define XTK_COLORPICKER_SPECTRUM_MASK   (1ull << 13u)
+
 XtkLocalId xtk_container_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_text_create(XtkTxn *txn, XtkNodeRef parent, XtkTextProps const *props);
 XtkLocalId xtk_button_create(XtkTxn *txn, XtkNodeRef parent, XtkButtonProps const *props);
 XtkLocalId xtk_toggle_create(XtkTxn *txn, XtkNodeRef parent, XtkToggleProps const *props);
-XtkLocalId xtk_checkbox_create(XtkTxn *txn, XtkNodeRef parent, XtkToggleProps const *props);
+XtkLocalId xtk_checkbox_create(XtkTxn *txn, XtkNodeRef parent, XtkCheckBoxProps const *props);
 XtkLocalId xtk_radio_create(XtkTxn *txn, XtkNodeRef parent, XtkToggleProps const *props);
 XtkLocalId xtk_switch_create(XtkTxn *txn, XtkNodeRef parent, XtkToggleProps const *props);
 XtkLocalId xtk_slider_create(XtkTxn *txn, XtkNodeRef parent, XtkSliderProps const *props);
-XtkLocalId xtk_textbox_create(XtkTxn *txn, XtkNodeRef parent, XtkInputProps const *props);
+XtkLocalId xtk_textbox_create(XtkTxn *txn, XtkNodeRef parent, XtkTextBoxProps const *props);
 XtkLocalId xtk_scroll_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_image_create(XtkTxn *txn, XtkNodeRef parent, XtkImageProps const *props);
 XtkLocalId xtk_progress_create(XtkTxn *txn, XtkNodeRef parent, XtkProgressProps const *props);
@@ -1286,7 +1632,7 @@ XtkLocalId xtk_dialog_create(XtkTxn *txn, XtkNodeRef parent, XtkDialogProps cons
 XtkLocalId xtk_dialogbody_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_menubar_create(XtkTxn *txn, XtkNodeRef parent, XtkLayoutProps const *props);
 XtkLocalId xtk_menuitem_create(XtkTxn *txn, XtkNodeRef parent, XtkItemProps const *props);
-XtkLocalId xtk_nav_create(XtkTxn *txn, XtkNodeRef parent, XtkSelectionProps const *props);
+XtkLocalId xtk_nav_create(XtkTxn *txn, XtkNodeRef parent, XtkNavProps const *props);
 XtkLocalId xtk_navitem_create(XtkTxn *txn, XtkNodeRef parent, XtkItemProps const *props);
 XtkLocalId xtk_tabs_create(XtkTxn *txn, XtkNodeRef parent, XtkSelectionProps const *props);
 XtkLocalId xtk_tabitem_create(XtkTxn *txn, XtkNodeRef parent, XtkItemProps const *props);
@@ -1315,6 +1661,12 @@ XtkLocalId xtk_splitview_create(XtkTxn *txn, XtkNodeRef parent, XtkSplitViewProp
 XtkLocalId xtk_splitpane_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_splitbody_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_titlebar_create(XtkTxn *txn, XtkNodeRef parent, XtkTitleBarProps const *props);
+XtkLocalId xtk_scrollbar_create(XtkTxn *txn, XtkNodeRef parent, XtkScrollBarProps const *props);
+XtkLocalId xtk_looping_create(XtkTxn *txn, XtkNodeRef parent, XtkLoopingProps const *props);
+XtkLocalId xtk_datepicker_create(XtkTxn *txn, XtkNodeRef parent, XtkDatePickerProps const *props);
+XtkLocalId xtk_timepicker_create(XtkTxn *txn, XtkNodeRef parent, XtkTimePickerProps const *props);
+XtkLocalId xtk_calendar_create(XtkTxn *txn, XtkNodeRef parent, XtkCalendarProps const *props);
+XtkLocalId xtk_colorpicker_create(XtkTxn *txn, XtkNodeRef parent, XtkColorPickerProps const *props);
 bool       xtk_container_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1351,6 +1703,10 @@ bool      xtk_text_setfontsize(XtkScene *scene, XtkCtrl control, float value, Xt
 bool      xtk_text_setfontweight(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
 bool      xtk_text_settextalign(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
 bool      xtk_text_setfg(XtkScene *scene, XtkCtrl control, XtkColor value, XtkChangeStamp change);
+bool      xtk_text_setmaxlines(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_text_settrim(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_text_settextwrap(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_text_setselectable(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_button_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_button_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_button_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1390,7 +1746,10 @@ bool      xtk_checkbox_settext(XtkScene *scene, XtkCtrl control, char const *dat
 bool      xtk_checkbox_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool      xtk_checkbox_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_checkbox_setchecked(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_checkbox_setindeterminate(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_checkbox_setthreestate(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_checkbox_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_checkbox_onstate(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_radio_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_radio_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_radio_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1436,7 +1795,12 @@ bool      xtk_slider_settickplace(XtkScene *scene, XtkCtrl control, uint32_t val
 bool      xtk_slider_setsnapsto(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
 bool      xtk_slider_setsmallchange(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_slider_setlargechange(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_slider_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_slider_setrange(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_slider_setrangestart(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_slider_setrangeend(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 XtkSubRef xtk_slider_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_slider_onrange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_textbox_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_textbox_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_textbox_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1451,6 +1815,8 @@ bool      xtk_textbox_setenabled(XtkScene *scene, XtkCtrl control, bool value, X
 bool      xtk_textbox_setplaceholder(
   XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
 );
+bool      xtk_textbox_setmultiline(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_textbox_setreadonly(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_textbox_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_scroll_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_scroll_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1498,6 +1864,12 @@ bool      xtk_progress_setmin(XtkScene *scene, XtkCtrl control, float value, Xtk
 bool      xtk_progress_setmax(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_progress_setvalue(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_progress_setindeterminate(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_progress_setstate(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_progress_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_progress_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_progress_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_progress_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_progress_setborder_width(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_list_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_list_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_list_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1639,6 +2011,8 @@ bool xtk_progressring_setmin(XtkScene *scene, XtkCtrl control, float value, XtkC
 bool xtk_progressring_setmax(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_progressring_setvalue(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_progressring_setindeterminate(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_progressring_setstate(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool xtk_progressring_setactive(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_badge_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_badge_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_badge_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1728,9 +2102,11 @@ bool      xtk_combo_settip(XtkScene *scene, XtkCtrl control, char const *data, u
 bool      xtk_combo_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_combo_setplaceholder(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_combo_setsel(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
-bool xtk_combo_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_combo_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_combo_seteditable(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_combo_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_combo_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_combo_onsubmit(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_expander_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_expander_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_expander_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -1870,7 +2246,6 @@ bool      xtk_nav_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChange
 bool      xtk_nav_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool      xtk_nav_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_nav_setsel(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
-bool      xtk_nav_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 XtkSubRef xtk_nav_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_nav_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_navitem_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2269,17 +2644,12 @@ bool      xtk_splitview_setmr(XtkScene *scene, XtkCtrl control, float value, Xtk
 bool      xtk_splitview_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_splitview_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool      xtk_splitview_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
-bool      xtk_splitview_setitems(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
-bool      xtk_splitview_setjustify(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
 bool      xtk_splitview_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_splitview_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_splitview_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_splitview_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_splitview_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_splitview_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool      xtk_splitview_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool      xtk_splitview_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool      xtk_splitview_setwrap(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
 bool      xtk_splitview_setopen(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_splitview_setdisplay(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
 bool      xtk_splitview_setplacement(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
@@ -2347,5 +2717,101 @@ bool xtk_titlebar_setbackdisabled(XtkScene *scene, XtkCtrl control, bool value, 
 bool xtk_titlebar_setshowtoggle(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_titlebar_setintegrate(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_titlebar_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_scrollbar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_scrollbar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_scrollbar_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_scrollbar_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_scrollbar_setmin(XtkScene *scene, XtkCtrl control, double value, XtkChangeStamp change);
+bool      xtk_scrollbar_setmax(XtkScene *scene, XtkCtrl control, double value, XtkChangeStamp change);
+bool      xtk_scrollbar_setvalue(XtkScene *scene, XtkCtrl control, double value, XtkChangeStamp change);
+bool      xtk_scrollbar_setviewport(XtkScene *scene, XtkCtrl control, double value, XtkChangeStamp change);
+bool      xtk_scrollbar_setsmallchange(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setlargechange(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_scrollbar_setindicator(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+XtkSubRef xtk_scrollbar_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_looping_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_looping_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_looping_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_looping_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_looping_setsel(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_looping_setitemh(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setitemw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_looping_setloop(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+XtkSubRef xtk_looping_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_datepicker_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_datepicker_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_datepicker_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_datepicker_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_datepicker_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_datepicker_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_datepicker_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_datepicker_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_datepicker_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_datepicker_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_datepicker_setheader(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_datepicker_setdate(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_datepicker_setminyear(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_datepicker_setmaxyear(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+XtkSubRef xtk_datepicker_onvalue(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_timepicker_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_timepicker_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_timepicker_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_timepicker_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_timepicker_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_timepicker_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_timepicker_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_timepicker_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_timepicker_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_timepicker_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_timepicker_setheader(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_timepicker_settime(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_timepicker_setclock(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool xtk_timepicker_setstep(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+XtkSubRef xtk_timepicker_onvalue(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_calendar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_calendar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_calendar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_calendar_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_calendar_setdate(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_calendar_setmode(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_calendar_setmindate(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_calendar_setmaxdate(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_calendar_setfirstday(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+XtkSubRef xtk_calendar_ondate(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_colorpicker_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colorpicker_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colorpicker_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colorpicker_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+bool      xtk_colorpicker_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colorpicker_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colorpicker_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colorpicker_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_colorpicker_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_colorpicker_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_colorpicker_setcolor(XtkScene *scene, XtkCtrl control, XtkColor value, XtkChangeStamp change);
+bool xtk_colorpicker_setalpha(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_colorpicker_setmorebutton(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_colorpicker_setspectrum(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change);
+XtkSubRef xtk_colorpicker_onvalue(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 
 #endif

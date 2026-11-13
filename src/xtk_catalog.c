@@ -129,6 +129,38 @@ static XtkPropDesc const properties [XTK_PROP_STANDARD_COUNT] = {
   PROPERTY(XTK_PROP_INITIAL_VALUE, "initial-value", XTK_PROP_KIND_I32, XTK_INVALIDATE_NONE),
   PROPERTY(XTK_PROP_URL, "url", XTK_PROP_KIND_STRING, XTK_INVALIDATE_NONE),
   PROPERTY(XTK_PROP_ADD_VISIBLE, "add-visible", XTK_PROP_KIND_BOOL, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_VIEWPORT_SIZE, "viewport-size", XTK_PROP_KIND_F64, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_INDICATOR_MODE, "indicator-mode", XTK_PROP_KIND_ENUM, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_SHOULD_LOOP, "should-loop", XTK_PROP_KIND_BOOL, XTK_INVALIDATE_LAYOUT),
+  PROPERTY(XTK_PROP_IS_THREE_STATE, "is-three-state", XTK_PROP_KIND_BOOL, STATE_INVALIDATION),
+  PROPERTY(
+	XTK_PROP_PROGRESS_STATE, "progress-state", XTK_PROP_KIND_ENUM, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS
+  ),
+  PROPERTY(XTK_PROP_IS_RANGE, "is-range", XTK_PROP_KIND_BOOL, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_RANGE_START, "range-start", XTK_PROP_KIND_F32, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS),
+  PROPERTY(XTK_PROP_RANGE_END, "range-end", XTK_PROP_KIND_F32, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS),
+  PROPERTY(XTK_PROP_IS_EDITABLE, "is-editable", XTK_PROP_KIND_BOOL, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_HEADER, "header", XTK_PROP_KIND_STRING, CONTENT_INVALIDATION),
+  PROPERTY(XTK_PROP_DATE, "date", XTK_PROP_KIND_I32, CONTENT_INVALIDATION),
+  PROPERTY(XTK_PROP_TIME, "time", XTK_PROP_KIND_I32, CONTENT_INVALIDATION),
+  PROPERTY(XTK_PROP_MIN_YEAR, "minimum-year", XTK_PROP_KIND_I32, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_MAX_YEAR, "maximum-year", XTK_PROP_KIND_I32, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_MIN_DATE, "minimum-date", XTK_PROP_KIND_I32, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_MAX_DATE, "maximum-date", XTK_PROP_KIND_I32, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_FIRST_DAY, "first-day-of-week", XTK_PROP_KIND_I32, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_CLOCK, "clock", XTK_PROP_KIND_ENUM, CONTENT_INVALIDATION),
+  PROPERTY(XTK_PROP_MINUTE_INCREMENT, "minute-increment", XTK_PROP_KIND_I32, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_COLOR, "color", XTK_PROP_KIND_COLOR, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS),
+  PROPERTY(XTK_PROP_ALPHA_ENABLED, "alpha-enabled", XTK_PROP_KIND_BOOL, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_MORE_BUTTON_VISIBLE, "more-button-visible", XTK_PROP_KIND_BOOL, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_SPECTRUM, "spectrum-components", XTK_PROP_KIND_ENUM, XTK_INVALIDATE_PAINT),
+  PROPERTY(XTK_PROP_PROGRESS_ACTIVE, "is-active", XTK_PROP_KIND_BOOL, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS),
+  PROPERTY(XTK_PROP_PROGRESS_BORDER_WIDTH, "progress-border-width", XTK_PROP_KIND_F32, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_MULTILINE, "multiline", XTK_PROP_KIND_BOOL, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_MAX_LINES, "max-lines", XTK_PROP_KIND_I32, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_TEXT_TRIM, "text-trimming", XTK_PROP_KIND_ENUM, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_TEXT_WRAP, "text-wrapping", XTK_PROP_KIND_BOOL, GEOMETRY_INVALIDATION),
+  PROPERTY(XTK_PROP_SELECTABLE, "is-text-selection-enabled", XTK_PROP_KIND_BOOL, STATE_INVALIDATION),
 };
 
 #define EVENT(id_, name_, routing_, payload_)                                         \
@@ -148,12 +180,18 @@ static XtkEventDesc const events [XTK_EVENT_STANDARD_COUNT] = {
   EVENT(XTK_EVENT_REFRESH, "refresh", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_I32),
   EVENT(XTK_EVENT_TREE_EXPAND, "tree-expand", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_INDEX_BOOL),
   EVENT(XTK_EVENT_TREE_SELECT, "tree-select", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_INDEX_BOOL),
+  EVENT(XTK_EVENT_CHANGE_I32, "change-i32", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_I32),
+  EVENT(XTK_EVENT_CHANGE_RANGE, "change-range", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_RANGE),
+  EVENT(XTK_EVENT_SUBMIT_STRING, "submit-string", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_STRING),
+  EVENT(XTK_EVENT_VALUE_CHANGED, "value-changed", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_I32),
+  EVENT(XTK_EVENT_DATE_SELECT, "date-select", XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_INDEX_BOOL),
 };
 
 static XtkPropertyId const layout_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -200,6 +238,10 @@ static XtkPropertyId const text_properties [] = {
   XTK_PROP_FONT_WEIGHT,
   XTK_PROP_TEXT_ALIGN,
   XTK_PROP_FOREGROUND,
+  XTK_PROP_MAX_LINES,
+  XTK_PROP_TEXT_TRIM,
+  XTK_PROP_TEXT_WRAP,
+  XTK_PROP_SELECTABLE,
 };
 static XtkPropertyId const button_properties [] = {
   XTK_PROP_WIDTH,
@@ -245,6 +287,126 @@ static XtkPropertyId const toggle_properties [] = {
   XTK_PROP_CHECKED,
   XTK_PROP_ICON,
 };
+static XtkPropertyId const checkbox_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TEXT,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_CHECKED,
+  XTK_PROP_ICON,
+  XTK_PROP_INDETERMINATE,
+  XTK_PROP_IS_THREE_STATE,
+};
+static XtkPropertyId const scroll_bar_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_ORIENTATION,
+  XTK_PROP_MIN_F64,
+  XTK_PROP_MAX_F64,
+  XTK_PROP_VALUE_F64,
+  XTK_PROP_VIEWPORT_SIZE,
+  XTK_PROP_SMALL_CHANGE,
+  XTK_PROP_LARGE_CHANGE,
+  XTK_PROP_INDICATOR_MODE,
+};
+static XtkPropertyId const looping_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_ITEMS,
+  XTK_PROP_ITEM_COUNT,
+  XTK_PROP_SELECTED_INDEX,
+  XTK_PROP_ITEM_HEIGHT,
+  XTK_PROP_ITEM_WIDTH,
+  XTK_PROP_SHOULD_LOOP,
+};
+static XtkPropertyId const date_picker_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_HEADER,
+  XTK_PROP_DATE,
+  XTK_PROP_MIN_YEAR,
+  XTK_PROP_MAX_YEAR,
+};
+static XtkPropertyId const time_picker_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_HEADER,
+  XTK_PROP_TIME,
+  XTK_PROP_CLOCK,
+  XTK_PROP_MINUTE_INCREMENT,
+};
+static XtkPropertyId const calendar_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_DATE,
+  XTK_PROP_SELECTION_MODE,
+  XTK_PROP_MIN_DATE,
+  XTK_PROP_MAX_DATE,
+  XTK_PROP_FIRST_DAY,
+};
+static XtkPropertyId const color_picker_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_COLOR,
+  XTK_PROP_ALPHA_ENABLED,
+  XTK_PROP_MORE_BUTTON_VISIBLE,
+  XTK_PROP_SPECTRUM,
+};
 static XtkPropertyId const slider_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
@@ -265,6 +427,10 @@ static XtkPropertyId const slider_properties [] = {
   XTK_PROP_SLIDER_SNAPS_TO,
   XTK_PROP_SMALL_CHANGE,
   XTK_PROP_LARGE_CHANGE,
+  XTK_PROP_ORIENTATION,
+  XTK_PROP_IS_RANGE,
+  XTK_PROP_RANGE_START,
+  XTK_PROP_RANGE_END,
 };
 static XtkPropertyId const input_properties [] = {
   XTK_PROP_WIDTH,
@@ -279,6 +445,22 @@ static XtkPropertyId const input_properties [] = {
   XTK_PROP_TOOLTIP,
   XTK_PROP_ENABLED,
   XTK_PROP_PLACEHOLDER,
+};
+static XtkPropertyId const textbox_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TEXT,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_PLACEHOLDER,
+  XTK_PROP_MULTILINE,
+  XTK_PROP_READ_ONLY,
 };
 static XtkPropertyId const image_properties [] = {
   XTK_PROP_WIDTH,
@@ -297,6 +479,7 @@ static XtkPropertyId const person_picture_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -315,6 +498,7 @@ static XtkPropertyId const split_view_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -338,6 +522,7 @@ static XtkPropertyId const title_bar_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -367,6 +552,29 @@ static XtkPropertyId const progress_properties [] = {
   XTK_PROP_MAX_F32,
   XTK_PROP_VALUE_F32,
   XTK_PROP_INDETERMINATE,
+  XTK_PROP_PROGRESS_STATE,
+  XTK_PROP_PADDING_LEFT,
+  XTK_PROP_PADDING_TOP,
+  XTK_PROP_PADDING_RIGHT,
+  XTK_PROP_PADDING_BOTTOM,
+  XTK_PROP_PROGRESS_BORDER_WIDTH,
+};
+static XtkPropertyId const progress_ring_properties [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_MIN_F32,
+  XTK_PROP_MAX_F32,
+  XTK_PROP_VALUE_F32,
+  XTK_PROP_INDETERMINATE,
+  XTK_PROP_PROGRESS_STATE,
+  XTK_PROP_PROGRESS_ACTIVE,
 };
 static XtkPropertyId const number_properties [] = {
   XTK_PROP_WIDTH,
@@ -389,6 +597,7 @@ static XtkPropertyId const rating_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -408,6 +617,7 @@ static XtkPropertyId const badge_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -607,6 +817,8 @@ static XtkPropertyId const combo_properties [] = {
   XTK_PROP_PLACEHOLDER,
   XTK_PROP_SELECTED_INDEX,
   XTK_PROP_ITEMS,
+  XTK_PROP_TEXT,
+  XTK_PROP_IS_EDITABLE,
 };
 static XtkPropertyId const nav_properties [] = {
   XTK_PROP_WIDTH,
@@ -640,6 +852,7 @@ static XtkPropertyId const dialog_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -657,6 +870,7 @@ static XtkPropertyId const teaching_tip_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -680,6 +894,7 @@ static XtkPropertyId const pager_properties [] = {
   XTK_PROP_WIDTH,
   XTK_PROP_HEIGHT,
   XTK_PROP_GROW,
+  XTK_PROP_SHRINK,
   XTK_PROP_ALIGN_SELF,
   XTK_PROP_MARGIN_LEFT,
   XTK_PROP_MARGIN_TOP,
@@ -741,18 +956,23 @@ static XtkPropertyId const refresh_properties [] = {
   XTK_PROP_REFRESHING,
 };
 
-static XtkEventId const invoke_events []  = {XTK_EVENT_INVOKE};
-static XtkEventId const bool_events []    = {XTK_EVENT_CHANGE_BOOL};
-static XtkEventId const f32_events []     = {XTK_EVENT_CHANGE_F32};
-static XtkEventId const f64_events []     = {XTK_EVENT_CHANGE_F64};
-static XtkEventId const string_events []  = {XTK_EVENT_CHANGE_STRING};
-static XtkEventId const select_events []  = {XTK_EVENT_SELECT, XTK_EVENT_INVOKE};
-static XtkEventId const tab_events []     = {XTK_EVENT_SELECT, XTK_EVENT_CLOSE, XTK_EVENT_INVOKE};
-static XtkEventId const overlay_events [] = {XTK_EVENT_CLOSE, XTK_EVENT_INVOKE};
-static XtkEventId const close_events []   = {XTK_EVENT_CLOSE};
-static XtkEventId const refresh_events [] = {XTK_EVENT_REFRESH};
-static XtkEventId const toggle_events []  = {XTK_EVENT_TOGGLE};
-static XtkEventId const query_events []   = {
+static XtkEventId const invoke_events []      = {XTK_EVENT_INVOKE};
+static XtkEventId const bool_events []        = {XTK_EVENT_CHANGE_BOOL};
+static XtkEventId const f32_events []         = {XTK_EVENT_CHANGE_F32};
+static XtkEventId const slider_events []      = {XTK_EVENT_CHANGE_F32, XTK_EVENT_CHANGE_RANGE};
+static XtkEventId const value_events []       = {XTK_EVENT_VALUE_CHANGED};
+static XtkEventId const date_select_events [] = {XTK_EVENT_DATE_SELECT};
+static XtkEventId const checkbox_events []    = {XTK_EVENT_CHANGE_BOOL, XTK_EVENT_CHANGE_I32};
+static XtkEventId const combo_events []       = {XTK_EVENT_SELECT, XTK_EVENT_INVOKE, XTK_EVENT_SUBMIT_STRING};
+static XtkEventId const f64_events []         = {XTK_EVENT_CHANGE_F64};
+static XtkEventId const string_events []      = {XTK_EVENT_CHANGE_STRING};
+static XtkEventId const select_events []      = {XTK_EVENT_SELECT, XTK_EVENT_INVOKE};
+static XtkEventId const tab_events []         = {XTK_EVENT_SELECT, XTK_EVENT_CLOSE, XTK_EVENT_INVOKE};
+static XtkEventId const overlay_events []     = {XTK_EVENT_CLOSE, XTK_EVENT_INVOKE};
+static XtkEventId const close_events []       = {XTK_EVENT_CLOSE};
+static XtkEventId const refresh_events []     = {XTK_EVENT_REFRESH};
+static XtkEventId const toggle_events []      = {XTK_EVENT_TOGGLE};
+static XtkEventId const query_events []       = {
   XTK_EVENT_CHANGE_STRING,
   XTK_EVENT_QUERY,
   XTK_EVENT_SELECT,
@@ -790,11 +1010,13 @@ static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
   CONTROL_NO_EVENTS(XTK_CTRL_TEXT, "text", text_properties, ACCESS(XTK_ACCESS_ROLE_TEXT, false, false)),
   CONTROL(XTK_CTRL_BUTTON, "button", button_properties, invoke_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)),
   CONTROL(XTK_CTRL_TOGGLE, "toggle-button", toggle_properties, bool_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)),
-  CONTROL(XTK_CTRL_CHECKBOX, "checkbox", toggle_properties, bool_events, ACCESS(XTK_ACCESS_ROLE_CHECKBOX, true, true)),
+  CONTROL(
+	XTK_CTRL_CHECKBOX, "checkbox", checkbox_properties, checkbox_events, ACCESS(XTK_ACCESS_ROLE_CHECKBOX, true, true)
+  ),
   CONTROL(XTK_CTRL_RADIO, "radio", toggle_properties, bool_events, ACCESS(XTK_ACCESS_ROLE_RADIO, true, true)),
   CONTROL(XTK_CTRL_SWITCH, "switch", toggle_properties, bool_events, ACCESS(XTK_ACCESS_ROLE_CHECKBOX, true, true)),
-  CONTROL(XTK_CTRL_SLIDER, "slider", slider_properties, f32_events, ACCESS(XTK_ACCESS_ROLE_SLIDER, true, true)),
-  CONTROL(XTK_CTRL_TEXTBOX, "text-input", input_properties, string_events, ACCESS(XTK_ACCESS_ROLE_EDIT, true, true)),
+  CONTROL(XTK_CTRL_SLIDER, "slider", slider_properties, slider_events, ACCESS(XTK_ACCESS_ROLE_SLIDER, true, true)),
+  CONTROL(XTK_CTRL_TEXTBOX, "text-input", textbox_properties, string_events, ACCESS(XTK_ACCESS_ROLE_EDIT, true, true)),
   CONTROL_NO_EVENTS(XTK_CTRL_SCROLL, "scroll", container_properties, ACCESS(XTK_ACCESS_ROLE_GROUP, true, true)),
   CONTROL_NO_EVENTS(XTK_CTRL_IMAGE, "image", image_properties, ACCESS(XTK_ACCESS_ROLE_IMAGE, false, false)),
   CONTROL_NO_EVENTS(XTK_CTRL_PROGRESS, "progress", progress_properties, ACCESS(XTK_ACCESS_ROLE_NONE, false, false)),
@@ -810,7 +1032,7 @@ static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
 	XTK_CTRL_REPEAT, "repeat-button", button_properties, invoke_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)
   ),
   CONTROL_NO_EVENTS(
-	XTK_CTRL_PROGRESSRING, "progress-ring", progress_properties, ACCESS(XTK_ACCESS_ROLE_NONE, false, false)
+	XTK_CTRL_PROGRESSRING, "progress-ring", progress_ring_properties, ACCESS(XTK_ACCESS_ROLE_NONE, false, false)
   ),
   CONTROL_NO_EVENTS(XTK_CTRL_BADGE, "info-badge", badge_properties, ACCESS(XTK_ACCESS_ROLE_TEXT, false, false)),
   CONTROL_NO_EVENTS(XTK_CTRL_TOOLTIP, "tooltip", overlay_properties, ACCESS(XTK_ACCESS_ROLE_NONE, false, false)),
@@ -820,7 +1042,7 @@ static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
 	XTK_CTRL_DROPDOWN, "dropdown-button", button_properties, invoke_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)
   ),
   CONTROL(XTK_CTRL_SPLIT, "split-button", button_properties, invoke_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)),
-  CONTROL(XTK_CTRL_COMBO, "combo-box", combo_properties, select_events, ACCESS(XTK_ACCESS_ROLE_EDIT, true, true)),
+  CONTROL(XTK_CTRL_COMBO, "combo-box", combo_properties, combo_events, ACCESS(XTK_ACCESS_ROLE_EDIT, true, true)),
   CONTROL(XTK_CTRL_EXPANDER, "expander", expander_properties, toggle_events, ACCESS(XTK_ACCESS_ROLE_GROUP, true, true)),
   CONTROL_NO_EVENTS(XTK_CTRL_EXPHEAD, "expander-header", item_properties, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)),
   CONTROL_NO_EVENTS(
@@ -906,6 +1128,41 @@ static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
   CONTROL(
 	XTK_CTRL_TITLEBAR, "title-bar", title_bar_properties, title_bar_events, ACCESS(XTK_ACCESS_ROLE_GROUP, true, true)
   ),
+  CONTROL(
+	XTK_CTRL_SCROLLBAR, "scroll-bar", scroll_bar_properties, f64_events, ACCESS(XTK_ACCESS_ROLE_SCROLLBAR, false, false)
+  ),
+  CONTROL(
+	XTK_CTRL_LOOPING, "looping-selector", looping_properties, select_events, ACCESS(XTK_ACCESS_ROLE_LIST, true, true)
+  ),
+  CONTROL_NO_EVENTS(
+	XTK_CTRL_LOOPITEM, "looping-selector-item", item_properties, ACCESS(XTK_ACCESS_ROLE_LIST_ITEM, false, false)
+  ),
+  CONTROL(
+	XTK_CTRL_DATEPICKER, "date-picker", date_picker_properties, value_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)
+  ),
+  CONTROL(
+	XTK_CTRL_TIMEPICKER, "time-picker", time_picker_properties, value_events, ACCESS(XTK_ACCESS_ROLE_BUTTON, true, true)
+  ),
+  CONTROL_NO_EVENTS(
+	XTK_CTRL_PICKERFLYOUT, "picker-flyout", item_properties, ACCESS(XTK_ACCESS_ROLE_GROUP, false, false)
+  ),
+  CONTROL(
+	XTK_CTRL_CALENDAR, "calendar-view", calendar_properties, date_select_events,
+	ACCESS(XTK_ACCESS_ROLE_LIST, true, true)
+  ),
+  CONTROL_NO_EVENTS(
+	XTK_CTRL_CALDAY, "calendar-view-day-item", item_properties, ACCESS(XTK_ACCESS_ROLE_LIST_ITEM, false, false)
+  ),
+  CONTROL(
+	XTK_CTRL_COLORPICKER, "color-picker", color_picker_properties, value_events,
+	ACCESS(XTK_ACCESS_ROLE_GROUP, false, false)
+  ),
+  CONTROL_NO_EVENTS(
+	XTK_CTRL_COLORSPECTRUM, "color-spectrum", item_properties, ACCESS(XTK_ACCESS_ROLE_SLIDER, true, true)
+  ),
+  CONTROL_NO_EVENTS(
+	XTK_CTRL_COLORSLIDER, "color-picker-slider", item_properties, ACCESS(XTK_ACCESS_ROLE_SLIDER, true, true)
+  ),
 };
 
 static bool id_in(uint32_t id, uint32_t const *ids, uint32_t count) {
@@ -928,13 +1185,13 @@ XtkEventDesc const *xtk_catalog_event(XtkEventId id) {
 	return &events [id];
 }
 
-XtkPropDesc const *xtk_catalog_control_property(XtkCtrlId control, XtkPropertyId property) {
+XtkPropDesc const *xtk_catalog_ctrlprop(XtkCtrlId control, XtkPropertyId property) {
 	XtkCtrlDesc const *desc = xtk_catalog_control(control);
 	if (!desc || !id_in(property, desc->properties, desc->property_count)) return NULL;
 	return xtk_catalog_property(property);
 }
 
-XtkEventDesc const *xtk_catalog_control_event(XtkCtrlId control, XtkEventId event) {
+XtkEventDesc const *xtk_catalog_ctrlevent(XtkCtrlId control, XtkEventId event) {
 	XtkCtrlDesc const *desc = xtk_catalog_control(control);
 	if (!desc || !id_in(event, desc->events, desc->event_count)) return NULL;
 	return xtk_catalog_event(event);

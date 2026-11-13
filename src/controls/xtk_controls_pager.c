@@ -34,79 +34,79 @@ XtkLocalId xtk_pager_create(XtkTxn *txn, XtkNodeRef parent, XtkPagerProps const 
 }
 
 bool xtk_pager_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_WIDTH, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_WIDTH, value, change);
 }
 
 bool xtk_pager_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_HEIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_HEIGHT, value, change);
 }
 
 bool xtk_pager_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_GROW, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
 bool xtk_pager_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_SHRINK, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
 bool xtk_pager_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
 bool xtk_pager_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_LEFT, value, change);
 }
 
 bool xtk_pager_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_TOP, value, change);
 }
 
 bool xtk_pager_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_RIGHT, value, change);
 }
 
 bool xtk_pager_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
-	return xtk_control_set_f32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_MARGIN_BOTTOM, value, change);
 }
 
 bool xtk_pager_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_pager_setsel(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
-	return xtk_control_set_i32(scene, control, XTK_PROP_SELECTED_INDEX, value, change);
+	return xtk_ctrl_seti32(scene, control, XTK_PROP_SELECTED_INDEX, value, change);
 }
 
 bool xtk_pager_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
-	return xtk_control_set_i32(scene, control, XTK_PROP_ITEM_COUNT, value, change);
+	return xtk_ctrl_seti32(scene, control, XTK_PROP_ITEM_COUNT, value, change);
 }
 
 bool xtk_pager_setdisplay(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_DISPLAY_MODE, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_DISPLAY_MODE, value, change);
 }
 
 bool xtk_pager_setfirst(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_FIRST_BUTTON, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_FIRST_BUTTON, value, change);
 }
 
 bool xtk_pager_setprev(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_PREVIOUS_BUTTON, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_PREVIOUS_BUTTON, value, change);
 }
 
 bool xtk_pager_setnext(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_NEXT_BUTTON, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_NEXT_BUTTON, value, change);
 }
 
 bool xtk_pager_setlast(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
-	return xtk_control_set_enum(scene, control, XTK_PROP_LAST_BUTTON, value, change);
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_LAST_BUTTON, value, change);
 }
 
 bool xtk_pager_setprefix(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_PREFIX, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_PREFIX, data, xtk_controls_text_len(data, len), change);
 }
 
 bool xtk_pager_setsuffix(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
-	return xtk_control_set_string(scene, control, XTK_PROP_SUFFIX, data, xtk_controls_text_len(data, len), change);
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_SUFFIX, data, xtk_controls_text_len(data, len), change);
 }
 
 XtkSubRef xtk_pager_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

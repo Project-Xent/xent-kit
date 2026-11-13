@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-int xtk_list_auto_columns(float cross, float itemw, int explicit_columns) {
+int xtk_list_autocolumns(float cross, float itemw, int explicit_columns) {
 	if (explicit_columns > 0) return explicit_columns;
 	if (itemw <= 0.0f || cross <= 0.0f) return 1;
 	int cols = ( int ) floorf(cross / itemw);
@@ -33,7 +33,7 @@ static void list_window(XtkRt *rt, XentNodeId node, XtkEl const *el, int *first,
 		viewport.extent = isnan(XTK_EL_DATA(el)->height) ? 600.0f : XTK_EL_DATA(el)->height;
 		viewport.cross  = isnan(XTK_EL_DATA(el)->width) ? 0.0f : XTK_EL_DATA(el)->width;
 	}
-	*cols            = xtk_list_auto_columns(viewport.cross, list->itemw, list->ncol);
+	*cols            = xtk_list_autocolumns(viewport.cross, list->itemw, list->ncol);
 	int   total_rows = (list->nitem + *cols - 1) / *cols;
 	float item_h     = list->itemh;
 	float max_offset = ( float ) total_rows * item_h - viewport.extent;
@@ -55,30 +55,6 @@ static bool list_attach(XtkUi *ui, XtkEl *wrap, XtkEl *content) {
 	return xtk_el_set_children(wrap, child, 1);
 }
 
-static XtkEl *list_make_row(
-  XtkRt *rt, XtkEl const *el, XtkListKind kind, bool single, float cell_width, int cols, int window, int i
-) {
-	XtkListDesc list = *XTK_EL_DETAIL(el, XtkListDesc);
-	XtkEl      *row  = xtk_el_new(rt->ui, XTK_CTRL_LISTITEM, NULL);
-	if (!row) return NULL;
-	xtk_keyed_u64(row, ( uint64_t ) (window ? i % window : 0));
-	XTK_EL_DATA(row)->height = list.itemh;
-	if (cell_width > 0.0f) XTK_EL_DATA(row)->width = cell_width;
-	XtkListItemDesc item = {
-	  .index    = i,
-	  .kind     = kind,
-	  .selected = single && i == list.sel,
-	  .multi    = list.sel_mode == XTK_LIST_SELECT_MULTIPLE,
-	  .x        = ( float ) (i % cols) * cell_width,
-	  .y        = ( float ) (i / cols) * list.itemh,
-	  .w        = cell_width,
-	  .h        = list.itemh,
-	};
-	if (!XTK_EL_STORE(row, item)) return NULL;
-	if (!list_attach(rt->ui, row, list.item(rt->ui, list.env, i))) return NULL;
-	return row;
-}
-
 typedef struct ListRealizeCtx {
 	XtkListKind kind;
 	bool        single;
@@ -88,6 +64,28 @@ typedef struct ListRealizeCtx {
 	int         first;
 	int         last;
 } ListRealizeCtx;
+
+static XtkEl *list_make_row(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, int i) {
+	XtkListDesc list = *XTK_EL_DETAIL(el, XtkListDesc);
+	XtkEl      *row  = xtk_el_new(rt->ui, XTK_CTRL_LISTITEM, NULL);
+	if (!row) return NULL;
+	xtk_keyed_u64(row, ( uint64_t ) (ctx->window ? i % ctx->window : 0));
+	XTK_EL_DATA(row)->height = list.itemh;
+	if (ctx->cell_width > 0.0f) XTK_EL_DATA(row)->width = ctx->cell_width;
+	XtkListItemDesc item = {
+	  .index    = i,
+	  .kind     = ctx->kind,
+	  .selected = ctx->single && i == list.sel,
+	  .multi    = list.sel_mode == XTK_LIST_SELECT_MULTIPLE,
+	  .x        = ( float ) (i % ctx->cols) * ctx->cell_width,
+	  .y        = ( float ) (i / ctx->cols) * list.itemh,
+	  .w        = ctx->cell_width,
+	  .h        = list.itemh,
+	};
+	if (!XTK_EL_STORE(row, item)) return NULL;
+	if (!list_attach(rt->ui, row, list.item(rt->ui, list.env, i))) return NULL;
+	return row;
+}
 
 static void list_realize_ctx(XtkRt *rt, XentNodeId node, XtkEl const *el, ListRealizeCtx *ctx) {
 	XtkListDesc const *list = XTK_EL_DETAIL(el, XtkListDesc);
@@ -105,7 +103,7 @@ static void list_realize_ctx(XtkRt *rt, XentNodeId node, XtkEl const *el, ListRe
 static int list_fill_rows(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, XtkEl **rows) {
 	int filled = 0;
 	for (int i = ctx->first; i <= ctx->last; i++) {
-		XtkEl *row = list_make_row(rt, el, ctx->kind, ctx->single, ctx->cell_width, ctx->cols, ctx->window, i);
+		XtkEl *row = list_make_row(rt, el, ctx, i);
 		if (!row) break;
 		rows [filled++] = row;
 	}

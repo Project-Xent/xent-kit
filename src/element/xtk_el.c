@@ -233,9 +233,6 @@ XtkEl *xtk_el_new(XtkUi *ui, XtkCtrlId type, char const *text) {
 static XtkEl xtk_end_sentinel;
 XtkEl *const XTK_END = &xtk_end_sentinel;
 
-/* Children arrive as an XTK_END-terminated compound literal; NULL entries are
- * skipped (conditional rendering) and the survivors are copied into a dense
- * arena array. */
 void         xtk_el_adopt(XtkUi *ui, XtkEl *el, XtkEl *children []) {
 	if (!el || !children) return;
 
@@ -289,6 +286,17 @@ XtkEl *xtk_slider(XtkUi *ui, XtkSliderDesc desc) {
 	if (desc.step == 0.0f) desc.step = 1.0f;
 	if (desc.small_change == 0.0f) desc.small_change = 1.0f;
 	if (desc.large_change == 0.0f) desc.large_change = 10.0f;
+	if (desc.range && desc.range_start == 0.0f && desc.range_end == 0.0f) desc.range_end = desc.max;
+	if (!XTK_EL_STORE(el, desc)) return NULL;
+	return el;
+}
+
+XtkEl *xtk_scroll_bar(XtkUi *ui, XtkScrollBarDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_SCROLLBAR, NULL);
+	if (!el) return NULL;
+	if (desc.max == 0.0 && desc.min == 0.0) desc.max = 100.0;
+	if (desc.small_change == 0.0) desc.small_change = 1.0;
+	if (desc.large_change == 0.0) desc.large_change = 10.0;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }

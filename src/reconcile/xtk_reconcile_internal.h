@@ -3,7 +3,7 @@
 
 #include <xtk/xtk_reconcile.h>
 
-#include "../runtime/xtk_runtime_internal.h"
+#include "../runtime/xtk_rt_internal.h"
 #include "../encode/xtk_encode.h"
 #include "../encode/xtk_prop_state.h"
 #include "xtk_plan.h"
@@ -11,7 +11,7 @@
 typedef struct XtkNode {
 	XentNodeId           node;
 	XentNodeId           host;
-	void                *binding; /* kit-owned XtkBinding when subscribed */
+	void                *binding;
 	void                *ext;
 	struct XtkNode     **children;
 	int                  child_count;

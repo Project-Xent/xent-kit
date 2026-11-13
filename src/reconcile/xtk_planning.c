@@ -281,7 +281,7 @@ static bool record_sub_tokens(XtkReconcileTxn *txn, XtkPlanRec *plan, uint32_t s
 	return true;
 }
 
-static bool plan_bind_fresh(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el) {
+static bool plan_binding_alloc(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el) {
 	if (!xtk_el_needs_binding(el)) return true;
 	plan->next_binding = ( XtkBinding * ) xtk_alloc_zero(1, sizeof(*plan->next_binding));
 	if (!plan->next_binding) return false;
@@ -301,7 +301,7 @@ static bool plan_create(
 ) {
 	plan->is_create = true;
 	plan->fresh     = node_fresh(XTK_EL_DATA(el)->type);
-	if (!plan->fresh || !plan_bind_fresh(txn, plan, el)) return false;
+	if (!plan->fresh || !plan_binding_alloc(txn, plan, el)) return false;
 	XtkNodeRef pref       = parent ? parent->ref : xtk_ref_existing(( XtkCtrl ) txn->rt->host_root);
 	uint32_t   sub_before = txn->batch->next_sub;
 	if (!xtk_encode_create(txn->batch, pref, before, el, &plan->local)) return false;
@@ -312,12 +312,10 @@ static bool plan_create(
 	return retire_push(txn, committed);
 }
 
-static bool plan_new_binding(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el) {
-	if (!xtk_el_needs_binding(el)) return true;
-	plan->next_binding = ( XtkBinding * ) xtk_alloc_zero(1, sizeof(*plan->next_binding));
-	if (!plan->next_binding) return false;
-	plan->next_binding->rt = txn->rt;
-	uint32_t sub_before    = txn->batch->next_sub;
+static bool plan_binding_sync(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el) {
+	if (!plan_binding_alloc(txn, plan, el)) return false;
+	if (!plan->next_binding) return true;
+	uint32_t sub_before = txn->batch->next_sub;
 	if (!xtk_encode_subscribe(txn->batch, plan->ref, plan->next_binding, el)) return false;
 	return record_sub_tokens(txn, plan, sub_before);
 }
@@ -328,7 +326,7 @@ static bool plan_binding(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkNode *commit
 	if (!committed->binding && !next_has_binding) return true;
 	plan->binding_changed = true;
 	if (committed->binding && !xtk_encode_unsubscribe_all(txn->batch, committed)) return false;
-	return plan_new_binding(txn, plan, el);
+	return plan_binding_sync(txn, plan, el);
 }
 
 static bool plan_reuse(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el, XtkNode *committed, XtkPropView props) {

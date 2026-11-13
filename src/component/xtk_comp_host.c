@@ -1,16 +1,16 @@
-#include "xtk_component_runtime_internal.h"
+#include "xtk_comp_rtinternal.h"
 
-XtkCtrl     xtk_component_control(XtkCompHost const *h) { return h ? h->control : XTK_CTRL_INVALID; }
+XtkCtrl     xtk_comp_control(XtkCompHost const *h) { return h ? h->control : XTK_CTRL_INVALID; }
 
-XtkCtrl     xtk_component_content_root(XtkCompHost const *h) { return h ? h->content_root : XTK_CTRL_INVALID; }
+XtkCtrl     xtk_comp_contentroot(XtkCompHost const *h) { return h ? h->content_root : XTK_CTRL_INVALID; }
 
-XtkCtrl     xtk_component_impl_root(XtkCompHost const *h) { return h ? h->impl_root : XTK_CTRL_INVALID; }
+XtkCtrl     xtk_comp_implroot(XtkCompHost const *h) { return h ? h->impl_root : XTK_CTRL_INVALID; }
 
-XentCtx    *xtk_component_context(XtkCompHost const *h) { return h ? h->ctx : NULL; }
+XentCtx    *xtk_comp_context(XtkCompHost const *h) { return h ? h->ctx : NULL; }
 
-XtkHost    *xtk_component_host(XtkCompHost const *h) { return h ? h->host : NULL; }
+XtkHost    *xtk_comp_host(XtkCompHost const *h) { return h ? h->host : NULL; }
 
-void const *xtk_component_query_provider(XtkCompHost const *h, XtkProviderId id, size_t minimum_size) {
+void const *xtk_comp_queryprovider(XtkCompHost const *h, XtkProviderId id, size_t minimum_size) {
 	if (!h || id == XTK_PROVIDER_ID_INVALID) return NULL;
 	for (uint32_t i = 0; i < h->provider_count; i++) {
 		XtkProviderDesc const *p = &h->providers [i];

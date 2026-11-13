@@ -22,4 +22,15 @@ bool xtk_encode_props(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, Xtk
 bool xtk_encode_subscribe(XtkBatch *batch, XtkNodeRef target, XtkBinding *binding, XtkEl const *el);
 bool xtk_encode_unsubscribe_all(XtkBatch *batch, XtkNode const *node);
 
+bool xtk_encode_date_picker(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
+bool xtk_encode_time_picker(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
+bool xtk_encode_calendar(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
+bool xtk_encode_color_picker(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
+
+bool xtk_items_strings(XtkBatch *batch, XtkNodeRef target, char const *const *items, int count);
+bool xtk_items_selector(XtkBatch *batch, XtkNodeRef target, XtkSelectorItem const *items, int count);
+bool xtk_items_tabs(XtkBatch *batch, XtkNodeRef target, XtkTabDesc const *tabs, int count);
+bool xtk_items_tree(XtkBatch *batch, XtkNodeRef target, XtkTreeDesc const *tree);
+bool xtk_items_nav(XtkBatch *batch, XtkNodeRef target, XtkNavDesc const *nav);
+
 #endif

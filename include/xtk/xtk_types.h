@@ -1,22 +1,10 @@
-/**
- * @file xtk_types.h
- * @brief XTK type definitions: color, control type, and control-specific enums.
- *
- * Platform-agnostic types used by the XTK declarative layer. Backend renderers
- * (fluxent, nexent, luxent) map these to platform-specific equivalents.
- */
 #ifndef XTK_TYPES_H
 #define XTK_TYPES_H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <assert.h> /* static_assert: keyword in C23, macro in C11/C17 */
+#include <assert.h>
 
-/* -------------------------------------------------------------------------
- * Color
- * ---------------------------------------------------------------------- */
-
-/** @brief RGBA color packed as uint32_t (0xRRGGBBAA). */
 typedef struct XtkColor {
 	uint32_t rgba;
 } XtkColor;
@@ -45,20 +33,12 @@ static float inline xtk_color_bf(XtkColor c) { return ((c.rgba >> 8) & 0xff) / 2
 
 static float inline xtk_color_af(XtkColor c) { return (c.rgba & 0xff) / 255.0f; }
 
-/* -------------------------------------------------------------------------
- * UTF-8 utilities
- * ---------------------------------------------------------------------- */
-
 static int inline xtk_utf8_len(char const *s) {
 	int n = 0;
 	for (; s && *s; s++)
 		if ((*s & 0xc0) != 0x80) n++;
 	return n;
 }
-
-/* -------------------------------------------------------------------------
- * Control type
- * ---------------------------------------------------------------------- */
 
 typedef enum XtkCtrlType
 {
@@ -129,21 +109,27 @@ typedef enum XtkCtrlType
 	XTK_CTRL_SPLITPANE,
 	XTK_CTRL_SPLITBODY,
 	XTK_CTRL_TITLEBAR,
+	XTK_CTRL_SCROLLBAR,
+	XTK_CTRL_LOOPING,
+	XTK_CTRL_LOOPITEM,
+	XTK_CTRL_DATEPICKER,
+	XTK_CTRL_TIMEPICKER,
+	XTK_CTRL_PICKERFLYOUT,
+	XTK_CTRL_CALENDAR,
+	XTK_CTRL_CALDAY,
+	XTK_CTRL_COLORPICKER,
+	XTK_CTRL_COLORSPECTRUM,
+	XTK_CTRL_COLORSLIDER,
 	XTK_CTRL_TYPE_COUNT,
 } XtkCtrlType;
 
-/** @brief True for the four virtualized items-host roots (ListView family). */
-static bool inline xtk_is_list_type(XtkCtrlType t) {
+static bool inline xtk_ctrl_islist(XtkCtrlType t) {
 	return t == XTK_CTRL_LIST
 	    || t == XTK_CTRL_LISTBOX
 	    || t == XTK_CTRL_GRIDVIEW
 	    || t == XTK_CTRL_REPEATER
 	    || t == XTK_CTRL_ITEMSVIEW;
 }
-
-/* -------------------------------------------------------------------------
- * Text
- * ---------------------------------------------------------------------- */
 
 typedef enum XtkFontWeight
 {
@@ -166,9 +152,14 @@ typedef enum XtkTextAlign
 	XTK_TEXT_JUSTIFY,
 } XtkTextAlign;
 
-/* -------------------------------------------------------------------------
- * Button
- * ---------------------------------------------------------------------- */
+typedef enum XtkTextTrim
+{
+	XTK_TRIM_NONE,
+	XTK_TRIM_CHAR,
+	XTK_TRIM_CHAR_ELLIPSIS,
+	XTK_TRIM_WORD,
+	XTK_TRIM_WORD_ELLIPSIS,
+} XtkTextTrim;
 
 typedef enum XtkButtonStyle
 {
@@ -177,10 +168,6 @@ typedef enum XtkButtonStyle
 	XTK_BUTTON_TEXT,
 	XTK_BUTTON_ACCENT,
 } XtkButtonStyle;
-
-/* -------------------------------------------------------------------------
- * Slider
- * ---------------------------------------------------------------------- */
 
 typedef enum XtkTickPlacement
 {
@@ -197,9 +184,19 @@ typedef enum XtkSliderSnap
 	XTK_SLIDER_SNAP_TICKS,
 } XtkSliderSnap;
 
-/* -------------------------------------------------------------------------
- * Image
- * ---------------------------------------------------------------------- */
+typedef enum XtkCheckState
+{
+	XTK_CHECK_UNCHECKED = 0,
+	XTK_CHECK_CHECKED,
+	XTK_CHECK_INDETERMINATE,
+} XtkCheckState;
+
+typedef enum XtkProgressState
+{
+	XTK_PROGRESS_NORMAL = 0,
+	XTK_PROGRESS_PAUSED,
+	XTK_PROGRESS_ERROR,
+} XtkProgressState;
 
 typedef enum XtkImageStretch
 {
@@ -209,20 +206,12 @@ typedef enum XtkImageStretch
 	XTK_IMAGE_UNIFORM_TO_FILL,
 } XtkImageStretch;
 
-/* -------------------------------------------------------------------------
- * Info badge
- * ---------------------------------------------------------------------- */
-
 typedef enum XtkBadgeMode
 {
 	XTK_BADGE_DOT,
 	XTK_BADGE_NUMBER,
 	XTK_BADGE_ICON,
 } XtkBadgeMode;
-
-/* -------------------------------------------------------------------------
- * Info bar
- * ---------------------------------------------------------------------- */
 
 typedef enum XtkInfoBarSeverity
 {
@@ -232,10 +221,6 @@ typedef enum XtkInfoBarSeverity
 	XTK_INFOBAR_ERROR,
 } XtkInfoBarSeverity;
 
-/* -------------------------------------------------------------------------
- * Content dialog
- * ---------------------------------------------------------------------- */
-
 typedef enum XtkDialogResult
 {
 	XTK_DIALOG_NONE = 0,
@@ -243,11 +228,6 @@ typedef enum XtkDialogResult
 	XTK_DIALOG_SECONDARY,
 } XtkDialogResult;
 
-/* -------------------------------------------------------------------------
- * Teaching tip
- * ---------------------------------------------------------------------- */
-
-/** @brief WinUI TeachingTipPlacementMode. Zero = Auto. */
 typedef enum XtkTeachingTipPlacement
 {
 	XTK_TIP_PLACE_AUTO = 0,
@@ -266,13 +246,11 @@ typedef enum XtkTeachingTipPlacement
 	XTK_TIP_PLACE_CENTER,
 } XtkTeachingTipPlacement;
 
-/** @brief Why a teaching tip closed (WinUI TeachingTipCloseReason). */
 typedef enum XtkTeachingTipCloseReason
 {
 	XTK_TIP_CLOSE_BUTTON = 0,
 	XTK_TIP_CLOSE_LIGHT_DISMISS,
 	XTK_TIP_CLOSE_PROGRAMMATIC,
 } XtkTeachingTipCloseReason;
-
 
 #endif

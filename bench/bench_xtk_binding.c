@@ -1,12 +1,11 @@
 #include <xtk/xtk_reconcile.h>
 #include <xtk/xtk_catalog.h>
-#include <xtk/xtk_cells.h>
 
 #include "xtk_retained.h"
-#include "xtk_alloc_internal.h"
+#include <xtk/xtk_alloc.h>
 #include "xtk_internal.h"
 #include "reconcile/xtk_reconcile_internal.h"
-#include "runtime/xtk_runtime_internal.h"
+#include "runtime/xtk_rt_internal.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -24,7 +23,6 @@ typedef enum BenchMode
 	BENCH_FULL,
 	BENCH_MEMO,
 	BENCH_SINGLE,
-	BENCH_DIRECT,
 } BenchMode;
 
 typedef struct BenchModel {
@@ -153,46 +151,6 @@ static int run_reconcile(BenchMode mode, char const *name) {
 	return 0;
 }
 
-static bool direct_update(XtkCells *cells, XtkCellId text, XtkCellId slider, bool single, uint32_t revision) {
-	char value [32];
-	int  len = snprintf(value, sizeof(value), "value-%u", revision);
-	if (len < 0 || !xtk_cell_set_string(cells, text, value, ( uint32_t ) len)) return false;
-	if (!single && !xtk_cell_set_f32(cells, slider, ( float ) (revision % 100u))) return false;
-	return xtk_cells_flush(cells);
-}
-
-static int run_direct(bool single, char const *name) {
-	Fixture fixture = {0};
-	if (!fixture_init(&fixture, BENCH_DIRECT) || !reconcile_once(&fixture, NULL)) return 1;
-	XtkNode  *text_node   = fixture.runtime->root->children [ITEM_COUNT - 2];
-	XtkNode  *slider_node = fixture.runtime->root->children [ITEM_COUNT - 1];
-	XtkCells *cells       = xtk_cells_create(xtk_scene_from_host(fixture.host), 1u);
-	if (!cells) return 1;
-	XtkCellId text = xtk_cells_bind(cells, ( XtkCtrl ) text_node->node, XTK_PROP_TEXT);
-	XtkCellId slider
-	  = single ? XTK_CELL_INVALID : xtk_cells_bind(cells, ( XtkCtrl ) slider_node->node, XTK_PROP_VALUE_F32);
-	if (text == XTK_CELL_INVALID || (!single && slider == XTK_CELL_INVALID)) return 1;
-	for (int i = 0; i < WARMUP_ITERATIONS; i++)
-		if (!direct_update(cells, text, slider, single, ( uint32_t ) i)) return 1;
-
-	xtk_alloc_test_reset();
-	uint64_t begin = clock_ns();
-	for (int i = 0; i < MEASURE_ITERATIONS; i++)
-		if (!direct_update(cells, text, slider, single, ( uint32_t ) i)) return 1;
-	uint64_t      elapsed = clock_ns() - begin;
-	XtkAllocStats alloc   = xtk_alloc_test_stats();
-	int           patches = MEASURE_ITERATIONS * (single ? 1 : 2);
-	printf(
-	  "binding=%s iterations=%d elapsed_ns=%" PRIu64 " ns_per_iteration=%" PRIu64 " allocation_attempts=%" PRIu64
-	  " nodes_built=0 nodes_compared=0 nodes_skipped=0 property_patches=%d mutations=%d allocation_peak_bytes=%zu\n",
-	  name, MEASURE_ITERATIONS, elapsed, elapsed / MEASURE_ITERATIONS, alloc.attempts, patches, patches,
-	  alloc.peak_bytes
-	);
-	if (!xtk_cells_destroy(cells)) return 1;
-	fixture_dispose(&fixture);
-	return 0;
-}
-
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	printf(
@@ -202,7 +160,5 @@ int main(void) {
 	if (run_reconcile(BENCH_FULL, "full")) return 1;
 	if (run_reconcile(BENCH_MEMO, "memo")) return 1;
 	if (run_reconcile(BENCH_SINGLE, "declarative_single")) return 1;
-	if (run_direct(true, "imperative_single")) return 1;
-	if (run_direct(false, "direct")) return 1;
 	return 0;
 }

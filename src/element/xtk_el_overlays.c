@@ -44,6 +44,3 @@ XtkEl *xtk_teachtip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl
 	xtk_el_adopt(ui, el, children);
 	return el;
 }
-
-/* No children here: the reconciler realizes the visible cell window itself
- * (xtk_list_realize), so the desc tree stays O(viewport), not O(count). */

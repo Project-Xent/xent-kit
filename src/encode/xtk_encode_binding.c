@@ -1,6 +1,6 @@
 #include "xtk_encode.h"
 #include "../xtk_internal.h"
-#include "../runtime/xtk_runtime_internal.h"
+#include "../runtime/xtk_rt_internal.h"
 #include "../reconcile/xtk_reconcile_internal.h"
 #include <xtk/xtk_catalog.h>
 #include <xtk/xtk_event.h>
@@ -31,9 +31,12 @@ static XtkBindingSpec const binding_specs [] = {
   BIND(XTK_CTRL_REPEAT, XtkButtonDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_LINK, XtkHyperlinkDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_CHECKBOX, XtkToggleDesc, change, XTK_EVENT_CHANGE_BOOL),
+  BIND(XTK_CTRL_CHECKBOX, XtkToggleDesc, change_state, XTK_EVENT_CHANGE_I32),
   BIND(XTK_CTRL_RADIO, XtkToggleDesc, change, XTK_EVENT_CHANGE_BOOL),
   BIND(XTK_CTRL_SWITCH, XtkToggleDesc, change, XTK_EVENT_CHANGE_BOOL),
   BIND(XTK_CTRL_SLIDER, XtkSliderDesc, change, XTK_EVENT_CHANGE_F32),
+  BIND(XTK_CTRL_SLIDER, XtkSliderDesc, change_range, XTK_EVENT_CHANGE_RANGE),
+  BIND(XTK_CTRL_SCROLLBAR, XtkScrollBarDesc, change, XTK_EVENT_CHANGE_F64),
   BIND(XTK_CTRL_TEXTBOX, XtkTextBoxDesc, change, XTK_EVENT_CHANGE_STRING),
   BIND(XTK_CTRL_PASSWORD, XtkTextBoxDesc, change, XTK_EVENT_CHANGE_STRING),
   BIND(XTK_CTRL_LIST, XtkListDesc, select, XTK_EVENT_SELECT),
@@ -51,6 +54,12 @@ static XtkBindingSpec const binding_specs [] = {
   BIND(XTK_CTRL_REFRESH, XtkRefreshDesc, on_refresh, XTK_EVENT_REFRESH),
   BIND(XTK_CTRL_RADIOGROUP, XtkRadioButtonsDesc, select, XTK_EVENT_SELECT),
   BIND(XTK_CTRL_COMBO, XtkComboDesc, select, XTK_EVENT_SELECT),
+  BIND(XTK_CTRL_COMBO, XtkComboDesc, submit, XTK_EVENT_SUBMIT_STRING),
+  BIND(XTK_CTRL_LOOPING, XtkLoopingDesc, select, XTK_EVENT_SELECT),
+  BIND(XTK_CTRL_DATEPICKER, XtkDatePickerDesc, change, XTK_EVENT_VALUE_CHANGED),
+  BIND(XTK_CTRL_TIMEPICKER, XtkTimePickerDesc, change, XTK_EVENT_VALUE_CHANGED),
+  BIND(XTK_CTRL_CALENDAR, XtkCalendarDesc, select, XTK_EVENT_DATE_SELECT),
+  BIND(XTK_CTRL_COLORPICKER, XtkColorPickerDesc, change, XTK_EVENT_VALUE_CHANGED),
   BIND(XTK_CTRL_SPLIT, XtkSplitDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_TOGGLESPLIT, XtkSplitDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_TOGGLESPLIT, XtkSplitDesc, toggle, XTK_EVENT_CHANGE_BOOL),
@@ -120,14 +129,8 @@ bool xtk_binding_msgs_equal(XtkBinding const *a, XtkEl const *el) {
 	return true;
 }
 
-static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
-	XtkMsg msg = base;
+static XtkMsg msg_from_pair(XtkMsg msg, XtkEvent const *event) {
 	switch (event->payload.kind) {
-	case XTK_EVENT_PAYLOAD_BOOL   : msg.b = event->payload.u.b; break;
-	case XTK_EVENT_PAYLOAD_F32    : msg.f = event->payload.u.f32; break;
-	case XTK_EVENT_PAYLOAD_F64    : msg.d = event->payload.u.f64; break;
-	case XTK_EVENT_PAYLOAD_I32    : msg.i = event->payload.u.i32; break;
-	case XTK_EVENT_PAYLOAD_STRING : msg.ptr = ( void * ) event->payload.u.string.data; break;
 	case XTK_EVENT_PAYLOAD_QUERY :
 		msg.ptr = ( void * ) event->payload.u.query.text;
 		msg.i   = event->payload.u.query.index;
@@ -140,7 +143,24 @@ static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
 		msg.i = event->payload.u.index_bool.index;
 		msg.b = event->payload.u.index_bool.value;
 		break;
+	case XTK_EVENT_PAYLOAD_RANGE :
+		msg.f = event->payload.u.range.start;
+		msg.d = event->payload.u.range.end;
+		break;
 	default : break;
+	}
+	return msg;
+}
+
+static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
+	XtkMsg msg = base;
+	switch (event->payload.kind) {
+	case XTK_EVENT_PAYLOAD_BOOL   : msg.b = event->payload.u.b; break;
+	case XTK_EVENT_PAYLOAD_F32    : msg.f = event->payload.u.f32; break;
+	case XTK_EVENT_PAYLOAD_F64    : msg.d = event->payload.u.f64; break;
+	case XTK_EVENT_PAYLOAD_I32    : msg.i = event->payload.u.i32; break;
+	case XTK_EVENT_PAYLOAD_STRING : msg.ptr = ( void * ) event->payload.u.string.data; break;
+	default                       : msg = msg_from_pair(msg, event); break;
 	}
 	return msg;
 }
@@ -152,12 +172,11 @@ static uint32_t trampoline(void *arg, XtkEvent const *event) {
 	if (!bound) return XTK_EVENT_CONTINUE;
 	XtkMsg base = *bound;
 	if (base.tag == 0) return XTK_EVENT_CONTINUE;
-	XtkMsg msg   = msg_from_event(base, event);
-	msg.trace_id = event->trace_id;
+	XtkMsg msg = msg_from_event(base, event);
 	if (event->payload.kind == XTK_EVENT_PAYLOAD_STRING)
-		( void ) xtk_runtime_post_string(b->rt, msg, event->payload.u.string.data, event->payload.u.string.len);
+		( void ) xtk_rt_poststring(b->rt, msg, event->payload.u.string.data, event->payload.u.string.len);
 	else if (event->payload.kind == XTK_EVENT_PAYLOAD_QUERY)
-		( void ) xtk_runtime_post_string(b->rt, msg, event->payload.u.query.text, event->payload.u.query.len);
+		( void ) xtk_rt_poststring(b->rt, msg, event->payload.u.query.text, event->payload.u.query.len);
 	else ( void ) xtk_rt_post(b->rt, msg);
 	return XTK_EVENT_HANDLED;
 }

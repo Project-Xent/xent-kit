@@ -1,6 +1,6 @@
 #include <xtk/xtk_scene.h>
 
-XtkScene xtk_scene_from_host(XtkHost *host) { return (XtkScene) {.host = host}; }
+XtkScene xtk_scene_fromhost(XtkHost *host) { return (XtkScene) {.host = host}; }
 
 uint64_t xtk_scene_revision(XtkScene const *scene) {
 	if (!scene || !scene->host || !scene->host->vt) return 0u;
@@ -87,45 +87,45 @@ static bool one_shot_set(XtkScene *scene, XtkCtrl control, XtkPropertyId id, Xtk
 	}
 	XtkBatchResult *result = xtk_txn_commit(&txn, NULL);
 	if (!result) return false;
-	xtk_batch_result_destroy(result);
+	xtk_batchresult_destroy(result);
 	return true;
 }
 
-bool xtk_control_set(XtkScene *scene, XtkCtrl control, XtkPropertyId id, XtkValue value, XtkChangeStamp change) {
+bool xtk_ctrl_set(XtkScene *scene, XtkCtrl control, XtkPropertyId id, XtkValue value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, value, change);
 }
 
-bool xtk_control_set_bool(XtkScene *scene, XtkCtrl control, XtkPropertyId id, bool value, XtkChangeStamp change) {
+bool xtk_ctrl_setbool(XtkScene *scene, XtkCtrl control, XtkPropertyId id, bool value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_BOOL, .u.b = value}, change);
 }
 
-bool xtk_control_set_f32(XtkScene *scene, XtkCtrl control, XtkPropertyId id, float value, XtkChangeStamp change) {
+bool xtk_ctrl_setf32(XtkScene *scene, XtkCtrl control, XtkPropertyId id, float value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_F32, .u.f32 = value}, change);
 }
 
-bool xtk_control_set_i32(XtkScene *scene, XtkCtrl control, XtkPropertyId id, int32_t value, XtkChangeStamp change) {
+bool xtk_ctrl_seti32(XtkScene *scene, XtkCtrl control, XtkPropertyId id, int32_t value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_I32, .u.i32 = value}, change);
 }
 
-bool xtk_control_set_f64(XtkScene *scene, XtkCtrl control, XtkPropertyId id, double value, XtkChangeStamp change) {
+bool xtk_ctrl_setf64(XtkScene *scene, XtkCtrl control, XtkPropertyId id, double value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_F64, .u.f64 = value}, change);
 }
 
-bool xtk_control_set_enum(XtkScene *scene, XtkCtrl control, XtkPropertyId id, uint32_t value, XtkChangeStamp change) {
+bool xtk_ctrl_setenum(XtkScene *scene, XtkCtrl control, XtkPropertyId id, uint32_t value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_ENUM, .u.u32 = value}, change);
 }
 
-bool xtk_control_set_color(XtkScene *scene, XtkCtrl control, XtkPropertyId id, XtkColor value, XtkChangeStamp change) {
+bool xtk_ctrl_setcolor(XtkScene *scene, XtkCtrl control, XtkPropertyId id, XtkColor value, XtkChangeStamp change) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_COLOR, .u.color = value}, change);
 }
 
-bool xtk_control_set_resource(
+bool xtk_ctrl_setresource(
   XtkScene *scene, XtkCtrl control, XtkPropertyId id, XtkResource value, XtkChangeStamp change
 ) {
 	return one_shot_set(scene, control, id, (XtkValue) {.kind = XTK_VALUE_RESOURCE, .u.resource = value}, change);
 }
 
-bool xtk_control_set_string(
+bool xtk_ctrl_setstring(
   XtkScene *scene, XtkCtrl control, XtkPropertyId id, char const *data, uint32_t len, XtkChangeStamp change
 ) {
 	if (data == NULL && len > 0u) return false;
@@ -138,7 +138,7 @@ bool xtk_control_set_string(
 	);
 }
 
-bool xtk_control_get(
+bool xtk_ctrl_get(
   XtkScene const *scene, XtkCtrl control, XtkPropertyId id, XtkValueView *out_value, XtkChangeStamp *out_change
 ) {
 	if (!scene || !scene->host || !scene->host->vt) return false;

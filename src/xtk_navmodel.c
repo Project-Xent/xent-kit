@@ -1,4 +1,4 @@
-#include <xtk/xtk_nav_model.h>
+#include <xtk/xtk_navmodel.h>
 
 #include <limits.h>
 #include <stddef.h>
@@ -37,7 +37,7 @@ static bool nav_item_size(XtkNavItemDesc const *item, int *parent, int index, ui
 	return add_string_size(size, item->icon) && add_string_size(size, item->label);
 }
 
-uint32_t xtk_nav_model_size(XtkNavDesc const *desc) {
+uint32_t xtk_navmodel_size(XtkNavDesc const *desc) {
 	if (!desc || desc->nitem < 0 || (desc->nitem && !desc->items)) return 0u;
 	if (( uint32_t ) desc->nitem > (UINT32_MAX - NAV_HEADER_SIZE) / NAV_ITEM_SIZE) return 0u;
 	uint32_t size = NAV_HEADER_SIZE + ( uint32_t ) desc->nitem * NAV_ITEM_SIZE;
@@ -58,8 +58,8 @@ static void write_string(uint8_t *data, uint32_t *cursor, char const *text, uint
 	*cursor += *length + 1u;
 }
 
-bool xtk_nav_model_write(XtkNavDesc const *desc, void *buffer, uint32_t size) {
-	uint32_t required = xtk_nav_model_size(desc);
+bool xtk_navmodel_write(XtkNavDesc const *desc, void *buffer, uint32_t size) {
+	uint32_t required = xtk_navmodel_size(desc);
 	if (!required || !buffer || size != required) return false;
 	uint8_t *data = ( uint8_t * ) buffer;
 	memset(data, 0, size);
@@ -104,7 +104,7 @@ read_string(uint8_t const *data, uint32_t size, uint32_t floor, uint32_t offset,
 	return true;
 }
 
-bool xtk_nav_model_open(void const *buffer, uint32_t size, XtkNavModelView *out) {
+bool xtk_navmodel_open(void const *buffer, uint32_t size, XtkNavModelView *out) {
 	if (!buffer || !out || size < NAV_HEADER_SIZE) return false;
 	uint8_t const *data  = ( uint8_t const * ) buffer;
 	uint32_t       count = load_u32(data + 12u);
@@ -118,11 +118,11 @@ bool xtk_nav_model_open(void const *buffer, uint32_t size, XtkNavModelView *out)
 	  .data = data, .size = size, .count = count, .flags = load_u32(data + 16u), .app_title = title};
 	XtkNavModelItemView item;
 	for (uint32_t i = 0; i < count; i++)
-		if (!xtk_nav_model_item(out, i, &item)) return false;
+		if (!xtk_navmodel_item(out, i, &item)) return false;
 	return true;
 }
 
-bool xtk_nav_model_item(XtkNavModelView const *model, uint32_t index, XtkNavModelItemView *out) {
+bool xtk_navmodel_item(XtkNavModelView const *model, uint32_t index, XtkNavModelItemView *out) {
 	if (!model || !model->data || !out || index >= model->count) return false;
 	uint32_t       floor  = NAV_HEADER_SIZE + model->count * NAV_ITEM_SIZE;
 	uint8_t const *wire   = model->data + NAV_HEADER_SIZE + index * NAV_ITEM_SIZE;
@@ -131,7 +131,7 @@ bool xtk_nav_model_item(XtkNavModelView const *model, uint32_t index, XtkNavMode
 	if (kind > XTK_NAV_CHILD || load_u32(wire + 24u) != 0u) return false;
 	if (kind == XTK_NAV_CHILD && (parent < 0 || ( uint32_t ) parent >= index)) return false;
 	if (kind == XTK_NAV_CHILD
-		&& load_u32(model->data + NAV_HEADER_SIZE + ( uint32_t ) parent * NAV_ITEM_SIZE) != XTK_NAV_ITEM)
+	    && load_u32(model->data + NAV_HEADER_SIZE + ( uint32_t ) parent * NAV_ITEM_SIZE) != XTK_NAV_ITEM)
 		return false;
 	if (kind != XTK_NAV_CHILD && parent != -1) return false;
 	char const *icon;

@@ -34,8 +34,6 @@ XtkEl *xtk_splitview(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *conte
 	if (!el) return NULL;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 
-	/* Internal wrappers: content mounts first (drawn under), pane second (on top
-	 * for overlay). The SplitView positions the two wrappers each frame. */
 	XtkEl *cw = xtk_el_new(ui, XTK_CTRL_SPLITBODY, NULL);
 	XtkEl *pw = xtk_el_new(ui, XTK_CTRL_SPLITPANE, NULL);
 	if (!cw || !pw) return NULL;

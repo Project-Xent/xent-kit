@@ -7,11 +7,6 @@
 
 #include "xtk_types.h"
 
-
-/* Frozen standard descriptors for the retained host. Names are stable for
- * v0.3.0 source consumers; struct layouts may still change before ABI freeze.
- * Host and declarative code share these definitions — no second control model. */
-
 typedef uint64_t XtkCtrl;
 typedef uint64_t XtkResource;
 typedef uint32_t XtkCtrlId;
@@ -86,6 +81,7 @@ typedef enum XtkEventPayloadKind
 	XTK_EVENT_PAYLOAD_QUERY,
 	XTK_EVENT_PAYLOAD_RATING,
 	XTK_EVENT_PAYLOAD_INDEX_BOOL,
+	XTK_EVENT_PAYLOAD_RANGE,
 } XtkEventPayloadKind;
 
 typedef struct XtkEventDesc {
@@ -109,6 +105,7 @@ typedef enum XtkAccessRole
 	XTK_ACCESS_ROLE_LIST_ITEM,
 	XTK_ACCESS_ROLE_GROUP,
 	XTK_ACCESS_ROLE_WINDOW,
+	XTK_ACCESS_ROLE_SCROLLBAR,
 } XtkAccessRole;
 
 typedef struct XtkAccessDesc {
@@ -136,6 +133,5 @@ typedef struct XtkCtrlDesc {
 	uint32_t               create_invalidates;
 	uint32_t               destroy_invalidates;
 } XtkCtrlDesc;
-
 
 #endif
