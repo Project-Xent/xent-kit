@@ -2,11 +2,12 @@
 #define XTK_RUNTIME_INTERNAL_H
 
 #include <xtk/xtk_reconcile.h>
+#include <xtk/xtk_scene.h>
 
 #define XTK_QUEUE_CAP 256
 
 struct XtkRt {
-	XtkHost           *host;
+	XtkScene           scene;
 	XtkRtCfg           cfg;
 	XentCtx           *ctx;
 	XentNodeId         host_root;
@@ -35,7 +36,7 @@ struct XtkRt {
 
 	struct XtkScratch *scratch;
 	struct XtkScratch *plan_scratch;
-	XtkBatch          *batch_cache;
+	XtkBatch          *batch;
 };
 
 #endif

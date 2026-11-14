@@ -49,7 +49,7 @@ bool xtk_pager_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChang
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
-bool xtk_pager_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pager_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -81,23 +81,23 @@ bool xtk_pager_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChan
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_ITEM_COUNT, value, change);
 }
 
-bool xtk_pager_setdisplay(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pager_setdisplay(XtkScene *scene, XtkCtrl control, XtkPagerDisplayMode value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_DISPLAY_MODE, value, change);
 }
 
-bool xtk_pager_setfirst(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pager_setfirst(XtkScene *scene, XtkCtrl control, XtkPagerButtonVis value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_FIRST_BUTTON, value, change);
 }
 
-bool xtk_pager_setprev(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pager_setprev(XtkScene *scene, XtkCtrl control, XtkPagerButtonVis value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_PREVIOUS_BUTTON, value, change);
 }
 
-bool xtk_pager_setnext(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pager_setnext(XtkScene *scene, XtkCtrl control, XtkPagerButtonVis value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_NEXT_BUTTON, value, change);
 }
 
-bool xtk_pager_setlast(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pager_setlast(XtkScene *scene, XtkCtrl control, XtkPagerButtonVis value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_LAST_BUTTON, value, change);
 }
 

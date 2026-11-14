@@ -6,9 +6,20 @@
 #include <xtk/xtk_catalog.h>
 #include <xtk/xtk_reconcile.h>
 
+typedef struct XtkRealized {
+	int first;
+	int last;
+	int lanes;
+} XtkRealized;
+
+static_assert(XTK_EVENT_STANDARD_COUNT <= 32, "XtkBinding.user_events is a 32-bit event mask");
+
 typedef struct XtkBinding {
-	XtkRt *rt;
-	XtkMsg msgs [XTK_EVENT_STANDARD_COUNT];
+	XtkRt         *rt;
+	XtkRealized    realized;
+	XtkChangeStamp echo;
+	uint32_t       user_events;
+	XtkMsg         msgs [XTK_EVENT_STANDARD_COUNT];
 } XtkBinding;
 
 bool                   xtk_el_needs_binding(XtkEl const *el);

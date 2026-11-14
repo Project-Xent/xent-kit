@@ -11,8 +11,7 @@
 typedef struct XtkNode {
 	XentNodeId           node;
 	XentNodeId           host;
-	void                *binding;
-	void                *ext;
+	XtkBinding          *binding;
 	struct XtkNode     **children;
 	int                  child_count;
 	int                  child_cap;
@@ -70,8 +69,7 @@ typedef struct XtkReconcileTxn {
 	XtkBatchDiag     diagnostic;
 	XtkIdentityDiag  identity;
 	XtkFrameMetrics *metrics;
-	bool             prepared;
-	XtkPrepare      *prepare;
+	XtkTxn           xtxn;
 } XtkReconcileTxn;
 
 XtkFrameStatus
@@ -86,7 +84,9 @@ void xtk_plan_abort_fresh(XtkPlanRec *plan);
 bool xtk_plan_root(XtkReconcileTxn *txn, XtkEl *next, XtkPlanRec **root);
 
 bool xtk_publication_preflight(XtkReconcileTxn *txn, XtkPlanRec *plan);
-void xtk_publication_verify_result(XtkReconcileTxn const *txn, XtkPlanRec const *plan, XtkBatchResult const *result);
+void xtk_publication_verify_result(
+  XtkPlanRec const *plan, XtkBatchResult const *result, uint32_t locals, uint32_t subs
+);
 XtkNode *xtk_publication_resolve(XtkPlanRec *plan, XtkBatchResult const *result);
 void     xtk_publication_retire(XtkRt *rt, XtkReconcileTxn *txn);
 

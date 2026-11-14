@@ -19,6 +19,15 @@ bool          xtk_prop_view_build(XtkEl const *el, XtkPropPatch *items, uint32_t
 void          xtk_prop_view_destroy(XtkPropView *view);
 XtkPropState *xtk_prop_state_copy(XtkPropView view);
 void          xtk_prop_state_destroy(XtkPropState *state);
-bool xtk_prop_state_diff(XtkBatch *batch, XtkNodeRef target, XtkPropState const *old, XtkPropView next, bool *changed);
+
+typedef struct XtkEcho {
+	XtkChangeStamp stamp;
+	XtkPropertyId  force [8];
+	uint32_t       nforce;
+} XtkEcho;
+
+bool xtk_prop_state_diff(
+  XtkBatch *batch, XtkNodeRef target, XtkPropState const *old, XtkPropView next, XtkEcho const *echo, bool *changed
+);
 
 #endif

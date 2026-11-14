@@ -38,7 +38,7 @@ bool xtk_colorpicker_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkC
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_colorpicker_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_colorpicker_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -78,7 +78,7 @@ bool xtk_colorpicker_setmorebutton(XtkScene *scene, XtkCtrl control, bool value,
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_MORE_BUTTON_VISIBLE, value, change);
 }
 
-bool xtk_colorpicker_setspectrum(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_colorpicker_setspectrum(XtkScene *scene, XtkCtrl control, XtkSpectrum value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_SPECTRUM, value, change);
 }
 

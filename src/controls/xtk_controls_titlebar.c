@@ -55,7 +55,7 @@ bool xtk_titlebar_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkCh
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
-bool xtk_titlebar_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_titlebar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -109,4 +109,8 @@ bool xtk_titlebar_setintegrate(XtkScene *scene, XtkCtrl control, bool value, Xtk
 
 XtkSubRef xtk_titlebar_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
 	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_titlebar_ontoggle(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_TOGGLE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

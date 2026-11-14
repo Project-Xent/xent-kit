@@ -44,7 +44,7 @@ bool xtk_text_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeSt
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_text_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_text_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -76,11 +76,11 @@ bool xtk_text_setfontsize(XtkScene *scene, XtkCtrl control, float value, XtkChan
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_FONT_SIZE, value, change);
 }
 
-bool xtk_text_setfontweight(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_text_setfontweight(XtkScene *scene, XtkCtrl control, XtkFontWeight value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_FONT_WEIGHT, value, change);
 }
 
-bool xtk_text_settextalign(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_text_settextalign(XtkScene *scene, XtkCtrl control, XtkTextAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_TEXT_ALIGN, value, change);
 }
 
@@ -92,7 +92,7 @@ bool xtk_text_setmaxlines(XtkScene *scene, XtkCtrl control, int32_t value, XtkCh
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_MAX_LINES, value, change);
 }
 
-bool xtk_text_settrim(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_text_settrim(XtkScene *scene, XtkCtrl control, XtkTextTrim value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_TEXT_TRIM, value, change);
 }
 

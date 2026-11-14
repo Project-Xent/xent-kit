@@ -36,7 +36,7 @@ bool xtk_canvas_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChan
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
-bool xtk_canvas_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_canvas_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 

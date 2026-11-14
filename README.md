@@ -46,6 +46,30 @@ The test gate includes Host atomicity, allocation failures, Components,
 Providers, generated catalog coverage, event routing, virtualization,
 reconciliation, and static/revisioned regions.
 
+## Language bindings
+
+The binding surface is the imperative API: `xtk_scene_*`, `xtk_txn_*`,
+`xtk_ctrl_*`, `xtk_catalog_*` and event subscription. Declarative layers are
+written per language on top of it; the C declarative runtime (`xtk_rt`) is one
+such consumer, not part of the surface. Official bindings: oxent (Rust),
+zxent (Zig), xenthon (Python), hsxent (Haskell).
+
+- Enums crossing the ABI are four bytes (`static_assert`ed); bind them as
+  `int32`. Public structs contain no `long double`, `__int128` or bit-fields.
+- `static inline` helpers and function-like macros are not exported and carry
+  no semantics of their own; reimplement them or fill the structs directly:
+  `xtk_ref_none/existing/local`, `xtk_msg`, `xtk_msg_i`, `xtk_color_*`,
+  `xtk_date`, `xtk_changestamp_valid`, `xtk_event_phasesvalid`,
+  `xtk_utf8_len`, `xtk_ctrl_islist`, `xtk_ctrl_iscomp`, `xtk_kids`.
+  `XTK_END` is the address `1`.
+- The component ABI (`XtkCompType`, `xtk_component`, `xtk_comp_*`,
+  `flux_host_registercomp`) is not part of the binding surface in 0.3.x and may
+  change without notice.
+- `xmake gen-bindings <rust|zig|cython|haskell|enum-types> <out>` generates
+  typed control builders and enums from `tools/catalog.lua`.
+- Link a release bundle (`xent-<ver>-<arch>-windows-gnu.zip` from fluxent's
+  `xmake dist`): `libxent.a` plus the system libraries in `lib/pkgconfig/xent.pc`.
+
 ## Dependencies
 
 - [`xent-core`](https://github.com/Project-Xent/xent-core)

@@ -46,11 +46,14 @@ typedef struct XtkElementData {
 	uint64_t      region_id;
 	uint64_t      region_revision;
 	int           virtual_first;
-	int           virtual_last;
-	int           virtual_lanes;
 	bool          virtualized;
 	bool          stack_row;
 } XtkElementData;
+
+typedef struct XtkScrollDetail {
+	XtkStackDesc  stack;
+	XtkScrollDesc scroll;
+} XtkScrollDetail;
 
 typedef struct XtkMenuItemDetail {
 	char const *icon;

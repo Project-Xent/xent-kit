@@ -26,8 +26,16 @@ XtkEl *xtk_card(XtkUi *ui, XtkStackDesc desc, XtkEl *children []) {
 	return stack(ui, XTK_CTRL_CARD, false, desc, children);
 }
 
-XtkEl *xtk_scroll(XtkUi *ui, XtkEl *children []) {
-	return stack(ui, XTK_CTRL_SCROLL, false, (XtkStackDesc) {.fill = true, .align = XENT_FLEX_ALIGN_STRETCH}, children);
+XtkEl *xtk_scroll(XtkUi *ui, XtkScrollDesc desc, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_SCROLL, NULL);
+	if (!el) return NULL;
+	XtkScrollDetail detail = {
+	  .stack  = {.fill = true, .align = XENT_FLEX_ALIGN_STRETCH},
+	  .scroll = desc,
+	};
+	if (!XTK_EL_STORE(el, detail)) return NULL;
+	xtk_el_adopt(ui, el, children);
+	return el;
 }
 
 XtkEl *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []) {

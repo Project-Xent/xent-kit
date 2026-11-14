@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "xtk_ids.h"
+
 typedef struct XtkColor {
 	uint32_t rgba;
 } XtkColor;
@@ -39,89 +41,6 @@ static int inline xtk_utf8_len(char const *s) {
 		if ((*s & 0xc0) != 0x80) n++;
 	return n;
 }
-
-typedef enum XtkCtrlType
-{
-	XTK_CTRL_INVALID = 0,
-	XTK_CTRL_CONTAINER,
-	XTK_CTRL_TEXT,
-	XTK_CTRL_BUTTON,
-	XTK_CTRL_TOGGLE,
-	XTK_CTRL_CHECKBOX,
-	XTK_CTRL_RADIO,
-	XTK_CTRL_SWITCH,
-	XTK_CTRL_SLIDER,
-	XTK_CTRL_TEXTBOX,
-	XTK_CTRL_SCROLL,
-	XTK_CTRL_IMAGE,
-	XTK_CTRL_PROGRESS,
-	XTK_CTRL_LIST,
-	XTK_CTRL_TAB,
-	XTK_CTRL_CARD,
-	XTK_CTRL_DIVIDER,
-	XTK_CTRL_CANVAS,
-	XTK_CTRL_PASSWORD,
-	XTK_CTRL_NUMBER,
-	XTK_CTRL_LINK,
-	XTK_CTRL_REPEAT,
-	XTK_CTRL_PROGRESSRING,
-	XTK_CTRL_BADGE,
-	XTK_CTRL_TOOLTIP,
-	XTK_CTRL_FLYOUT,
-	XTK_CTRL_MENUFLY,
-	XTK_CTRL_DROPDOWN,
-	XTK_CTRL_SPLIT,
-	XTK_CTRL_COMBO,
-	XTK_CTRL_EXPANDER,
-	XTK_CTRL_EXPHEAD,
-	XTK_CTRL_EXPBODY,
-	XTK_CTRL_INFOBAR,
-	XTK_CTRL_DIALOG,
-	XTK_CTRL_DIALOGBODY,
-	XTK_CTRL_MENUBAR,
-	XTK_CTRL_MENUITEM,
-	XTK_CTRL_NAV,
-	XTK_CTRL_NAVITEM,
-	XTK_CTRL_TABS,
-	XTK_CTRL_TABITEM,
-	XTK_CTRL_LISTITEM,
-	XTK_CTRL_LISTBOX,
-	XTK_CTRL_GRIDVIEW,
-	XTK_CTRL_REPEATER,
-	XTK_CTRL_ITEMSVIEW,
-	XTK_CTRL_FLIP,
-	XTK_CTRL_PIPS,
-	XTK_CTRL_SUGGEST,
-	XTK_CTRL_TOGGLESPLIT,
-	XTK_CTRL_RADIOGROUP,
-	XTK_CTRL_RATING,
-	XTK_CTRL_SELECTOR,
-	XTK_CTRL_SELECTORITEM,
-	XTK_CTRL_BREADCRUMB,
-	XTK_CTRL_CRUMB,
-	XTK_CTRL_TEACHTIP,
-	XTK_CTRL_TREE,
-	XTK_CTRL_TREEITEM,
-	XTK_CTRL_REFRESH,
-	XTK_CTRL_AVATAR,
-	XTK_CTRL_PAGER,
-	XTK_CTRL_SPLITVIEW,
-	XTK_CTRL_SPLITPANE,
-	XTK_CTRL_SPLITBODY,
-	XTK_CTRL_TITLEBAR,
-	XTK_CTRL_SCROLLBAR,
-	XTK_CTRL_LOOPING,
-	XTK_CTRL_LOOPITEM,
-	XTK_CTRL_DATEPICKER,
-	XTK_CTRL_TIMEPICKER,
-	XTK_CTRL_PICKERFLYOUT,
-	XTK_CTRL_CALENDAR,
-	XTK_CTRL_CALDAY,
-	XTK_CTRL_COLORPICKER,
-	XTK_CTRL_COLORSPECTRUM,
-	XTK_CTRL_COLORSLIDER,
-	XTK_CTRL_TYPE_COUNT,
-} XtkCtrlType;
 
 static bool inline xtk_ctrl_islist(XtkCtrlType t) {
 	return t == XTK_CTRL_LIST
@@ -246,11 +165,42 @@ typedef enum XtkTeachingTipPlacement
 	XTK_TIP_PLACE_CENTER,
 } XtkTeachingTipPlacement;
 
+typedef enum XtkTeachingTipTail
+{
+	XTK_TIP_TAIL_AUTO = 0,
+	XTK_TIP_TAIL_VISIBLE,
+	XTK_TIP_TAIL_COLLAPSED,
+} XtkTeachingTipTail;
+
+typedef enum XtkScrollBarIndicator
+{
+	XTK_SCROLLBAR_INDICATOR_NONE = 0,
+	XTK_SCROLLBAR_INDICATOR_TOUCH,
+	XTK_SCROLLBAR_INDICATOR_MOUSE,
+} XtkScrollBarIndicator;
+
 typedef enum XtkTeachingTipCloseReason
 {
 	XTK_TIP_CLOSE_BUTTON = 0,
 	XTK_TIP_CLOSE_LIGHT_DISMISS,
 	XTK_TIP_CLOSE_PROGRAMMATIC,
 } XtkTeachingTipCloseReason;
+
+static_assert(sizeof(XtkFontWeight) == 4, "XtkFontWeight crosses the ABI as int32");
+static_assert(sizeof(XtkTextAlign) == 4, "XtkTextAlign crosses the ABI as int32");
+static_assert(sizeof(XtkTextTrim) == 4, "XtkTextTrim crosses the ABI as int32");
+static_assert(sizeof(XtkButtonStyle) == 4, "XtkButtonStyle crosses the ABI as int32");
+static_assert(sizeof(XtkTickPlacement) == 4, "XtkTickPlacement crosses the ABI as int32");
+static_assert(sizeof(XtkSliderSnap) == 4, "XtkSliderSnap crosses the ABI as int32");
+static_assert(sizeof(XtkCheckState) == 4, "XtkCheckState crosses the ABI as int32");
+static_assert(sizeof(XtkProgressState) == 4, "XtkProgressState crosses the ABI as int32");
+static_assert(sizeof(XtkImageStretch) == 4, "XtkImageStretch crosses the ABI as int32");
+static_assert(sizeof(XtkBadgeMode) == 4, "XtkBadgeMode crosses the ABI as int32");
+static_assert(sizeof(XtkInfoBarSeverity) == 4, "XtkInfoBarSeverity crosses the ABI as int32");
+static_assert(sizeof(XtkDialogResult) == 4, "XtkDialogResult crosses the ABI as int32");
+static_assert(sizeof(XtkTeachingTipPlacement) == 4, "XtkTeachingTipPlacement crosses the ABI as int32");
+static_assert(sizeof(XtkTeachingTipTail) == 4, "XtkTeachingTipTail crosses the ABI as int32");
+static_assert(sizeof(XtkScrollBarIndicator) == 4, "XtkScrollBarIndicator crosses the ABI as int32");
+static_assert(sizeof(XtkTeachingTipCloseReason) == 4, "XtkTeachingTipCloseReason crosses the ABI as int32");
 
 #endif

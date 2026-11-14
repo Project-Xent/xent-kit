@@ -7,7 +7,6 @@ static XtkEl *items_host(XtkUi *ui, XtkCtrlType type, XtkListDesc desc) {
 	if (!el) return NULL;
 	if (desc.nitem < 0 || !desc.item) desc.nitem = 0;
 	if (desc.itemh <= 0.0f) desc.itemh = 40.0f;
-	if (desc.overscan <= 0) desc.overscan = 4;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	XTK_EL_DATA(el)->virtualized = true;
 	return el;
@@ -35,7 +34,6 @@ static XtkListDesc itemsview_list_desc(XtkItemsViewDesc const *desc) {
 	  .itemh                = desc->itemh,
 	  .itemw                = desc->itemw,
 	  .ncol                 = desc->ncol,
-	  .overscan             = desc->overscan,
 	  .item                 = desc->item,
 	  .env                  = desc->env,
 	  .sel_mode             = desc->selection_mode,

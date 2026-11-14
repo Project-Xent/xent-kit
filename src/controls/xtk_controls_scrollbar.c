@@ -46,7 +46,7 @@ bool xtk_scrollbar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkCha
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_scrollbar_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_scrollbar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -74,7 +74,7 @@ bool xtk_scrollbar_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkC
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_ENABLED, value, change);
 }
 
-bool xtk_scrollbar_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_scrollbar_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ORIENTATION, value, change);
 }
 
@@ -102,7 +102,7 @@ bool xtk_scrollbar_setlargechange(XtkScene *scene, XtkCtrl control, float value,
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_LARGE_CHANGE, value, change);
 }
 
-bool xtk_scrollbar_setindicator(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_scrollbar_setindicator(XtkScene *scene, XtkCtrl control, XtkScrollBarIndicator value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_INDICATOR_MODE, value, change);
 }
 

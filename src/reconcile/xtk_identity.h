@@ -3,6 +3,7 @@
 
 #include "xtk_scratch.h"
 #include <xtk/xtk_reconcile.h>
+#include <xtk/xtk_scene.h>
 
 typedef enum XtkSiblingMode
 {
@@ -14,6 +15,6 @@ typedef enum XtkSiblingMode
 XtkSiblingMode xtk_sibling_mode(XtkEl const *parent);
 
 XtkIdentityError
-xtk_identity_validate_tree(XtkHost *host, XtkEl const *root, XtkScratch *scratch, XtkIdentityDiag *out);
+xtk_identity_validate_tree(XtkScene const *scene, XtkEl const *root, XtkScratch *scratch, XtkIdentityDiag *out);
 
 #endif

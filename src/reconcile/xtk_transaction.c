@@ -1,22 +1,14 @@
 #include "xtk_reconcile_internal.h"
 
-#include "../batch/xtk_batch_internal.h"
 #include "xtk_identity.h"
 
 #include "xtk_internal.h"
 
 static void txn_fail(XtkReconcileTxn *txn, XtkFrameStatus status) {
 	txn->status = status;
-	if (txn->prepared && txn->prepare) {
-		txn->rt->host->vt->abort(txn->rt->host, txn->prepare);
-		txn->prepare  = NULL;
-		txn->prepared = false;
-	}
 	if (txn->root_plan) xtk_plan_abort_fresh(txn->root_plan);
-	if (txn->batch) {
-		xtk_batch_reset(txn->batch, txn->rt->host->vt->revision(txn->rt->host));
-		txn->batch = NULL;
-	}
+	xtk_txn_abort(&txn->xtxn);
+	txn->batch = NULL;
 	xtk_scratch_reset(txn->plans);
 	xtk_ui_abort_candidate(txn->rt->ui);
 	txn->rt->force         = true;
@@ -31,63 +23,38 @@ static XtkFrameStatus txn_abort(XtkReconcileTxn *txn, XtkPlanRec *root, XtkFrame
 	return txn->status;
 }
 
-static XtkFrameStatus txn_empty_commit(XtkReconcileTxn *txn, XtkEl *next, XtkPlanRec *root) {
-	( void ) next;
-	txn->rt->root = xtk_publication_resolve(root, NULL);
+static XtkFrameStatus txn_finish(XtkReconcileTxn *txn, XtkPlanRec *root, XtkBatchResult const *result) {
+	txn->rt->root = xtk_publication_resolve(root, result);
+	if (result) xtk_publication_retire(txn->rt, txn);
 	xtk_plan_free(root);
-	xtk_batch_reset(txn->batch, txn->rt->host->vt->revision(txn->rt->host));
 	xtk_scratch_reset(txn->plans);
 	return XTK_FRAME_COMMITTED;
 }
 
-static XtkFrameStatus
-txn_diag_abort(XtkReconcileTxn *txn, XtkPlanRec *root, XtkBatchDiag *diag, XtkFrameStatus status) {
-	if (diag) *diag = txn->diagnostic;
-	return txn_abort(txn, root, status);
+static XtkFrameStatus txn_empty_commit(XtkReconcileTxn *txn, XtkPlanRec *root) {
+	xtk_txn_abort(&txn->xtxn);
+	return txn_finish(txn, root, NULL);
 }
 
-static XtkFrameStatus txn_host_preflight(XtkReconcileTxn *txn, XtkPlanRec *root, XtkBatchDiag *diag) {
-	if (!txn->rt->host->vt->preflight) return XTK_FRAME_COMMITTED;
-	XtkBatchError perr = txn->rt->host->vt->preflight(txn->rt->host, txn->batch, &txn->diagnostic);
-	if (perr == XTK_BATCH_OK) return XTK_FRAME_COMMITTED;
-	return txn_diag_abort(txn, root, diag, XTK_FRAME_PREFLIGHT_FAILED);
+static XtkFrameStatus stage_status(XtkBatchStage stage) {
+	if (stage == XTK_BATCH_STAGE_PREPARE) return XTK_FRAME_PREPARE_FAILED;
+	if (stage == XTK_BATCH_STAGE_COMMIT) return XTK_FRAME_COMMIT_FAILED;
+	return XTK_FRAME_PREFLIGHT_FAILED;
 }
 
-static void bind_created_virtual_regions(XtkRt *rt, XtkPlanRec const *plan, XtkNode const *published) {
-	if (!plan || !published) return;
-	XtkElementData const *data = XTK_EL_DATA(plan->el);
-	if (plan->is_create && data->virtualized && rt->cfg.virtual_range) {
-		XtkVirtualRange range = {data->virtual_first, data->virtual_last, data->virtual_lanes};
-		rt->cfg.virtual_range(rt->cfg.ctx, published->node, &range);
+static XtkFrameStatus txn_commit(XtkReconcileTxn *txn, XtkPlanRec *root, XtkBatchDiag *diag) {
+	uint32_t        locals = txn->batch->next_local;
+	uint32_t        subs   = txn->batch->next_sub;
+	XtkBatchResult *result = xtk_txn_commit(&txn->xtxn, &txn->diagnostic);
+	txn->batch             = NULL;
+	if (!result) {
+		if (diag) *diag = txn->diagnostic;
+		return txn_abort(txn, root, stage_status(txn->diagnostic.stage));
 	}
-	for (int i = 0; i < plan->child_count; i++)
-		bind_created_virtual_regions(rt, plan->children [i].plan, published->children [i]);
-}
-
-static XtkFrameStatus txn_host_commit(XtkReconcileTxn *txn, XtkEl *next, XtkPlanRec *root, XtkBatchDiag *diag) {
-	XtkFrameStatus pf = txn_host_preflight(txn, root, diag);
-	if (pf != XTK_FRAME_COMMITTED) return pf;
-
-	XtkBatchError prep_err = txn->rt->host->vt->prepare(txn->rt->host, txn->batch, &txn->prepare, &txn->diagnostic);
-	if (prep_err != XTK_BATCH_OK || !txn->prepare) return txn_diag_abort(txn, root, diag, XTK_FRAME_PREPARE_FAILED);
-	txn->prepared          = true;
-
-	XtkBatchResult *result = txn->rt->host->vt->commit(txn->rt->host, txn->prepare, &txn->diagnostic);
-	txn->prepare           = NULL;
-	txn->prepared          = false;
-	if (!result) return txn_diag_abort(txn, root, diag, XTK_FRAME_COMMIT_FAILED);
-
-	xtk_publication_verify_result(txn, root, result);
-	XtkNode *published = xtk_publication_resolve(root, result);
+	xtk_publication_verify_result(root, result, locals, subs);
+	XtkFrameStatus status = txn_finish(txn, root, result);
 	xtk_batchresult_destroy(result);
-
-	txn->rt->root = published;
-	bind_created_virtual_regions(txn->rt, root, published);
-	xtk_publication_retire(txn->rt, txn);
-	xtk_plan_free(root);
-	xtk_batch_reset(txn->batch, txn->rt->host->vt->revision(txn->rt->host));
-	xtk_scratch_reset(txn->plans);
-	return XTK_FRAME_COMMITTED;
+	return status;
 }
 
 static XtkFrameStatus txn_null_tree(XtkRt *rt) {
@@ -99,15 +66,11 @@ static XtkFrameStatus txn_null_tree(XtkRt *rt) {
 
 static XtkFrameStatus txn_validate_candidate(XtkReconcileTxn *txn, XtkEl *next, XtkIdentityDiag *identity) {
 	xtk_scratch_reset(txn->scratch);
-	if (xtk_ui_failed(txn->rt->ui)) {
+	if (xtk_ui_failed(txn->rt->ui) || !xtk_normalize_tree(txn->rt, next)) {
 		txn_fail(txn, XTK_FRAME_BUILD_FAILED);
 		return txn->status;
 	}
-	if (!xtk_normalize_tree(txn->rt, next)) {
-		txn_fail(txn, XTK_FRAME_BUILD_FAILED);
-		return txn->status;
-	}
-	if (xtk_identity_validate_tree(txn->rt->host, next, txn->scratch, &txn->identity) == XTK_IDENTITY_OK)
+	if (xtk_identity_validate_tree(&txn->rt->scene, next, txn->scratch, &txn->identity) == XTK_IDENTITY_OK)
 		return XTK_FRAME_COMMITTED;
 	txn->identity.frame_sequence = txn->rt->frame_sequence;
 	if (identity) *identity = txn->identity;
@@ -115,17 +78,18 @@ static XtkFrameStatus txn_validate_candidate(XtkReconcileTxn *txn, XtkEl *next, 
 	return txn->status;
 }
 
-static XtkFrameStatus txn_plan_batch(XtkReconcileTxn *txn, XtkEl *next, XtkPlanRec **root, XtkBatchDiag *diag) {
-	txn->batch = txn->rt->batch_cache;
-	xtk_batch_reset(txn->batch, txn->rt->host->vt->revision(txn->rt->host));
+static XtkFrameStatus txn_plan_batch(XtkReconcileTxn *txn, XtkEl *next, XtkPlanRec **root) {
+	if (!xtk_txn_beginwith(&txn->rt->scene, txn->rt->batch, &txn->xtxn)) {
+		txn_fail(txn, XTK_FRAME_PREFLIGHT_FAILED);
+		return txn->status;
+	}
+	txn->batch = xtk_txn_batch(&txn->xtxn);
 	if (!xtk_plan_prepare(txn, next)) {
 		txn_fail(txn, XTK_FRAME_PREFLIGHT_FAILED);
 		return txn->status;
 	}
 	if (!xtk_plan_root(txn, next, root)) return txn_abort(txn, *root, XTK_FRAME_PREFLIGHT_FAILED);
 	if (!xtk_publication_preflight(txn, *root)) return txn_abort(txn, *root, XTK_FRAME_PREFLIGHT_FAILED);
-	XtkBatchError err = xtk_batch_preflight(txn->batch, &txn->diagnostic);
-	if (err != XTK_BATCH_OK) return txn_diag_abort(txn, *root, diag, XTK_FRAME_PREFLIGHT_FAILED);
 	return XTK_FRAME_COMMITTED;
 }
 
@@ -150,9 +114,9 @@ xtk_reconcile_run(XtkRt *rt, XtkEl *next, XtkBatchDiag *diag, XtkIdentityDiag *i
 	XtkFrameStatus status = txn_validate_candidate(&txn, next, identity);
 	if (status != XTK_FRAME_COMMITTED) return status;
 	XtkPlanRec *root = NULL;
-	status           = txn_plan_batch(&txn, next, &root, diag);
+	status           = txn_plan_batch(&txn, next, &root);
 	if (status != XTK_FRAME_COMMITTED) return status;
 	txn_record_batch_metrics(&txn);
-	if (txn.batch->count == 0) return txn_empty_commit(&txn, next, root);
-	return txn_host_commit(&txn, next, root, diag);
+	if (txn.batch->count == 0) return txn_empty_commit(&txn, root);
+	return txn_commit(&txn, root, diag);
 }

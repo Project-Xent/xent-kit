@@ -1,5 +1,7 @@
 #include <xtk/xtk_scene.h>
 
+#include "batch/xtk_batch_internal.h"
+
 XtkScene xtk_scene_fromhost(XtkHost *host) { return (XtkScene) {.host = host}; }
 
 uint64_t xtk_scene_revision(XtkScene const *scene) {
@@ -12,35 +14,62 @@ XtkCtrl xtk_scene_root(XtkScene const *scene) {
 	return scene->host->vt->root(scene->host);
 }
 
+XtkCtrlDesc const *xtk_scene_ctrldesc(XtkScene const *scene, XtkCtrlId type) {
+	if (!scene || !scene->host || !scene->host->vt || type == XTK_CTRL_ID_INVALID) return NULL;
+	return scene->host->vt->desc(scene->host, type);
+}
+
 bool xtk_txn_begin(XtkScene *scene, XtkTxn *out) {
 	if (!scene || !scene->host || !out) return false;
 	XtkBatch *batch = xtk_batch_alloc(xtk_scene_revision(scene));
 	if (!batch) return false;
-	out->scene = scene;
-	out->batch = batch;
+	*out = (XtkTxn) {.scene = scene, .batch = batch};
 	return true;
 }
 
+bool xtk_txn_beginwith(XtkScene *scene, XtkBatch *batch, XtkTxn *out) {
+	if (!scene || !scene->host || !batch || !out) return false;
+	xtk_batch_reset(batch, xtk_scene_revision(scene));
+	*out = (XtkTxn) {.scene = scene, .batch = batch, .borrowed = true};
+	return true;
+}
+
+static XtkBatchResult *txn_fail(XtkTxn *txn, XtkBatchDiag *diagnostic, XtkBatchStage stage) {
+	diagnostic->stage = stage;
+	xtk_txn_abort(txn);
+	return NULL;
+}
+
+static bool        txn_live(XtkTxn const *txn) { return txn && txn->scene && txn->scene->host && txn->batch; }
+
+static XtkPrepare *txn_prepare(XtkHost *host, XtkBatch *batch, XtkBatchDiag *diagnostic) {
+	XtkPrepare *prepare = NULL;
+	if (host->vt->prepare(host, batch, &prepare, diagnostic) == XTK_BATCH_OK) return prepare;
+	if (prepare) host->vt->abort(host, prepare);
+	return NULL;
+}
+
 XtkBatchResult *xtk_txn_commit(XtkTxn *txn, XtkBatchDiag *diagnostic) {
-	if (!txn || !txn->scene || !txn->scene->host || !txn->batch) return NULL;
-	XtkHost     *host    = txn->scene->host;
-	XtkPrepare  *prepare = NULL;
+	if (!txn_live(txn)) return NULL;
+	XtkHost     *host = txn->scene->host;
 	XtkBatchDiag local;
 	if (!diagnostic) diagnostic = &local;
-	if (host->vt->prepare(host, txn->batch, &prepare, diagnostic) != XTK_BATCH_OK) {
-		xtk_batch_free(txn->batch);
-		txn->batch = NULL;
-		return NULL;
-	}
+	if (xtk_batch_preflight(txn->batch, diagnostic) != XTK_BATCH_OK)
+		return txn_fail(txn, diagnostic, XTK_BATCH_STAGE_VALIDATE);
+	if (host->vt->preflight && host->vt->preflight(host, txn->batch, diagnostic) != XTK_BATCH_OK)
+		return txn_fail(txn, diagnostic, XTK_BATCH_STAGE_PREFLIGHT);
+	XtkPrepare *prepare = txn_prepare(host, txn->batch, diagnostic);
+	if (!prepare) return txn_fail(txn, diagnostic, XTK_BATCH_STAGE_PREPARE);
 	XtkBatchResult *result = host->vt->commit(host, prepare, diagnostic);
-	xtk_batch_free(txn->batch);
-	txn->batch = NULL;
+	if (!result) diagnostic->stage = XTK_BATCH_STAGE_COMMIT;
+	xtk_txn_abort(txn);
 	return result;
 }
 
 void xtk_txn_abort(XtkTxn *txn) {
-	if (!txn) return;
-	xtk_batch_free(txn->batch);
+	if (!txn || !txn->batch) return;
+	if (txn->borrowed) xtk_batch_reset(txn->batch, xtk_scene_revision(txn->scene));
+	else xtk_batch_free(txn->batch);
 	txn->batch = NULL;
 }
 

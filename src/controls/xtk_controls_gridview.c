@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_gridview_create(XtkTxn *txn, XtkNodeRef parent, XtkListProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_GRIDVIEW, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [16];
+	XtkPropPatch   patches [17];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -23,6 +23,7 @@ XtkLocalId xtk_gridview_create(XtkTxn *txn, XtkNodeRef parent, XtkListProps cons
 	xtk_controls_append_f32(patches, &count, (props->set >> 13u) & 1u, XTK_PROP_ITEM_WIDTH, props->itemw, change);
 	xtk_controls_append_i32(patches, &count, (props->set >> 14u) & 1u, XTK_PROP_COLUMN_COUNT, props->ncol, change);
 	xtk_controls_append_enum(patches, &count, (props->set >> 15u) & 1u, XTK_PROP_SELECTION_MODE, props->mode, change);
+	xtk_controls_append_i32(patches, &count, (props->set >> 16u) & 1u, XTK_PROP_REALIZED_FIRST, props->first, change);
 	return xtk_txn_create(txn, XTK_CTRL_GRIDVIEW, parent, xtk_ref_none(), patches, count);
 }
 
@@ -38,7 +39,7 @@ bool xtk_gridview_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChan
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_gridview_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_gridview_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -86,8 +87,12 @@ bool xtk_gridview_setncol(XtkScene *scene, XtkCtrl control, int32_t value, XtkCh
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_COLUMN_COUNT, value, change);
 }
 
-bool xtk_gridview_setmode(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_gridview_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_SELECTION_MODE, value, change);
+}
+
+bool xtk_gridview_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
+	return xtk_ctrl_seti32(scene, control, XTK_PROP_REALIZED_FIRST, value, change);
 }
 
 XtkSubRef xtk_gridview_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
@@ -96,4 +101,8 @@ XtkSubRef xtk_gridview_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, v
 
 XtkSubRef xtk_gridview_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
 	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_gridview_onrealize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_REALIZE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

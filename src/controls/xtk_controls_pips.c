@@ -36,7 +36,7 @@ bool xtk_pips_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeSt
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_pips_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pips_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -68,7 +68,7 @@ bool xtk_pips_setnitem(XtkScene *scene, XtkCtrl control, int32_t value, XtkChang
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_ITEM_COUNT, value, change);
 }
 
-bool xtk_pips_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pips_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ORIENTATION, value, change);
 }
 
@@ -76,10 +76,14 @@ bool xtk_pips_setmaxvisible(XtkScene *scene, XtkCtrl control, int32_t value, Xtk
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_MAX_VISIBLE, value, change);
 }
 
-bool xtk_pips_setnav(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_pips_setnav(XtkScene *scene, XtkCtrl control, XtkPipsNavVis value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_NAV_VISIBILITY, value, change);
 }
 
 XtkSubRef xtk_pips_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
 	return xtk_txn_on(txn, target, XTK_EVENT_SELECT, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_pips_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

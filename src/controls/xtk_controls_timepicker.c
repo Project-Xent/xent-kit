@@ -38,7 +38,7 @@ bool xtk_timepicker_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkCh
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_timepicker_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_timepicker_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -74,7 +74,7 @@ bool xtk_timepicker_settime(XtkScene *scene, XtkCtrl control, int32_t value, Xtk
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_TIME, value, change);
 }
 
-bool xtk_timepicker_setclock(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_timepicker_setclock(XtkScene *scene, XtkCtrl control, XtkClock value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_CLOCK, value, change);
 }
 

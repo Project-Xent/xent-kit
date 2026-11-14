@@ -50,7 +50,7 @@ bool xtk_card_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChange
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
-bool xtk_card_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_card_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -74,15 +74,15 @@ bool xtk_card_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_
 	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
-bool xtk_card_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_card_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ORIENTATION, value, change);
 }
 
-bool xtk_card_setitems(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_card_setitems(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_ITEMS, value, change);
 }
 
-bool xtk_card_setjustify(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_card_setjustify(XtkScene *scene, XtkCtrl control, XentFlexJustify value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_JUSTIFY_CONTENT, value, change);
 }
 
@@ -118,6 +118,6 @@ bool xtk_card_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeSta
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_FIT_HEIGHT, value, change);
 }
 
-bool xtk_card_setwrap(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_card_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_WRAP, value, change);
 }

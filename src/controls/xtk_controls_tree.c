@@ -35,7 +35,7 @@ bool xtk_tree_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeSt
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_tree_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_tree_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -75,10 +75,14 @@ bool xtk_tree_setitemh(XtkScene *scene, XtkCtrl control, float value, XtkChangeS
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_ITEM_HEIGHT, value, change);
 }
 
-XtkSubRef xtk_tree_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
-	return xtk_txn_on(txn, target, XTK_EVENT_SELECT, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
-}
-
 XtkSubRef xtk_tree_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
 	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_tree_onexpand(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_TREE_EXPAND, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_tree_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_TREE_SELECT, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

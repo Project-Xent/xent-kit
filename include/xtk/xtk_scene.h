@@ -8,18 +8,21 @@
 typedef struct XtkTxn {
 	XtkScene *scene;
 	XtkBatch *batch;
+	bool      borrowed;
 } XtkTxn;
 
-XtkScene        xtk_scene_fromhost(XtkHost *host);
-uint64_t        xtk_scene_revision(XtkScene const *scene);
-XtkCtrl         xtk_scene_root(XtkScene const *scene);
+XtkScene           xtk_scene_fromhost(XtkHost *host);
+uint64_t           xtk_scene_revision(XtkScene const *scene);
+XtkCtrl            xtk_scene_root(XtkScene const *scene);
+XtkCtrlDesc const *xtk_scene_ctrldesc(XtkScene const *scene, XtkCtrlId type);
 
-bool            xtk_txn_begin(XtkScene *scene, XtkTxn *out);
-XtkBatchResult *xtk_txn_commit(XtkTxn *txn, XtkBatchDiag *diagnostic);
-void            xtk_txn_abort(XtkTxn *txn);
-XtkBatch       *xtk_txn_batch(XtkTxn *txn);
+bool               xtk_txn_begin(XtkScene *scene, XtkTxn *out);
+bool               xtk_txn_beginwith(XtkScene *scene, XtkBatch *batch, XtkTxn *out);
+XtkBatchResult    *xtk_txn_commit(XtkTxn *txn, XtkBatchDiag *diagnostic);
+void               xtk_txn_abort(XtkTxn *txn);
+XtkBatch          *xtk_txn_batch(XtkTxn *txn);
 
-XtkLocalId      xtk_txn_create(
+XtkLocalId         xtk_txn_create(
   XtkTxn *txn, XtkCtrlId type, XtkNodeRef parent, XtkNodeRef before, XtkPropPatch const *props, uint32_t prop_count
 );
 bool      xtk_txn_drop(XtkTxn *txn, XtkNodeRef target);

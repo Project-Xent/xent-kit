@@ -41,7 +41,7 @@ bool xtk_badge_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChang
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_SHRINK, value, change);
 }
 
-bool xtk_badge_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_badge_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -65,7 +65,7 @@ bool xtk_badge_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32
 	return xtk_ctrl_setstring(scene, control, XTK_PROP_TOOLTIP, data, xtk_controls_text_len(data, len), change);
 }
 
-bool xtk_badge_setbadgemode(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_badge_setbadgemode(XtkScene *scene, XtkCtrl control, XtkBadgeMode value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_BADGE_MODE, value, change);
 }
 

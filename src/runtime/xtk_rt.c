@@ -4,7 +4,6 @@
 #include "xtk_rt_internal.h"
 #include "../reconcile/xtk_reconcile_internal.h"
 #include "../reconcile/xtk_scratch.h"
-#include "batch/xtk_batch_internal.h"
 #include "xtk_internal.h"
 #include "../xtk_thread_internal.h"
 
@@ -24,7 +23,7 @@ static bool scratch_create(XtkScratch **out) {
 
 static void runtime_storage_dispose(XtkRt *rt) {
 	if (!rt) return;
-	xtk_batch_free(rt->batch_cache);
+	xtk_batch_free(rt->batch);
 	xtk_scratch_dispose(rt->plan_scratch);
 	xtk_alloc_free(rt->plan_scratch);
 	xtk_scratch_dispose(rt->scratch);
@@ -34,8 +33,8 @@ static void runtime_storage_dispose(XtkRt *rt) {
 static bool runtime_storage_create(XtkRt *rt) {
 	if (!scratch_create(&rt->scratch)) return false;
 	if (!scratch_create(&rt->plan_scratch)) return false;
-	rt->batch_cache = xtk_batch_alloc(0u);
-	return rt->batch_cache != NULL;
+	rt->batch = xtk_batch_alloc(0u);
+	return rt->batch != NULL;
 }
 
 static void request_frame(XtkRt *rt) {
@@ -164,7 +163,7 @@ static XtkFrameResult clean_frame(XtkRt *rt, XtkFrameResult result) {
 
 static void finish_frame(XtkRt *rt, XtkFrameResult *result, XtkFrameStatus status) {
 	result->status         = status;
-	result->revision_after = rt->host->vt->revision(rt->host);
+	result->revision_after = xtk_scene_revision(&rt->scene);
 	result->pending        = rt->q_count > 0 || rt->force || rt->frame_pending;
 	if (status != XTK_FRAME_COMMITTED && status != XTK_FRAME_CLEAN) {
 		rt->force         = true;
@@ -191,7 +190,7 @@ XtkFrameResult xtk_rt_frame(XtkRt *rt) {
 	rt->in_frame             = true;
 	rt->frame_pending        = false;
 
-	result.revision_before   = rt->host->vt->revision(rt->host);
+	result.revision_before   = xtk_scene_revision(&rt->scene);
 	result.dropped_since_ack = rt->dropped_since_ack;
 	result.dropped_total     = rt->dropped_total;
 
@@ -235,7 +234,7 @@ XtkRt *xtk_rt_create(
 		return NULL;
 	}
 
-	rt->host         = host;
+	rt->scene        = xtk_scene_fromhost(host);
 	rt->cfg          = *cfg;
 	rt->host_root    = host_root;
 	rt->model        = model;

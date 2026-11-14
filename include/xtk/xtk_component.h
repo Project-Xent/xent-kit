@@ -1,6 +1,8 @@
 #ifndef XTK_COMPONENT_H
 #define XTK_COMPONENT_H
 
+#include <assert.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -64,5 +66,7 @@ XtkCtrl     xtk_comp_implroot(XtkCompHost const *host);
 XentCtx    *xtk_comp_context(XtkCompHost const *host);
 XtkHost    *xtk_comp_host(XtkCompHost const *host);
 void const *xtk_comp_queryprovider(XtkCompHost const *host, XtkProviderId id, size_t minimum_size);
+
+static_assert(sizeof(XtkCompErr) == 4, "XtkCompErr crosses the ABI as int32");
 
 #endif

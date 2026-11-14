@@ -1,6 +1,8 @@
 #ifndef XTK_EVENT_H
 #define XTK_EVENT_H
 
+#include <assert.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -86,6 +88,19 @@ typedef struct XtkEventPayload {
 			float start;
 			float end;
 		} range;
+
+		struct {
+			int32_t first;
+			int32_t last;
+			int32_t lanes;
+		} window;
+
+		struct {
+			float x;
+			float y;
+			float max_x;
+			float max_y;
+		} scroll;
 	} u;
 } XtkEventPayload;
 
@@ -106,5 +121,10 @@ typedef uint32_t (*XtkEventFn)(void *arg, XtkEvent const *event);
 static bool inline xtk_event_phasesvalid(uint32_t phases) {
 	return phases != 0u && (phases & ~( uint32_t ) XTK_EVENT_PHASE_MASK_ALL) == 0u;
 }
+
+static_assert(sizeof(XtkEventCause) == 4, "XtkEventCause crosses the ABI as int32");
+static_assert(sizeof(XtkEventPhase) == 4, "XtkEventPhase crosses the ABI as int32");
+static_assert(sizeof(XtkEventPhaseMask) == 4, "XtkEventPhaseMask crosses the ABI as int32");
+static_assert(sizeof(XtkEventDisposition) == 4, "XtkEventDisposition crosses the ABI as int32");
 
 #endif

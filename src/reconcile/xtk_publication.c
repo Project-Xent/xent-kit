@@ -14,9 +14,8 @@ static XtkSubId sub_for_token(XtkBatchResult const *result, XtkSubRef token) {
 	return result->subscriptions [token].id;
 }
 
-static bool result_counts_ok(XtkReconcileTxn const *txn, XtkBatchResult const *result) {
-	if (!result) return false;
-	return result->control_count == txn->batch->next_local && result->subscription_count == txn->batch->next_sub;
+static bool result_counts_ok(XtkBatchResult const *result, uint32_t locals, uint32_t subs) {
+	return result && result->control_count == locals && result->subscription_count == subs;
 }
 
 static bool result_arrays_ok(XtkBatchResult const *result) {
@@ -41,8 +40,10 @@ static bool result_plan_ok(XtkPlanRec const *plan, XtkBatchResult const *result)
 	return true;
 }
 
-void xtk_publication_verify_result(XtkReconcileTxn const *txn, XtkPlanRec const *plan, XtkBatchResult const *result) {
-	if (!result_counts_ok(txn, result) || !result_arrays_ok(result) || !result_plan_ok(plan, result)) abort();
+void xtk_publication_verify_result(
+  XtkPlanRec const *plan, XtkBatchResult const *result, uint32_t locals, uint32_t subs
+) {
+	if (!result_counts_ok(result, locals, subs) || !result_arrays_ok(result) || !result_plan_ok(plan, result)) abort();
 }
 
 static bool node_reserve(XtkNode *n, int count) {
@@ -67,7 +68,6 @@ static bool node_reserve(XtkNode *n, int count) {
 static void node_free_tree(XtkRt *rt, XtkNode *n) {
 	if (!n) return;
 	for (int i = 0; i < n->child_count; i++) node_free_tree(rt, n->children [i]);
-	if (rt->cfg.node_cleanup) rt->cfg.node_cleanup(rt->cfg.ctx, n->node, n->ext);
 	xtk_alloc_free(n->binding);
 	xtk_prop_state_destroy(n->props);
 	if (n->key.kind == XTK_KEY_STRING) xtk_alloc_free(( void * ) n->key.value.string);
@@ -158,26 +158,17 @@ void xtk_publication_retire(XtkRt *rt, XtkReconcileTxn *txn) {
 	for (int i = 0; i < txn->retire_count; i++) node_free_tree(rt, txn->retire_nodes [i]);
 }
 
-static bool unmount_commit(XtkRt *rt, XtkBatch *batch) {
-	XtkPrepare  *prep = NULL;
-	XtkBatchDiag d    = {0};
-	if (rt->host->vt->prepare(rt->host, batch, &prep, &d) != XTK_BATCH_OK || !prep) {
-		if (prep) rt->host->vt->abort(rt->host, prep);
-		return false;
-	}
-	XtkBatchResult *result = rt->host->vt->commit(rt->host, prep, &d);
-	if (!result) return false;
-	xtk_batchresult_destroy(result);
-	return true;
-}
-
 bool xtk_unmount_all(XtkRt *rt) {
 	if (!rt || !rt->root) return true;
-	XtkBatch *batch = xtk_batch_alloc(rt->host->vt->revision(rt->host));
-	if (!batch) return false;
-	bool ok = xtk_batch_drop(batch, xtk_ref_existing(( XtkCtrl ) rt->root->node)) && unmount_commit(rt, batch);
-	xtk_batch_free(batch);
-	if (!ok) return false;
+	XtkTxn txn;
+	if (!xtk_txn_begin(&rt->scene, &txn)) return false;
+	if (!xtk_txn_drop(&txn, xtk_ref_existing(( XtkCtrl ) rt->root->node))) {
+		xtk_txn_abort(&txn);
+		return false;
+	}
+	XtkBatchResult *result = xtk_txn_commit(&txn, NULL);
+	if (!result) return false;
+	xtk_batchresult_destroy(result);
 	node_free_tree(rt, rt->root);
 	rt->root = NULL;
 	return true;

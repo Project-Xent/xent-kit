@@ -36,7 +36,7 @@ bool xtk_togglesplit_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkC
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_togglesplit_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_togglesplit_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -70,6 +70,10 @@ bool xtk_togglesplit_setenabled(XtkScene *scene, XtkCtrl control, bool value, Xt
 
 bool xtk_togglesplit_setchecked(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_CHECKED, value, change);
+}
+
+XtkSubRef xtk_togglesplit_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }
 
 XtkSubRef xtk_togglesplit_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

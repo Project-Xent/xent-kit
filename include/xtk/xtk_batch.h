@@ -1,6 +1,8 @@
 #ifndef XTK_BATCH_H
 #define XTK_BATCH_H
 
+#include <assert.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -203,9 +205,18 @@ typedef struct XtkSubMapping {
 	XtkSubId  id;
 } XtkSubMapping;
 
+typedef enum XtkBatchStage
+{
+	XTK_BATCH_STAGE_VALIDATE = 0,
+	XTK_BATCH_STAGE_PREFLIGHT,
+	XTK_BATCH_STAGE_PREPARE,
+	XTK_BATCH_STAGE_COMMIT,
+} XtkBatchStage;
+
 typedef struct XtkBatchDiag {
 	XtkBatchError error;
 	uint32_t      failed_op;
+	XtkBatchStage stage;
 } XtkBatchDiag;
 
 typedef struct XtkBatchResult {
@@ -232,5 +243,11 @@ XtkSubRef xtk_batch_on(XtkBatch *batch, XtkNodeRef target, XtkEventId event, uin
 bool      xtk_batch_off(XtkBatch *batch, XtkSubId id);
 
 XtkBatchError xtk_batch_preflight(XtkBatch *batch, XtkBatchDiag *diagnostic);
+
+static_assert(sizeof(XtkNodeRefKind) == 4, "XtkNodeRefKind crosses the ABI as int32");
+static_assert(sizeof(XtkValueKind) == 4, "XtkValueKind crosses the ABI as int32");
+static_assert(sizeof(XtkBatchStage) == 4, "XtkBatchStage crosses the ABI as int32");
+static_assert(sizeof(XtkBatchOpKind) == 4, "XtkBatchOpKind crosses the ABI as int32");
+static_assert(sizeof(XtkBatchError) == 4, "XtkBatchError crosses the ABI as int32");
 
 #endif

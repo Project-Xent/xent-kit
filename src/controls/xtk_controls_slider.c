@@ -53,7 +53,7 @@ bool xtk_slider_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChange
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_slider_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_slider_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -101,11 +101,11 @@ bool xtk_slider_settick(XtkScene *scene, XtkCtrl control, float value, XtkChange
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_TICK_FREQUENCY, value, change);
 }
 
-bool xtk_slider_settickplace(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_slider_settickplace(XtkScene *scene, XtkCtrl control, XtkTickPlacement value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_TICK_PLACEMENT, value, change);
 }
 
-bool xtk_slider_setsnapsto(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_slider_setsnapsto(XtkScene *scene, XtkCtrl control, XtkSliderSnap value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_SLIDER_SNAPS_TO, value, change);
 }
 
@@ -117,7 +117,7 @@ bool xtk_slider_setlargechange(XtkScene *scene, XtkCtrl control, float value, Xt
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_LARGE_CHANGE, value, change);
 }
 
-bool xtk_slider_setdir(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_slider_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ORIENTATION, value, change);
 }
 

@@ -39,7 +39,7 @@ bool xtk_dropdown_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChan
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_dropdown_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_dropdown_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -75,7 +75,7 @@ bool xtk_dropdown_seticon(XtkScene *scene, XtkCtrl control, char const *data, ui
 	return xtk_ctrl_setstring(scene, control, XTK_PROP_ICON, data, xtk_controls_text_len(data, len), change);
 }
 
-bool xtk_dropdown_setstyle(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_dropdown_setstyle(XtkScene *scene, XtkCtrl control, XtkButtonStyle value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_BUTTON_STYLE, value, change);
 }
 

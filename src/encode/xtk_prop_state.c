@@ -131,11 +131,19 @@ static XtkValue default_value(XtkPropertyId id, XtkValueKind kind) {
 	return value;
 }
 
-static bool
-emit_changed(XtkBatch *batch, XtkNodeRef target, XtkPropPatch const *old, XtkPropPatch const *next, bool *changed) {
-	if (old && value_equal(&old->value, &next->value)) return true;
+static bool forced(XtkEcho const *echo, XtkPropertyId id) {
+	for (uint32_t i = 0; i < echo->nforce; i++)
+		if (echo->force [i] == id) return true;
+	return false;
+}
+
+static bool emit_changed(
+  XtkBatch *batch, XtkNodeRef target, XtkPropPatch const *old, XtkPropPatch const *next, XtkEcho const *echo,
+  bool *changed
+) {
+	if (old && value_equal(&old->value, &next->value) && !forced(echo, next->id)) return true;
 	*changed = true;
-	return xtk_batch_set(batch, target, next->id, next->value, next->change);
+	return xtk_batch_set(batch, target, next->id, next->value, echo->stamp);
 }
 
 static bool emit_removed(XtkBatch *batch, XtkNodeRef target, XtkPropPatch const *old, XtkPropView next, bool *changed) {
@@ -145,12 +153,14 @@ static bool emit_removed(XtkBatch *batch, XtkNodeRef target, XtkPropPatch const 
 	return xtk_batch_set(batch, target, old->id, value, (XtkChangeStamp) {0});
 }
 
-bool xtk_prop_state_diff(XtkBatch *batch, XtkNodeRef target, XtkPropState const *old, XtkPropView next, bool *changed) {
+bool xtk_prop_state_diff(
+  XtkBatch *batch, XtkNodeRef target, XtkPropState const *old, XtkPropView next, XtkEcho const *echo, bool *changed
+) {
 	if (!batch || !changed) return false;
 	*changed = false;
 	for (uint32_t i = 0; i < next.count; i++) {
 		XtkPropPatch const *prior = old ? find_prop(old->items, old->count, next.items [i].id) : NULL;
-		if (!emit_changed(batch, target, prior, &next.items [i], changed)) return false;
+		if (!emit_changed(batch, target, prior, &next.items [i], echo, changed)) return false;
 	}
 	if (!old) return true;
 	for (uint32_t i = 0; i < old->count; i++)

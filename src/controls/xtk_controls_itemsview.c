@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_itemsview_create(XtkTxn *txn, XtkNodeRef parent, XtkItemsViewProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_ITEMSVIEW, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [17];
+	XtkPropPatch   patches [18];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -26,6 +26,7 @@ XtkLocalId xtk_itemsview_create(XtkTxn *txn, XtkNodeRef parent, XtkItemsViewProp
 	xtk_controls_append_bool(
 	  patches, &count, (props->set >> 16u) & 1u, XTK_PROP_ITEM_INVOKED_ENABLED, props->invoked, change
 	);
+	xtk_controls_append_i32(patches, &count, (props->set >> 17u) & 1u, XTK_PROP_REALIZED_FIRST, props->first, change);
 	return xtk_txn_create(txn, XTK_CTRL_ITEMSVIEW, parent, xtk_ref_none(), patches, count);
 }
 
@@ -41,7 +42,7 @@ bool xtk_itemsview_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkCha
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_itemsview_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_itemsview_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -89,12 +90,16 @@ bool xtk_itemsview_setncol(XtkScene *scene, XtkCtrl control, int32_t value, XtkC
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_COLUMN_COUNT, value, change);
 }
 
-bool xtk_itemsview_setmode(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_itemsview_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_SELECTION_MODE, value, change);
 }
 
 bool xtk_itemsview_setinvoked(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_ITEM_INVOKED_ENABLED, value, change);
+}
+
+bool xtk_itemsview_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
+	return xtk_ctrl_seti32(scene, control, XTK_PROP_REALIZED_FIRST, value, change);
 }
 
 XtkSubRef xtk_itemsview_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
@@ -103,4 +108,8 @@ XtkSubRef xtk_itemsview_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, 
 
 XtkSubRef xtk_itemsview_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
 	return xtk_txn_on(txn, target, XTK_EVENT_INVOKE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_itemsview_onrealize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_REALIZE, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

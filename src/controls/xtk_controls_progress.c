@@ -45,7 +45,7 @@ bool xtk_progress_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChan
 	return xtk_ctrl_setf32(scene, control, XTK_PROP_GROW, value, change);
 }
 
-bool xtk_progress_setself(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_progress_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_ALIGN_SELF, value, change);
 }
 
@@ -85,7 +85,7 @@ bool xtk_progress_setindeterminate(XtkScene *scene, XtkCtrl control, bool value,
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_INDETERMINATE, value, change);
 }
 
-bool xtk_progress_setstate(XtkScene *scene, XtkCtrl control, uint32_t value, XtkChangeStamp change) {
+bool xtk_progress_setstate(XtkScene *scene, XtkCtrl control, XtkProgressState value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_PROGRESS_STATE, value, change);
 }
 

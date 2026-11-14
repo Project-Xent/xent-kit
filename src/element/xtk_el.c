@@ -230,10 +230,7 @@ XtkEl *xtk_el_new(XtkUi *ui, XtkCtrlId type, char const *text) {
 	return el;
 }
 
-static XtkEl xtk_end_sentinel;
-XtkEl *const XTK_END = &xtk_end_sentinel;
-
-void         xtk_el_adopt(XtkUi *ui, XtkEl *el, XtkEl *children []) {
+void xtk_el_adopt(XtkUi *ui, XtkEl *el, XtkEl *children []) {
 	if (!el || !children) return;
 
 	int count = 0;

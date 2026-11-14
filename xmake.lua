@@ -1,7 +1,10 @@
 set_project("xent-kit")
-set_version(os.getenv("XENT_VERSION") or "0.3.1")
+set_version(os.getenv("XENT_VERSION") or "0.3.2")
 set_languages("c23")
 add_rules("mode.debug", "mode.release")
+if is_plat("mingw") and is_mode("release") then
+    set_symbols("none")
+end
 set_warnings("all")
 
 if is_mode("release") then
@@ -71,6 +74,21 @@ target("test_xtk_alloc_fail")
     add_deps("xtk", "xtk_testhost")
     add_files("tests/test_xtk_alloc_fail.c")
     add_includedirs("src")
+
+task("gen-bindings")
+    set_menu {
+        usage = "xmake gen-bindings <lang> <output>",
+        description = "Generate a typed language binding layer from tools/catalog.lua.",
+        options = {
+            {nil, "lang", "v", nil, "Binding language: rust, zig, cython, haskell."},
+            {nil, "output", "v", nil, "Output file (directory for cython and haskell)."},
+        },
+    }
+    on_run(function ()
+        import("core.base.option")
+        os.execv("xmake", {"lua", path.join(os.scriptdir(), "tools", "gen_bindings.lua"), option.get("lang"), path.absolute(option.get("output"))})
+    end)
+task_end()
 
 task("gen-controls")
     set_menu {

@@ -281,12 +281,16 @@ static bool record_sub_tokens(XtkReconcileTxn *txn, XtkPlanRec *plan, uint32_t s
 	return true;
 }
 
-static bool plan_binding_alloc(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el) {
+static bool plan_binding_alloc(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el, XtkBinding const *prev) {
 	if (!xtk_el_needs_binding(el)) return true;
 	plan->next_binding = ( XtkBinding * ) xtk_alloc_zero(1, sizeof(*plan->next_binding));
 	if (!plan->next_binding) return false;
 	plan->next_binding->rt = txn->rt;
-	plan->binding_changed  = true;
+	if (prev) {
+		plan->next_binding->realized = prev->realized;
+		plan->next_binding->echo     = prev->echo;
+	}
+	plan->binding_changed = true;
 	return true;
 }
 
@@ -301,7 +305,7 @@ static bool plan_create(
 ) {
 	plan->is_create = true;
 	plan->fresh     = node_fresh(XTK_EL_DATA(el)->type);
-	if (!plan->fresh || !plan_binding_alloc(txn, plan, el)) return false;
+	if (!plan->fresh || !plan_binding_alloc(txn, plan, el, NULL)) return false;
 	XtkNodeRef pref       = parent ? parent->ref : xtk_ref_existing(( XtkCtrl ) txn->rt->host_root);
 	uint32_t   sub_before = txn->batch->next_sub;
 	if (!xtk_encode_create(txn->batch, pref, before, el, &plan->local)) return false;
@@ -312,8 +316,8 @@ static bool plan_create(
 	return retire_push(txn, committed);
 }
 
-static bool plan_binding_sync(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el) {
-	if (!plan_binding_alloc(txn, plan, el)) return false;
+static bool plan_binding_sync(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el, XtkBinding const *prev) {
+	if (!plan_binding_alloc(txn, plan, el, prev)) return false;
 	if (!plan->next_binding) return true;
 	uint32_t sub_before = txn->batch->next_sub;
 	if (!xtk_encode_subscribe(txn->batch, plan->ref, plan->next_binding, el)) return false;
@@ -326,13 +330,29 @@ static bool plan_binding(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkNode *commit
 	if (!committed->binding && !next_has_binding) return true;
 	plan->binding_changed = true;
 	if (committed->binding && !xtk_encode_unsubscribe_all(txn->batch, committed)) return false;
-	return plan_binding_sync(txn, plan, el);
+	return plan_binding_sync(txn, plan, el, committed->binding);
+}
+
+static XtkEcho node_echo(XtkNode const *committed) {
+	XtkEcho     echo = {0};
+	XtkBinding *b    = committed->binding;
+	if (!b) return echo;
+	echo.stamp = b->echo;
+	for (XtkEventId event = 1; event < ( XtkEventId ) XTK_EVENT_STANDARD_COUNT; event++) {
+		if (!(b->user_events & (1u << event))) continue;
+		XtkPropertyId ids [XTK_MIRROR_MAX];
+		uint32_t      n = xtk_catalog_mirrors(committed->type_id, event, ids);
+		for (uint32_t i = 0; i < n && echo.nforce < 8u; i++) echo.force [echo.nforce++] = ids [i];
+	}
+	b->user_events = 0u;
+	return echo;
 }
 
 static bool plan_reuse(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el, XtkNode *committed, XtkPropView props) {
 	plan->ref = xtk_ref_existing(( XtkCtrl ) committed->node);
-	bool changed;
-	if (!xtk_prop_state_diff(txn->batch, plan->ref, committed->props, props, &changed)) return false;
+	bool    changed;
+	XtkEcho echo = node_echo(committed);
+	if (!xtk_prop_state_diff(txn->batch, plan->ref, committed->props, props, &echo, &changed)) return false;
 	if (changed) {
 		plan->next_props = xtk_prop_state_copy(props);
 		if (!plan->next_props) return false;

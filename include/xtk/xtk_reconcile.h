@@ -1,6 +1,8 @@
 #ifndef XTK_RECONCILE_H
 #define XTK_RECONCILE_H
 
+#include <assert.h>
+
 #include "xtk_host.h"
 #include "xtk_batch.h"
 
@@ -89,24 +91,9 @@ typedef struct XtkOverflowStatus {
 	uint32_t dropped_total;
 } XtkOverflowStatus;
 
-typedef struct XtkViewport {
-	float offset;
-	float extent;
-	float cross;
-} XtkViewport;
-
-typedef struct XtkVirtualRange {
-	int first;
-	int last;
-	int lanes;
-} XtkVirtualRange;
-
 typedef struct XtkRtCfg {
 	void *ctx;
 	void  (*request_frame)(void *ctx);
-	void  (*node_cleanup)(void *ctx, XentNodeId id, void *arg);
-	bool  (*viewport)(void *ctx, XentNodeId id, XtkViewport *out);
-	void  (*virtual_range)(void *ctx, XentNodeId id, XtkVirtualRange const *range);
 	void  (*on_diagnostic)(void *ctx, XtkFrameResult const *result);
 } XtkRtCfg;
 
@@ -126,5 +113,9 @@ XtkNode const    *xtk_rt_root(XtkRt const *rt);
 XtkNode const    *xtk_node_child(XtkNode const *node, int index);
 int               xtk_node_nchild(XtkNode const *node);
 XentNodeId        xtk_node_id(XtkNode const *node);
+
+static_assert(sizeof(XtkFrameStatus) == 4, "XtkFrameStatus crosses the ABI as int32");
+static_assert(sizeof(XtkPostStatus) == 4, "XtkPostStatus crosses the ABI as int32");
+static_assert(sizeof(XtkIdentityError) == 4, "XtkIdentityError crosses the ABI as int32");
 
 #endif

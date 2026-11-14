@@ -21,35 +21,27 @@ static XtkListKind list_kind_for(XtkCtrlType type) {
 	}
 }
 
-static void list_window(XtkRt *rt, XentNodeId node, XtkEl const *el, int *first, int *last, int *cols) {
-	XtkListDesc const *list     = XTK_EL_DETAIL(el, XtkListDesc);
-	XtkViewport        viewport = {0};
-	bool               ok       = rt->cfg.viewport
-	                           && node != XENT_NODE_INVALID
-	                           && rt->cfg.viewport(rt->cfg.ctx, node, &viewport)
-	                           && viewport.extent > 0.0f;
-	if (!ok) {
-		viewport.offset = 0.0f;
-		viewport.extent = isnan(XTK_EL_DATA(el)->height) ? 600.0f : XTK_EL_DATA(el)->height;
-		viewport.cross  = isnan(XTK_EL_DATA(el)->width) ? 0.0f : XTK_EL_DATA(el)->width;
-	}
-	*cols            = xtk_list_autocolumns(viewport.cross, list->itemw, list->ncol);
-	int   total_rows = (list->nitem + *cols - 1) / *cols;
-	float item_h     = list->itemh;
-	float max_offset = ( float ) total_rows * item_h - viewport.extent;
-	if (viewport.offset > max_offset) viewport.offset = max_offset;
-	if (viewport.offset < 0.0f) viewport.offset = 0.0f;
-	int row_first = ( int ) floorf(viewport.offset / item_h) - list->overscan;
-	int row_last  = ( int ) ceilf((viewport.offset + viewport.extent) / item_h) - 1 + list->overscan;
-	if (row_first < 0) row_first = 0;
-	if (row_last > total_rows - 1) row_last = total_rows - 1;
-	*first = row_first * *cols;
-	*last  = (row_last + 1) * *cols - 1;
-	if (*last > list->nitem - 1) *last = list->nitem - 1;
+static void list_window_fallback(XtkEl const *el, XtkListDesc const *list, XtkRealized *w) {
+	float extent = isnan(XTK_EL_DATA(el)->height) ? 600.0f : XTK_EL_DATA(el)->height;
+	float cross  = isnan(XTK_EL_DATA(el)->width) ? 0.0f : XTK_EL_DATA(el)->width;
+	w->lanes     = xtk_list_autocolumns(cross, list->itemw, list->ncol);
+	w->first     = 0;
+	w->last      = (( int ) ceilf(extent / list->itemh) + 4) * w->lanes - 1;
 }
 
-static bool list_attach(XtkUi *ui, XtkEl *wrap, XtkEl *content) {
-	( void ) ui;
+static void list_window(XtkNode const *committed, XtkEl const *el, XtkRealized *w) {
+	XtkListDesc const *list = XTK_EL_DETAIL(el, XtkListDesc);
+	XtkBinding const  *b    = committed ? committed->binding : NULL;
+	if (b && b->realized.lanes > 0) *w = b->realized;
+	else list_window_fallback(el, list, w);
+	if (w->last <= list->nitem - 1) return;
+	int span  = w->last - w->first;
+	w->last   = list->nitem - 1;
+	w->first  = w->last - span > 0 ? w->last - span : 0;
+	w->first -= w->first % w->lanes;
+}
+
+static bool list_attach(XtkEl *wrap, XtkEl *content) {
 	if (!content) return true;
 	XtkEl *child [] = {content};
 	return xtk_el_set_children(wrap, child, 1);
@@ -59,10 +51,8 @@ typedef struct ListRealizeCtx {
 	XtkListKind kind;
 	bool        single;
 	float       cell_width;
-	int         cols;
 	int         window;
-	int         first;
-	int         last;
+	XtkRealized range;
 } ListRealizeCtx;
 
 static XtkEl *list_make_row(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, int i) {
@@ -77,32 +67,26 @@ static XtkEl *list_make_row(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ct
 	  .kind     = ctx->kind,
 	  .selected = ctx->single && i == list.sel,
 	  .multi    = list.sel_mode == XTK_LIST_SELECT_MULTIPLE,
-	  .x        = ( float ) (i % ctx->cols) * ctx->cell_width,
-	  .y        = ( float ) (i / ctx->cols) * list.itemh,
-	  .w        = ctx->cell_width,
-	  .h        = list.itemh,
 	};
 	if (!XTK_EL_STORE(row, item)) return NULL;
-	if (!list_attach(rt->ui, row, list.item(rt->ui, list.env, i))) return NULL;
+	if (!list_attach(row, list.item(rt->ui, list.env, i))) return NULL;
 	return row;
 }
 
-static void list_realize_ctx(XtkRt *rt, XentNodeId node, XtkEl const *el, ListRealizeCtx *ctx) {
+static void list_realize_ctx(XtkNode const *committed, XtkEl const *el, ListRealizeCtx *ctx) {
 	XtkListDesc const *list = XTK_EL_DETAIL(el, XtkListDesc);
-	ctx->first              = 0;
-	ctx->last               = -1;
-	ctx->cols               = 1;
-	if (list->nitem > 0 && list->item) list_window(rt, node, el, &ctx->first, &ctx->last, &ctx->cols);
-	ctx->window = ctx->last - ctx->first + 1;
+	ctx->range              = (XtkRealized) {0, -1, 1};
+	if (list->nitem > 0 && list->item) list_window(committed, el, &ctx->range);
+	ctx->window = ctx->range.last - ctx->range.first + 1;
 	if (ctx->window < 0) ctx->window = 0;
 	ctx->kind       = list_kind_for(XTK_EL_DATA(el)->type);
 	ctx->single     = list->sel_mode == XTK_LIST_SELECT_SINGLE;
-	ctx->cell_width = ctx->cols > 1 || list->itemw > 0.0f ? list->itemw : 0.0f;
+	ctx->cell_width = ctx->range.lanes > 1 || list->itemw > 0.0f ? list->itemw : 0.0f;
 }
 
 static int list_fill_rows(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, XtkEl **rows) {
 	int filled = 0;
-	for (int i = ctx->first; i <= ctx->last; i++) {
+	for (int i = ctx->range.first; i <= ctx->range.last; i++) {
 		XtkEl *row = list_make_row(rt, el, ctx, i);
 		if (!row) break;
 		rows [filled++] = row;
@@ -110,26 +94,17 @@ static int list_fill_rows(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx,
 	return filled;
 }
 
-static bool list_realize(XtkRt *rt, XentNodeId node, XtkEl *el) {
+static bool list_realize(XtkRt *rt, XtkNode const *committed, XtkEl *el) {
 	ListRealizeCtx ctx;
-	list_realize_ctx(rt, node, el, &ctx);
-	XtkElementData *data = XTK_EL_DATA(el);
-	data->virtual_first  = ctx.first;
-	data->virtual_last   = ctx.last;
-	data->virtual_lanes  = ctx.cols;
-	size_t  n            = ( size_t ) (ctx.window ? ctx.window : 1);
-	XtkEl **rows         = ( XtkEl ** ) xtk_arena_alloc(xtk_ui_arena(rt->ui), sizeof(XtkEl *) * n);
+	list_realize_ctx(committed, el, &ctx);
+	XTK_EL_DATA(el)->virtual_first = ctx.range.first;
+	size_t  n                      = ( size_t ) (ctx.window ? ctx.window : 1);
+	XtkEl **rows                   = ( XtkEl ** ) xtk_arena_alloc(xtk_ui_arena(rt->ui), sizeof(XtkEl *) * n);
 	if (!rows) return false;
-	int filled = list_fill_rows(rt, el, &ctx, rows);
-	if (!xtk_el_set_children(el, rows, filled)) return false;
-	if (rt->cfg.virtual_range) {
-		XtkVirtualRange range = {ctx.first, ctx.first + filled - 1, ctx.cols};
-		rt->cfg.virtual_range(rt->cfg.ctx, node, &range);
-	}
-	return true;
+	return xtk_el_set_children(el, rows, list_fill_rows(rt, el, &ctx, rows));
 }
 
-static XtkNode *find_child_for_viewport(XtkNode *parent, XtkEl const *want, int index) {
+static XtkNode *committed_child(XtkNode *parent, XtkEl const *want, int index) {
 	if (!parent || !want || index < 0 || index >= parent->child_count) return NULL;
 	XtkNode *n = parent->children [index];
 	return n && n->type_id == XTK_EL_DATA(want)->type ? n : NULL;
@@ -137,12 +112,9 @@ static XtkNode *find_child_for_viewport(XtkNode *parent, XtkEl const *want, int 
 
 static bool normalize_lists(XtkRt *rt, XtkEl *el, XtkNode *committed) {
 	if (!el) return true;
-	if (XTK_EL_DATA(el)->virtualized) {
-		XentNodeId id = committed ? committed->node : XENT_NODE_INVALID;
-		if (!list_realize(rt, id, el)) return false;
-	}
+	if (XTK_EL_DATA(el)->virtualized && !list_realize(rt, committed, el)) return false;
 	for (int i = 0; i < XTK_EL_DATA(el)->child_count; i++) {
-		XtkNode *child = find_child_for_viewport(committed, xtk_el_child(el, i), i);
+		XtkNode *child = committed_child(committed, xtk_el_child(el, i), i);
 		if (!normalize_lists(rt, xtk_el_child(el, i), child)) return false;
 	}
 	return true;

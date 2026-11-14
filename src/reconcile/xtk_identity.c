@@ -47,10 +47,7 @@ static void diagnostic_path(XtkIdentityDiag *out, int const *path, uint32_t dept
 	out->path_truncated = depth > XTK_IDENTITY_PATH_MAX;
 }
 
-static bool type_known(XtkHost *host, XtkCtrlId type) {
-	if (type == XTK_CTRL_ID_INVALID) return false;
-	return host->vt->desc(host, type) != NULL;
-}
+static bool type_known(XtkScene const *scene, XtkCtrlId type) { return xtk_scene_ctrldesc(scene, type) != NULL; }
 
 static bool keyed_keys_equal(XtkEl const *parent, int other, XtkKey const *key, uint32_t h, KeySlot const *slot) {
 	if (slot->hash != h) return false;
@@ -104,8 +101,9 @@ static XtkIdentityError validate_keyed_keys(XtkEl const *parent, XtkScratch *scr
 	return XTK_IDENTITY_OK;
 }
 
-static XtkIdentityError
-sibling_type_or_mode(XtkHost *host, XtkEl const *parent, XtkEl const *child, int i, bool keyed, XtkIdentityDiag *out) {
+static XtkIdentityError sibling_type_or_mode(
+  XtkScene const *scene, XtkEl const *parent, XtkEl const *child, int i, bool keyed, XtkIdentityDiag *out
+) {
 	if (!child) {
 		if (out) {
 			out->error       = XTK_IDENTITY_MALFORMED;
@@ -114,7 +112,7 @@ sibling_type_or_mode(XtkHost *host, XtkEl const *parent, XtkEl const *child, int
 		}
 		return XTK_IDENTITY_MALFORMED;
 	}
-	if (!type_known(host, XTK_EL_DATA(child)->type)) {
+	if (!type_known(scene, XTK_EL_DATA(child)->type)) {
 		if (out) {
 			out->error       = XTK_IDENTITY_INVALID_TYPE;
 			out->parent_type = XTK_EL_DATA(parent)->type;
@@ -141,14 +139,14 @@ static XtkIdentityError report_parent_error(XtkEl const *parent, XtkIdentityDiag
 }
 
 static XtkIdentityError
-validate_siblings(XtkHost *host, XtkEl const *parent, XtkScratch *scratch, XtkIdentityDiag *out) {
+validate_siblings(XtkScene const *scene, XtkEl const *parent, XtkScratch *scratch, XtkIdentityDiag *out) {
 	if (XTK_EL_DATA(parent)->child_count < 0) return report_parent_error(parent, out, XTK_IDENTITY_INVALID_COUNT);
 	if (XTK_EL_DATA(parent)->child_count == 0) return XTK_IDENTITY_OK;
 	if (!xtk_el_child(parent, 0)) return report_parent_error(parent, out, XTK_IDENTITY_MALFORMED);
 
 	bool keyed = xtk_key_present(&XTK_EL_DATA(xtk_el_child(parent, 0))->key);
 	for (int i = 0; i < XTK_EL_DATA(parent)->child_count; i++) {
-		XtkIdentityError err = sibling_type_or_mode(host, parent, xtk_el_child(parent, i), i, keyed, out);
+		XtkIdentityError err = sibling_type_or_mode(scene, parent, xtk_el_child(parent, i), i, keyed, out);
 		if (err != XTK_IDENTITY_OK) return err;
 	}
 	if (keyed) return validate_keyed_keys(parent, scratch, out);
@@ -156,7 +154,7 @@ validate_siblings(XtkHost *host, XtkEl const *parent, XtkScratch *scratch, XtkId
 }
 
 typedef struct IdentityWalk {
-	XtkHost         *host;
+	XtkScene const  *scene;
 	XtkScratch      *scratch;
 	XtkIdentityDiag *out;
 	uint64_t        *regions;
@@ -215,7 +213,7 @@ static XtkIdentityError walk_node(IdentityWalk *ctx, XtkEl const *el, uint32_t d
 		}
 		return XTK_IDENTITY_INVALID_COUNT;
 	}
-	if (!type_known(ctx->host, XTK_EL_DATA(el)->type)) {
+	if (!type_known(ctx->scene, XTK_EL_DATA(el)->type)) {
 		if (ctx->out) {
 			ctx->out->error       = XTK_IDENTITY_INVALID_TYPE;
 			ctx->out->parent_type = XTK_EL_DATA(el)->type;
@@ -229,7 +227,7 @@ static XtkIdentityError walk_node(IdentityWalk *ctx, XtkEl const *el, uint32_t d
 		return region;
 	}
 	size_t           mark = xtk_scratch_mark(ctx->scratch);
-	XtkIdentityError err  = validate_siblings(ctx->host, el, ctx->scratch, ctx->out);
+	XtkIdentityError err  = validate_siblings(ctx->scene, el, ctx->scratch, ctx->out);
 	xtk_scratch_rewind(ctx->scratch, mark);
 	if (err != XTK_IDENTITY_OK) {
 		diagnostic_path(ctx->out, ctx->path, depth);
@@ -257,10 +255,10 @@ static XtkIdentityError walk(IdentityWalk *ctx, XtkEl const *el, uint32_t depth)
 }
 
 XtkIdentityError
-xtk_identity_validate_tree(XtkHost *host, XtkEl const *root, XtkScratch *scratch, XtkIdentityDiag *out) {
+xtk_identity_validate_tree(XtkScene const *scene, XtkEl const *root, XtkScratch *scratch, XtkIdentityDiag *out) {
 	if (out) memset(out, 0, sizeof(*out));
-	if (!host || !root || !scratch) return XTK_IDENTITY_INVALID_TYPE;
-	IdentityWalk ctx = {.host = host, .scratch = scratch, .out = out};
+	if (!scene || !root || !scratch) return XTK_IDENTITY_INVALID_TYPE;
+	IdentityWalk ctx = {.scene = scene, .scratch = scratch, .out = out};
 	if (!prepare_regions(&ctx, root)) return XTK_IDENTITY_OOM;
 	return walk(&ctx, root, 0u);
 }

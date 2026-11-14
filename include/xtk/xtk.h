@@ -1,6 +1,8 @@
 #ifndef XTK_H
 #define XTK_H
 
+#include <assert.h>
+
 #include "xtk_descriptor.h"
 #include "xtk_msg.h"
 #include <stdbool.h>
@@ -26,7 +28,7 @@ typedef struct XtkKey {
 	} value;
 } XtkKey;
 
-extern XtkEl *const XTK_END;
+#define XTK_END       (( XtkEl * ) ( uintptr_t ) 1u)
 
 #define xtk_kids(...) (( XtkEl *[] ) {__VA_ARGS__ __VA_OPT__(, ) XTK_END})
 
@@ -132,6 +134,12 @@ typedef struct XtkStackDesc {
 	bool            fill;
 	XentFlexWrap    wrap;
 } XtkStackDesc;
+
+typedef struct XtkScrollDesc {
+	float  x;
+	float  y;
+	XtkMsg scroll;
+} XtkScrollDesc;
 
 typedef struct XtkLoopingDesc {
 	char const *const *items;
@@ -321,7 +329,6 @@ typedef struct XtkListDesc {
 	float          itemh;
 	float          itemw;
 	int            ncol;
-	int            overscan;
 	XtkEl         *(*item)(XtkUi *ui, void *env, int index);
 	void          *env;
 	XtkListSelMode sel_mode;
@@ -339,8 +346,6 @@ typedef struct XtkListItemDesc {
 	bool        multi;
 	bool        expanded;
 	char const *icon;
-	float       x, y;
-	float       w, h;
 } XtkListItemDesc;
 
 typedef enum XtkItemsViewLayout
@@ -356,7 +361,6 @@ typedef struct XtkItemsViewDesc {
 	float              itemh;
 	float              itemw;
 	int                ncol;
-	int                overscan;
 	float              gap;
 	XtkEl             *(*item)(XtkUi *ui, void *env, int index);
 	void              *env;
@@ -665,7 +669,7 @@ XtkEl                 *xtk_suggest(XtkUi *ui, char const *placeholder, XtkAutoSu
 XtkEl                 *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl                 *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl                 *xtk_card(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
-XtkEl                 *xtk_scroll(XtkUi *ui, XtkEl *children []);
+XtkEl                 *xtk_scroll(XtkUi *ui, XtkScrollDesc desc, XtkEl *children []);
 XtkEl                 *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []);
 XtkEl                 *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []);
 XtkEl                 *xtk_tabs(XtkUi *ui, XtkTabViewDesc desc, XtkEl *children []);
@@ -688,5 +692,21 @@ XtkEl                 *xtk_sized(XtkEl *el, float width, float height);
 XtkEl                 *xtk_grow(XtkEl *el, float grow);
 XtkEl                 *xtk_align(XtkEl *el, XentFlexAlign align_self);
 XtkEl                 *xtk_margin(XtkEl *el, XentInsets margin);
+
+static_assert(sizeof(XtkKeyKind) == 4, "XtkKeyKind crosses the ABI as int32");
+static_assert(sizeof(XtkClock) == 4, "XtkClock crosses the ABI as int32");
+static_assert(sizeof(XtkCalendarMode) == 4, "XtkCalendarMode crosses the ABI as int32");
+static_assert(sizeof(XtkSpectrum) == 4, "XtkSpectrum crosses the ABI as int32");
+static_assert(sizeof(XtkListSelMode) == 4, "XtkListSelMode crosses the ABI as int32");
+static_assert(sizeof(XtkListKind) == 4, "XtkListKind crosses the ABI as int32");
+static_assert(sizeof(XtkItemsViewLayout) == 4, "XtkItemsViewLayout crosses the ABI as int32");
+static_assert(sizeof(XtkPipsNavVis) == 4, "XtkPipsNavVis crosses the ABI as int32");
+static_assert(sizeof(XtkPagerDisplayMode) == 4, "XtkPagerDisplayMode crosses the ABI as int32");
+static_assert(sizeof(XtkPagerButtonVis) == 4, "XtkPagerButtonVis crosses the ABI as int32");
+static_assert(sizeof(XtkNavKind) == 4, "XtkNavKind crosses the ABI as int32");
+static_assert(sizeof(XtkPullDirection) == 4, "XtkPullDirection crosses the ABI as int32");
+static_assert(sizeof(XtkTreeSelMode) == 4, "XtkTreeSelMode crosses the ABI as int32");
+static_assert(sizeof(XtkSplitViewDisplayMode) == 4, "XtkSplitViewDisplayMode crosses the ABI as int32");
+static_assert(sizeof(XtkSplitViewPanePlacement) == 4, "XtkSplitViewPanePlacement crosses the ABI as int32");
 
 #endif

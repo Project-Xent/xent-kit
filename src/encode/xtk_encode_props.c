@@ -577,6 +577,16 @@ static bool encode_list_item(XtkBatch *batch, XtkNodeRef target, XtkEl const *pr
 	    || value_bool(batch, target, XTK_PROP_SELECTED, XTK_EL_DETAIL(el, XtkListItemDesc)->selected);
 }
 
+static bool encode_scroll(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	( void ) prev;
+	XtkScrollDesc const *scroll = &XTK_EL_DETAIL(el, XtkScrollDetail)->scroll;
+	if (!scroll->scroll.tag) return true;
+	return value_f32(batch, target, XTK_PROP_SCROLL_X, scroll->x)
+	    && value_f32(batch, target, XTK_PROP_SCROLL_Y, scroll->y);
+}
+
+static bool encode_list_selection(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
+
 static bool encode_list_host(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	if (!xtk_ctrl_islist(XTK_EL_DATA(el)->type)) return true;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->nitem != XTK_EL_DETAIL(el, XtkListDesc)->nitem)
@@ -592,11 +602,18 @@ static bool encode_list_host(XtkBatch *batch, XtkNodeRef target, XtkEl const *pr
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->ncol != XTK_EL_DETAIL(el, XtkListDesc)->ncol)
 	    && !value_i32(batch, target, XTK_PROP_COLUMN_COUNT, XTK_EL_DETAIL(el, XtkListDesc)->ncol))
 		return false;
+	return encode_list_selection(batch, target, prev, el);
+}
+
+static bool encode_list_selection(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->sel_mode != XTK_EL_DETAIL(el, XtkListDesc)->sel_mode)
 	    && !value_enum(batch, target, XTK_PROP_SELECTION_MODE, ( uint32_t ) XTK_EL_DETAIL(el, XtkListDesc)->sel_mode))
 		return false;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->sel != XTK_EL_DETAIL(el, XtkListDesc)->sel)
 	    && !value_i32(batch, target, XTK_PROP_SELECTED_INDEX, XTK_EL_DETAIL(el, XtkListDesc)->sel))
+		return false;
+	if ((!prev || XTK_EL_DATA(prev)->virtual_first != XTK_EL_DATA(el)->virtual_first)
+	    && !value_i32(batch, target, XTK_PROP_REALIZED_FIRST, XTK_EL_DATA(el)->virtual_first))
 		return false;
 	if (XTK_EL_DATA(el)->type != XTK_CTRL_ITEMSVIEW) return true;
 	return (prev
@@ -1026,6 +1043,7 @@ static bool  encode_element_props(XtkBatch *batch, XtkNodeRef target, XtkEl cons
 	  [XTK_CTRL_SWITCH]       = encode_toggle,
 	  [XTK_CTRL_SLIDER]       = encode_slider,
 	  [XTK_CTRL_SCROLLBAR]    = encode_scroll_bar,
+	  [XTK_CTRL_SCROLL]       = encode_scroll,
 	  [XTK_CTRL_NUMBER]       = encode_number,
 	  [XTK_CTRL_IMAGE]        = encode_image,
 	  [XTK_CTRL_BADGE]        = encode_badge,

@@ -37,6 +37,7 @@ static XtkBindingSpec const binding_specs [] = {
   BIND(XTK_CTRL_SLIDER, XtkSliderDesc, change, XTK_EVENT_CHANGE_F32),
   BIND(XTK_CTRL_SLIDER, XtkSliderDesc, change_range, XTK_EVENT_CHANGE_RANGE),
   BIND(XTK_CTRL_SCROLLBAR, XtkScrollBarDesc, change, XTK_EVENT_CHANGE_F64),
+  BIND(XTK_CTRL_SCROLL, XtkScrollDetail, scroll.scroll, XTK_EVENT_SCROLL),
   BIND(XTK_CTRL_TEXTBOX, XtkTextBoxDesc, change, XTK_EVENT_CHANGE_STRING),
   BIND(XTK_CTRL_PASSWORD, XtkTextBoxDesc, change, XTK_EVENT_CHANGE_STRING),
   BIND(XTK_CTRL_LIST, XtkListDesc, select, XTK_EVENT_SELECT),
@@ -97,14 +98,15 @@ static void binding_load_spec(XtkBinding *binding, XtkEl const *el, XtkBindingSp
 }
 
 void xtk_binding_load_msgs(XtkBinding *binding, XtkEl const *el) {
-	XtkRt *rt = binding->rt;
-	*binding  = (XtkBinding) {.rt = rt};
+	*binding = (XtkBinding) {
+	  .rt = binding->rt, .realized = binding->realized, .echo = binding->echo, .user_events = binding->user_events};
 	for (size_t i = 0; i < sizeof(binding_specs) / sizeof(binding_specs [0]); i++)
 		binding_load_spec(binding, el, &binding_specs [i]);
 }
 
 bool xtk_el_needs_binding(XtkEl const *el) {
 	if (!el) return false;
+	if (XTK_EL_DATA(el)->virtualized) return true;
 	XtkBinding tmp = {0};
 	xtk_binding_load_msgs(&tmp, el);
 	for (XtkEventId event = 1; event < ( XtkEventId ) XTK_EVENT_STANDARD_COUNT; event++) {
@@ -147,6 +149,11 @@ static XtkMsg msg_from_pair(XtkMsg msg, XtkEvent const *event) {
 		msg.f = event->payload.u.range.start;
 		msg.d = event->payload.u.range.end;
 		break;
+	case XTK_EVENT_PAYLOAD_SCROLL :
+		msg.f = event->payload.u.scroll.y;
+		msg.d = event->payload.u.scroll.max_y;
+		msg.b = event->payload.u.scroll.y >= event->payload.u.scroll.max_y - 1.0f;
+		break;
 	default : break;
 	}
 	return msg;
@@ -165,19 +172,32 @@ static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
 	return msg;
 }
 
+static uint32_t realize(XtkBinding *b, XtkEvent const *event) {
+	b->realized
+	  = (XtkRealized) {event->payload.u.window.first, event->payload.u.window.last, event->payload.u.window.lanes};
+	xtk_rt_invalidate(b->rt);
+	return XTK_EVENT_HANDLED;
+}
+
+static void note_user(XtkBinding *b, XtkEvent const *event) {
+	if (event->change.revision > b->echo.revision) b->echo = event->change;
+	if (event->cause == XTK_EVENT_CAUSE_USER) b->user_events |= 1u << event->id;
+}
+
+static void post_msg(XtkRt *rt, XtkMsg msg, XtkEventPayload const *p) {
+	if (p->kind == XTK_EVENT_PAYLOAD_STRING) ( void ) xtk_rt_poststring(rt, msg, p->u.string.data, p->u.string.len);
+	else if (p->kind == XTK_EVENT_PAYLOAD_QUERY) ( void ) xtk_rt_poststring(rt, msg, p->u.query.text, p->u.query.len);
+	else ( void ) xtk_rt_post(rt, msg);
+}
+
 static uint32_t trampoline(void *arg, XtkEvent const *event) {
 	XtkBinding *b = ( XtkBinding * ) arg;
 	if (!b || !b->rt || !event) return XTK_EVENT_CONTINUE;
+	if (event->id == XTK_EVENT_REALIZE) return realize(b, event);
+	note_user(b, event);
 	XtkMsg const *bound = binding_msg_const(b, event->id);
-	if (!bound) return XTK_EVENT_CONTINUE;
-	XtkMsg base = *bound;
-	if (base.tag == 0) return XTK_EVENT_CONTINUE;
-	XtkMsg msg = msg_from_event(base, event);
-	if (event->payload.kind == XTK_EVENT_PAYLOAD_STRING)
-		( void ) xtk_rt_poststring(b->rt, msg, event->payload.u.string.data, event->payload.u.string.len);
-	else if (event->payload.kind == XTK_EVENT_PAYLOAD_QUERY)
-		( void ) xtk_rt_poststring(b->rt, msg, event->payload.u.query.text, event->payload.u.query.len);
-	else ( void ) xtk_rt_post(b->rt, msg);
+	if (!bound || bound->tag == 0) return XTK_EVENT_CONTINUE;
+	post_msg(b->rt, msg_from_event(*bound, event), &event->payload);
 	return XTK_EVENT_HANDLED;
 }
 
@@ -193,7 +213,9 @@ bool xtk_encode_subscribe(XtkBatch *batch, XtkNodeRef target, XtkBinding *bindin
 		XtkMsg const *msg = binding_msg_const(binding, event);
 		if (msg && !subscribe_one(batch, target, event, *msg, binding)) return false;
 	}
-	return true;
+	if (!XTK_EL_DATA(el)->virtualized) return true;
+	return xtk_batch_on(batch, target, XTK_EVENT_REALIZE, XTK_EVENT_PHASE_MASK_TARGET, trampoline, binding)
+	    != XTK_SUB_TOKEN_INVALID;
 }
 
 bool xtk_encode_unsubscribe_all(XtkBatch *batch, XtkNode const *node) {

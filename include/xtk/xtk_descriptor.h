@@ -1,6 +1,8 @@
 #ifndef XTK_DESCRIPTOR_H
 #define XTK_DESCRIPTOR_H
 
+#include <assert.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -82,6 +84,8 @@ typedef enum XtkEventPayloadKind
 	XTK_EVENT_PAYLOAD_RATING,
 	XTK_EVENT_PAYLOAD_INDEX_BOOL,
 	XTK_EVENT_PAYLOAD_RANGE,
+	XTK_EVENT_PAYLOAD_WINDOW,
+	XTK_EVENT_PAYLOAD_SCROLL,
 } XtkEventPayloadKind;
 
 typedef struct XtkEventDesc {
@@ -133,5 +137,12 @@ typedef struct XtkCtrlDesc {
 	uint32_t               create_invalidates;
 	uint32_t               destroy_invalidates;
 } XtkCtrlDesc;
+
+static_assert(sizeof(XtkPropertyKind) == 4, "XtkPropertyKind crosses the ABI as int32");
+static_assert(sizeof(XtkPropertyFlags) == 4, "XtkPropertyFlags crosses the ABI as int32");
+static_assert(sizeof(XtkInvalidate) == 4, "XtkInvalidate crosses the ABI as int32");
+static_assert(sizeof(XtkEventRouting) == 4, "XtkEventRouting crosses the ABI as int32");
+static_assert(sizeof(XtkEventPayloadKind) == 4, "XtkEventPayloadKind crosses the ABI as int32");
+static_assert(sizeof(XtkAccessRole) == 4, "XtkAccessRole crosses the ABI as int32");
 
 #endif

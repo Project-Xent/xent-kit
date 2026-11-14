@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.3.2
+
+- made `tools/catalog.lua` the single source of the control catalog:
+  `xtk_ids.h`, `xtk_catalog.c` and the typed control API are generated from it,
+  and enumerated properties carry their value domain, so the typed API takes
+  real enum types instead of `uint32_t`;
+- added `xmake gen-bindings <rust|zig|cython|haskell|enum-types> <out>`, the
+  generator the official language bindings (oxent, zxent, xenthon, hsxent)
+  build their control builders from;
+- added `XTK_EVENT_REALIZE` (payload `window {first, last, lanes}`) and
+  `XTK_PROP_REALIZED_FIRST`: list hosts announce the realized window, and the
+  consumer resizes the children and sets the first index in one transaction,
+  reusing slots in place. Virtualization is now available to the imperative
+  API, not only to the declarative runtime;
+- added the change-stamp echo contract: the host stamps each user event with
+  `{source, revision}` and records the properties it mirrors
+  (`xtk_catalog_mirrors`, at most `XTK_MIRROR_MAX`); a stamped set older than
+  the latest user edit of that property is dropped. The declarative runtime
+  resends mirrored properties after a user event, so a model that rejects an
+  edit pulls the control back;
+- added controlled scrolling: `XTK_PROP_SCROLL_X/Y` (NaN leaves an axis
+  uncontrolled, +inf pins it to the end as content grows) and
+  `XTK_EVENT_SCROLL` (payload `scroll {x, y, max_x, max_y}`);
+  `xtk_scroll` takes an `XtkScrollDesc {x, y, scroll}`;
+- made `xtk_txn_commit` the only commit path (validate, host preflight,
+  prepare, commit) and reported the failing stage in `XtkBatchDiag.stage`;
+- added `xtk_txn_beginwith`, which reuses a caller-owned batch so a steady-state
+  frame commits without allocating;
+- added `xtk_scene_ctrldesc` for querying a host's control descriptors;
+- made `XTK_END` a constant address instead of an exported variable;
+- routed `xtk_rt` and `gallery_decl` through the public txn/scene/catalog API
+  only;
+- **Fixed:** result verification read the batch after commit had freed it.
+
+### Breaking changes
+
+| Change | Migration |
+|---|---|
+| `xtk_scroll(ui, kids)` | `xtk_scroll(ui, (XtkScrollDesc) {.x = NAN, .y = NAN}, kids)` for an uncontrolled viewer |
+| `XtkRtCfg.viewport`, `XtkRtCfg.virtual_range`, `XtkViewport`, `XtkVirtualRange` removed | handle `XTK_EVENT_REALIZE`; the host owns the viewport |
+| `XtkRtCfg.node_cleanup` removed | — |
+| `XtkListDesc.overscan`, `XtkItemsViewDesc.overscan` removed | overscan belongs to the host |
+| `XtkListItemDesc.x/y/w/h` removed | items are laid out by the host |
+| `XtkStandardPropertyId`, `XtkStandardEventId`, `XtkCtrlType` moved to the generated `xtk_ids.h` | include `xtk/xtk.h` as before; values are unchanged in name |
+| typed descriptors use enum types (e.g. `self` is `XentFlexAlign`) | pass the enum constant |
+| `extern XtkEl *const XTK_END` became a macro | rebuild; bindings use the value `1` |
+
 ## 0.3.1
 
 - added the `SCROLLBAR` control: a scroll bar that owns no content, with the
