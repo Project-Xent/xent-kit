@@ -179,6 +179,40 @@ typedef enum XtkScrollBarIndicator
 	XTK_SCROLLBAR_INDICATOR_MOUSE,
 } XtkScrollBarIndicator;
 
+typedef enum XtkSortDirection
+{
+	XTK_SORT_NONE = 0,
+	XTK_SORT_ASCENDING,
+	XTK_SORT_DESCENDING,
+} XtkSortDirection;
+
+typedef enum XtkAppBarMode
+{
+	XTK_APPBAR_COMPACT = 0,
+	XTK_APPBAR_MINIMAL,
+	XTK_APPBAR_HIDDEN,
+} XtkAppBarMode;
+
+typedef enum XtkLabelPosition
+{
+	XTK_LABEL_BOTTOM = 0,
+	XTK_LABEL_RIGHT,
+	XTK_LABEL_COLLAPSED,
+} XtkLabelPosition;
+
+typedef enum XtkElementLabel
+{
+	XTK_ELEMENT_LABEL_DEFAULT = 0,
+	XTK_ELEMENT_LABEL_COLLAPSED,
+} XtkElementLabel;
+
+typedef enum XtkOverflowButton
+{
+	XTK_OVERFLOW_BUTTON_AUTO = 0,
+	XTK_OVERFLOW_BUTTON_VISIBLE,
+	XTK_OVERFLOW_BUTTON_COLLAPSED,
+} XtkOverflowButton;
+
 typedef enum XtkTeachingTipCloseReason
 {
 	XTK_TIP_CLOSE_BUTTON = 0,
@@ -201,6 +235,11 @@ static_assert(sizeof(XtkDialogResult) == 4, "XtkDialogResult crosses the ABI as 
 static_assert(sizeof(XtkTeachingTipPlacement) == 4, "XtkTeachingTipPlacement crosses the ABI as int32");
 static_assert(sizeof(XtkTeachingTipTail) == 4, "XtkTeachingTipTail crosses the ABI as int32");
 static_assert(sizeof(XtkScrollBarIndicator) == 4, "XtkScrollBarIndicator crosses the ABI as int32");
+static_assert(sizeof(XtkSortDirection) == 4, "XtkSortDirection crosses the ABI as int32");
+static_assert(sizeof(XtkAppBarMode) == 4, "XtkAppBarMode crosses the ABI as int32");
+static_assert(sizeof(XtkLabelPosition) == 4, "XtkLabelPosition crosses the ABI as int32");
+static_assert(sizeof(XtkElementLabel) == 4, "XtkElementLabel crosses the ABI as int32");
+static_assert(sizeof(XtkOverflowButton) == 4, "XtkOverflowButton crosses the ABI as int32");
 static_assert(sizeof(XtkTeachingTipCloseReason) == 4, "XtkTeachingTipCloseReason crosses the ABI as int32");
 
 #endif

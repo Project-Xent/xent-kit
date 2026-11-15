@@ -337,6 +337,7 @@ typedef struct XtkListDesc {
 	float          gap;
 	bool           item_invoked_enabled;
 	XtkMsg         invoke;
+	XtkEl         *header;
 } XtkListDesc;
 
 typedef struct XtkListItemDesc {
@@ -608,6 +609,43 @@ typedef struct XtkTitleBarDesc {
 	XtkMsg      on_pane_toggle;
 } XtkTitleBarDesc;
 
+typedef struct XtkColItemDesc {
+	float            width;
+	float            min_width;
+	float            max_width;
+	XtkTextAlign     align;
+	XtkSortDirection sort;
+	bool             unsortable;
+	bool             fixed;
+	XtkMsg           click;
+	XtkMsg           resize;
+	XtkMsg           fit;
+	XtkMsg           reorder;
+} XtkColItemDesc;
+
+typedef struct XtkCommandBarDesc {
+	bool              open;
+	bool              sticky;
+	bool              dynamic;
+	bool              disabled;
+	XtkAppBarMode     mode;
+	XtkLabelPosition  labels;
+	XtkOverflowButton more;
+	XtkMsg            change;
+} XtkCommandBarDesc;
+
+typedef struct XtkAppBarDesc {
+	char const *icon;
+	char const *accel;
+	bool        disabled;
+	bool        checked;
+	bool        secondary;
+	bool        label_collapsed;
+	int32_t     order;
+	XtkMsg      click;
+	XtkMsg      change;
+} XtkAppBarDesc;
+
 XENT_NODISCARD XtkUi  *xtk_ui_create(void);
 
 void                   xtk_ui_destroy(XtkUi *ui);
@@ -665,6 +703,10 @@ XtkEl                 *xtk_pips(XtkUi *ui, XtkPipsDesc desc);
 XtkEl                 *xtk_avatar(XtkUi *ui, XtkPersonPictureDesc desc);
 XtkEl                 *xtk_pager(XtkUi *ui, XtkPagerDesc desc);
 XtkEl                 *xtk_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc);
+XtkEl                 *xtk_colitem(XtkUi *ui, char const *label, XtkColItemDesc desc);
+XtkEl                 *xtk_appbarbutton(XtkUi *ui, char const *label, XtkAppBarDesc desc);
+XtkEl                 *xtk_appbartoggle(XtkUi *ui, char const *label, XtkAppBarDesc desc);
+XtkEl                 *xtk_appbarsep(XtkUi *ui, XtkAppBarDesc desc);
 
 XtkEl                 *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl                 *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
@@ -678,7 +720,9 @@ XtkEl                 *xtk_dialog(XtkUi *ui, char const *title, XtkDialogDesc de
 XtkEl                 *xtk_teachtip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl *children []);
 XtkEl                 *xtk_splitview(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *content);
 XtkEl                 *xtk_titlebar(XtkUi *ui, char const *title, XtkTitleBarDesc desc);
+XtkEl                 *xtk_commandbar(XtkUi *ui, XtkCommandBarDesc desc, XtkEl *children []);
 XtkEl                 *xtk_refresh(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []);
+XtkEl                 *xtk_colheader(XtkUi *ui, XtkEl *children []);
 
 XENT_NODISCARD XtkEl **xtk_children_alloc(XtkUi *ui, int capacity);
 

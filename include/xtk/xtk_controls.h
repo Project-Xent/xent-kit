@@ -1654,6 +1654,186 @@ typedef struct XtkColorPickerProps {
 #define XTK_COLORPICKER_MOREBUTTON_MASK (1ull << 12u)
 #define XTK_COLORPICKER_SPECTRUM_MASK   (1ull << 13u)
 
+typedef struct XtkColumnProps {
+	uint64_t         set;
+	XtkChangeStamp   stamp;
+	float            w;
+	float            minw;
+	float            maxw;
+	char const      *text;
+	uint32_t         text_len;
+	char const      *tip;
+	uint32_t         tip_len;
+	XtkTextAlign     align;
+	bool             enabled;
+	bool             resizable;
+	XtkSortDirection sort;
+} XtkColumnProps;
+
+#define XTK_COLUMN_W_MASK         (1ull << 0u)
+#define XTK_COLUMN_MINW_MASK      (1ull << 1u)
+#define XTK_COLUMN_MAXW_MASK      (1ull << 2u)
+#define XTK_COLUMN_TEXT_MASK      (1ull << 3u)
+#define XTK_COLUMN_TIP_MASK       (1ull << 4u)
+#define XTK_COLUMN_ALIGN_MASK     (1ull << 5u)
+#define XTK_COLUMN_ENABLED_MASK   (1ull << 6u)
+#define XTK_COLUMN_RESIZABLE_MASK (1ull << 7u)
+#define XTK_COLUMN_SORT_MASK      (1ull << 8u)
+
+typedef struct XtkCommandBarProps {
+	uint64_t          set;
+	XtkChangeStamp    stamp;
+	float             w;
+	float             h;
+	float             grow;
+	XentFlexAlign     self;
+	float             ml;
+	float             mt;
+	float             mr;
+	float             mb;
+	char const       *tip;
+	uint32_t          tip_len;
+	bool              enabled;
+	bool              open;
+	bool              sticky;
+	XtkAppBarMode     mode;
+	XtkLabelPosition  labels;
+	XtkOverflowButton more;
+	bool              dynamic;
+} XtkCommandBarProps;
+
+#define XTK_COMMANDBAR_W_MASK       (1ull << 0u)
+#define XTK_COMMANDBAR_H_MASK       (1ull << 1u)
+#define XTK_COMMANDBAR_GROW_MASK    (1ull << 2u)
+#define XTK_COMMANDBAR_SELF_MASK    (1ull << 3u)
+#define XTK_COMMANDBAR_ML_MASK      (1ull << 4u)
+#define XTK_COMMANDBAR_MT_MASK      (1ull << 5u)
+#define XTK_COMMANDBAR_MR_MASK      (1ull << 6u)
+#define XTK_COMMANDBAR_MB_MASK      (1ull << 7u)
+#define XTK_COMMANDBAR_TIP_MASK     (1ull << 8u)
+#define XTK_COMMANDBAR_ENABLED_MASK (1ull << 9u)
+#define XTK_COMMANDBAR_OPEN_MASK    (1ull << 10u)
+#define XTK_COMMANDBAR_STICKY_MASK  (1ull << 11u)
+#define XTK_COMMANDBAR_MODE_MASK    (1ull << 12u)
+#define XTK_COMMANDBAR_LABELS_MASK  (1ull << 13u)
+#define XTK_COMMANDBAR_MORE_MASK    (1ull << 14u)
+#define XTK_COMMANDBAR_DYNAMIC_MASK (1ull << 15u)
+
+typedef struct XtkAppBarButtonProps {
+	uint64_t        set;
+	XtkChangeStamp  stamp;
+	float           w;
+	float           h;
+	float           grow;
+	XentFlexAlign   self;
+	float           ml;
+	float           mt;
+	float           mr;
+	float           mb;
+	char const     *tip;
+	uint32_t        tip_len;
+	char const     *text;
+	uint32_t        text_len;
+	char const     *icon;
+	uint32_t        icon_len;
+	bool            enabled;
+	XtkElementLabel labelpos;
+	char const     *accel;
+	uint32_t        accel_len;
+	bool            secondary;
+	int32_t         order;
+} XtkAppBarButtonProps;
+
+#define XTK_APPBARBUTTON_W_MASK         (1ull << 0u)
+#define XTK_APPBARBUTTON_H_MASK         (1ull << 1u)
+#define XTK_APPBARBUTTON_GROW_MASK      (1ull << 2u)
+#define XTK_APPBARBUTTON_SELF_MASK      (1ull << 3u)
+#define XTK_APPBARBUTTON_ML_MASK        (1ull << 4u)
+#define XTK_APPBARBUTTON_MT_MASK        (1ull << 5u)
+#define XTK_APPBARBUTTON_MR_MASK        (1ull << 6u)
+#define XTK_APPBARBUTTON_MB_MASK        (1ull << 7u)
+#define XTK_APPBARBUTTON_TIP_MASK       (1ull << 8u)
+#define XTK_APPBARBUTTON_TEXT_MASK      (1ull << 9u)
+#define XTK_APPBARBUTTON_ICON_MASK      (1ull << 10u)
+#define XTK_APPBARBUTTON_ENABLED_MASK   (1ull << 11u)
+#define XTK_APPBARBUTTON_LABELPOS_MASK  (1ull << 12u)
+#define XTK_APPBARBUTTON_ACCEL_MASK     (1ull << 13u)
+#define XTK_APPBARBUTTON_SECONDARY_MASK (1ull << 14u)
+#define XTK_APPBARBUTTON_ORDER_MASK     (1ull << 15u)
+
+typedef struct XtkAppBarToggleProps {
+	uint64_t        set;
+	XtkChangeStamp  stamp;
+	float           w;
+	float           h;
+	float           grow;
+	XentFlexAlign   self;
+	float           ml;
+	float           mt;
+	float           mr;
+	float           mb;
+	char const     *tip;
+	uint32_t        tip_len;
+	char const     *text;
+	uint32_t        text_len;
+	char const     *icon;
+	uint32_t        icon_len;
+	bool            enabled;
+	XtkElementLabel labelpos;
+	char const     *accel;
+	uint32_t        accel_len;
+	bool            checked;
+	bool            secondary;
+	int32_t         order;
+} XtkAppBarToggleProps;
+
+#define XTK_APPBARTOGGLE_W_MASK         (1ull << 0u)
+#define XTK_APPBARTOGGLE_H_MASK         (1ull << 1u)
+#define XTK_APPBARTOGGLE_GROW_MASK      (1ull << 2u)
+#define XTK_APPBARTOGGLE_SELF_MASK      (1ull << 3u)
+#define XTK_APPBARTOGGLE_ML_MASK        (1ull << 4u)
+#define XTK_APPBARTOGGLE_MT_MASK        (1ull << 5u)
+#define XTK_APPBARTOGGLE_MR_MASK        (1ull << 6u)
+#define XTK_APPBARTOGGLE_MB_MASK        (1ull << 7u)
+#define XTK_APPBARTOGGLE_TIP_MASK       (1ull << 8u)
+#define XTK_APPBARTOGGLE_TEXT_MASK      (1ull << 9u)
+#define XTK_APPBARTOGGLE_ICON_MASK      (1ull << 10u)
+#define XTK_APPBARTOGGLE_ENABLED_MASK   (1ull << 11u)
+#define XTK_APPBARTOGGLE_LABELPOS_MASK  (1ull << 12u)
+#define XTK_APPBARTOGGLE_ACCEL_MASK     (1ull << 13u)
+#define XTK_APPBARTOGGLE_CHECKED_MASK   (1ull << 14u)
+#define XTK_APPBARTOGGLE_SECONDARY_MASK (1ull << 15u)
+#define XTK_APPBARTOGGLE_ORDER_MASK     (1ull << 16u)
+
+typedef struct XtkAppBarSeparatorProps {
+	uint64_t       set;
+	XtkChangeStamp stamp;
+	float          w;
+	float          h;
+	float          grow;
+	XentFlexAlign  self;
+	float          ml;
+	float          mt;
+	float          mr;
+	float          mb;
+	char const    *tip;
+	uint32_t       tip_len;
+	bool           secondary;
+	int32_t        order;
+} XtkAppBarSeparatorProps;
+
+#define XTK_APPBARSEP_W_MASK         (1ull << 0u)
+#define XTK_APPBARSEP_H_MASK         (1ull << 1u)
+#define XTK_APPBARSEP_GROW_MASK      (1ull << 2u)
+#define XTK_APPBARSEP_SELF_MASK      (1ull << 3u)
+#define XTK_APPBARSEP_ML_MASK        (1ull << 4u)
+#define XTK_APPBARSEP_MT_MASK        (1ull << 5u)
+#define XTK_APPBARSEP_MR_MASK        (1ull << 6u)
+#define XTK_APPBARSEP_MB_MASK        (1ull << 7u)
+#define XTK_APPBARSEP_TIP_MASK       (1ull << 8u)
+#define XTK_APPBARSEP_SECONDARY_MASK (1ull << 9u)
+#define XTK_APPBARSEP_ORDER_MASK     (1ull << 10u)
+
 XtkLocalId xtk_container_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_text_create(XtkTxn *txn, XtkNodeRef parent, XtkTextProps const *props);
 XtkLocalId xtk_button_create(XtkTxn *txn, XtkNodeRef parent, XtkButtonProps const *props);
@@ -1726,6 +1906,12 @@ XtkLocalId xtk_datepicker_create(XtkTxn *txn, XtkNodeRef parent, XtkDatePickerPr
 XtkLocalId xtk_timepicker_create(XtkTxn *txn, XtkNodeRef parent, XtkTimePickerProps const *props);
 XtkLocalId xtk_calendar_create(XtkTxn *txn, XtkNodeRef parent, XtkCalendarProps const *props);
 XtkLocalId xtk_colorpicker_create(XtkTxn *txn, XtkNodeRef parent, XtkColorPickerProps const *props);
+XtkLocalId xtk_colheader_create(XtkTxn *txn, XtkNodeRef parent, XtkLayoutProps const *props);
+XtkLocalId xtk_colitem_create(XtkTxn *txn, XtkNodeRef parent, XtkColumnProps const *props);
+XtkLocalId xtk_commandbar_create(XtkTxn *txn, XtkNodeRef parent, XtkCommandBarProps const *props);
+XtkLocalId xtk_appbarbutton_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarButtonProps const *props);
+XtkLocalId xtk_appbartoggle_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarToggleProps const *props);
+XtkLocalId xtk_appbarsep_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarSeparatorProps const *props);
 bool       xtk_container_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2894,5 +3080,91 @@ bool xtk_colorpicker_setalpha(XtkScene *scene, XtkCtrl control, bool value, XtkC
 bool xtk_colorpicker_setmorebutton(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_colorpicker_setspectrum(XtkScene *scene, XtkCtrl control, XtkSpectrum value, XtkChangeStamp change);
 XtkSubRef xtk_colorpicker_onvalue(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_colheader_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_colheader_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colheader_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_colitem_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colitem_setminw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colitem_setmaxw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_colitem_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_colitem_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_colitem_setalign(XtkScene *scene, XtkCtrl control, XtkTextAlign value, XtkChangeStamp change);
+bool      xtk_colitem_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_colitem_setresizable(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_colitem_setsort(XtkScene *scene, XtkCtrl control, XtkSortDirection value, XtkChangeStamp change);
+XtkSubRef xtk_colitem_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_colitem_onresize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_colitem_onfit(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_colitem_onreorder(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_commandbar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_commandbar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_commandbar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_commandbar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_commandbar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_commandbar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_commandbar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_commandbar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_commandbar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_commandbar_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_commandbar_setopen(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_commandbar_setsticky(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_commandbar_setmode(XtkScene *scene, XtkCtrl control, XtkAppBarMode value, XtkChangeStamp change);
+bool xtk_commandbar_setlabels(XtkScene *scene, XtkCtrl control, XtkLabelPosition value, XtkChangeStamp change);
+bool xtk_commandbar_setmore(XtkScene *scene, XtkCtrl control, XtkOverflowButton value, XtkChangeStamp change);
+bool xtk_commandbar_setdynamic(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+XtkSubRef xtk_commandbar_onopen(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_appbarbutton_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarbutton_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarbutton_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarbutton_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_appbarbutton_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarbutton_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarbutton_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarbutton_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_appbarbutton_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbarbutton_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbarbutton_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbarbutton_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_appbarbutton_setlabelpos(XtkScene *scene, XtkCtrl control, XtkElementLabel value, XtkChangeStamp change);
+bool xtk_appbarbutton_setaccel(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbarbutton_setsecondary(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_appbarbutton_setorder(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+XtkSubRef xtk_appbarbutton_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_appbartoggle_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbartoggle_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbartoggle_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbartoggle_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_appbartoggle_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbartoggle_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbartoggle_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbartoggle_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_appbartoggle_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbartoggle_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbartoggle_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbartoggle_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_appbartoggle_setlabelpos(XtkScene *scene, XtkCtrl control, XtkElementLabel value, XtkChangeStamp change);
+bool xtk_appbartoggle_setaccel(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_appbartoggle_setchecked(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_appbartoggle_setsecondary(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_appbartoggle_setorder(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+XtkSubRef xtk_appbartoggle_onchange(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_appbarsep_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_appbarsep_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_appbarsep_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_appbarsep_setsecondary(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_appbarsep_setorder(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 
 #endif

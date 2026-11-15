@@ -67,6 +67,10 @@ zxent (Zig), xenthon (Python), hsxent (Haskell).
   change without notice.
 - `xmake gen-bindings <rust|zig|cython|haskell|enum-types> <out>` generates
   typed control builders and enums from `tools/catalog.lua`.
+- Register controls before the first commit: `flux_controls_use(&flux_ctrl_<name>)`
+  (the name is the lowercase `XTK_CTRL_` suffix) or `flux_controls_all()`.
+  Bindings whose builders are compiled only when used (oxent, zxent) register
+  per builder so unused controls are not linked.
 - Link a release bundle (`xent-<ver>-<arch>-windows-gnu.zip` from fluxent's
   `xmake dist`): `libxent.a` plus the system libraries in `lib/pkgconfig/xent.pc`.
 

@@ -473,6 +473,61 @@ static bool encode_scroll_bar(XtkBatch *batch, XtkNodeRef target, XtkEl const *p
 	return encode_scalar_fields(batch, target, fields, sizeof(fields) / sizeof(fields [0]));
 }
 
+static bool encode_colitem(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkColItemDesc const *col       = XTK_EL_DETAIL(el, XtkColItemDesc);
+	XtkColItemDesc const *old       = prev ? XTK_EL_DETAIL(prev, XtkColItemDesc) : NULL;
+	ScalarField           fields [] = {
+	  {XTK_PROP_WIDTH,          SCALAR_F32,  !old || old->width != col->width,           {.f32 = col->width}             },
+	  {XTK_PROP_MIN_WIDTH,      SCALAR_F32,  !old || old->min_width != col->min_width,   {.f32 = col->min_width}         },
+	  {XTK_PROP_MAX_WIDTH,      SCALAR_F32,  !old || old->max_width != col->max_width,   {.f32 = col->max_width}         },
+	  {XTK_PROP_TEXT_ALIGN,     SCALAR_ENUM, !old || old->align != col->align,           {.u32 = ( uint32_t ) col->align}},
+	  {XTK_PROP_SORT_DIRECTION, SCALAR_ENUM, !old || old->sort != col->sort,             {.u32 = ( uint32_t ) col->sort} },
+	  {XTK_PROP_ENABLED,        SCALAR_BOOL, !old || old->unsortable != col->unsortable, {.b = !col->unsortable}         },
+	  {XTK_PROP_RESIZABLE,      SCALAR_BOOL, !old || old->fixed != col->fixed,           {.b = !col->fixed}              },
+	};
+	return encode_scalar_fields(batch, target, fields, sizeof(fields) / sizeof(fields [0]));
+}
+
+static bool encode_commandbar(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkCommandBarDesc const *bar       = XTK_EL_DETAIL(el, XtkCommandBarDesc);
+	XtkCommandBarDesc const *old       = prev ? XTK_EL_DETAIL(prev, XtkCommandBarDesc) : NULL;
+	ScalarField              fields [] = {
+	  {XTK_PROP_OPEN,                       SCALAR_BOOL, !old || old->open != bar->open,         {.b = bar->open}               },
+	  {XTK_PROP_IS_STICKY,                  SCALAR_BOOL, !old || old->sticky != bar->sticky,     {.b = bar->sticky}             },
+	  {XTK_PROP_DYNAMIC_OVERFLOW,           SCALAR_BOOL, !old || old->dynamic != bar->dynamic,   {.b = bar->dynamic}            },
+	  {XTK_PROP_ENABLED,                    SCALAR_BOOL, !old || old->disabled != bar->disabled, {.b = !bar->disabled}          },
+	  {XTK_PROP_CLOSED_DISPLAY_MODE,        SCALAR_ENUM, !old || old->mode != bar->mode,         {.u32 = ( uint32_t ) bar->mode}},
+	  {XTK_PROP_DEFAULT_LABEL_POSITION,     SCALAR_ENUM, !old || old->labels != bar->labels,
+	   {.u32 = ( uint32_t ) bar->labels}                                                                                        },
+	  {XTK_PROP_OVERFLOW_BUTTON_VISIBILITY, SCALAR_ENUM, !old || old->more != bar->more,
+	   {.u32 = ( uint32_t ) bar->more}                                                                                          },
+	};
+	return encode_scalar_fields(batch, target, fields, sizeof(fields) / sizeof(fields [0]));
+}
+
+static bool encode_appbar(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkAppBarDesc const *d          = XTK_EL_DETAIL(el, XtkAppBarDesc);
+	XtkAppBarDesc const *old        = prev ? XTK_EL_DETAIL(prev, XtkAppBarDesc) : NULL;
+	StringField          strings [] = {
+	  {XTK_PROP_ICON,             old ? old->icon : NULL,  d->icon },
+	  {XTK_PROP_ACCELERATOR_TEXT, old ? old->accel : NULL, d->accel},
+	};
+	if (XTK_EL_DATA(el)->type != XTK_CTRL_APPBARSEP && !encode_string_fields(batch, target, old != NULL, strings, 2u))
+		return false;
+	ScalarField fields [] = {
+	  {XTK_PROP_SECONDARY,              SCALAR_BOOL, !old || old->secondary != d->secondary,             {.b = d->secondary}},
+	  {XTK_PROP_DYNAMIC_OVERFLOW_ORDER, SCALAR_I32,  !old || old->order != d->order,                     {.i32 = d->order}  },
+	  {XTK_PROP_ENABLED,                SCALAR_BOOL, !old || old->disabled != d->disabled,               {.b = !d->disabled}},
+	  {XTK_PROP_LABEL_POSITION,         SCALAR_ENUM, !old || old->label_collapsed != d->label_collapsed,
+	   {.u32 = d->label_collapsed ? XTK_ELEMENT_LABEL_COLLAPSED : XTK_ELEMENT_LABEL_DEFAULT}                                },
+	  {XTK_PROP_CHECKED,                SCALAR_BOOL, !old || old->checked != d->checked,                 {.b = d->checked}  },
+	};
+	uint32_t n = XTK_EL_DATA(el)->type == XTK_CTRL_APPBARSEP    ? 2u
+	           : XTK_EL_DATA(el)->type == XTK_CTRL_APPBARTOGGLE ? 5u
+	                                                            : 4u;
+	return encode_scalar_fields(batch, target, fields, n);
+}
+
 static bool
 encode_progress_bar_style(XtkBatch *batch, XtkNodeRef target, XtkProgressDesc const *old, XtkProgressDesc const *desc) {
 	XtkProgressDesc const  defaults  = {0};
@@ -1043,6 +1098,11 @@ static bool  encode_element_props(XtkBatch *batch, XtkNodeRef target, XtkEl cons
 	  [XTK_CTRL_SWITCH]       = encode_toggle,
 	  [XTK_CTRL_SLIDER]       = encode_slider,
 	  [XTK_CTRL_SCROLLBAR]    = encode_scroll_bar,
+	  [XTK_CTRL_COLITEM]      = encode_colitem,
+	  [XTK_CTRL_COMMANDBAR]   = encode_commandbar,
+	  [XTK_CTRL_APPBARBUTTON] = encode_appbar,
+	  [XTK_CTRL_APPBARTOGGLE] = encode_appbar,
+	  [XTK_CTRL_APPBARSEP]    = encode_appbar,
 	  [XTK_CTRL_SCROLL]       = encode_scroll,
 	  [XTK_CTRL_NUMBER]       = encode_number,
 	  [XTK_CTRL_IMAGE]        = encode_image,

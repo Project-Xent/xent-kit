@@ -85,7 +85,9 @@ static void list_realize_ctx(XtkNode const *committed, XtkEl const *el, ListReal
 }
 
 static int list_fill_rows(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, XtkEl **rows) {
-	int filled = 0;
+	XtkEl *header = XTK_EL_DETAIL(el, XtkListDesc)->header;
+	int    filled = 0;
+	if (header) rows [filled++] = xtk_keyed(rt->ui, "header", header);
 	for (int i = ctx->range.first; i <= ctx->range.last; i++) {
 		XtkEl *row = list_make_row(rt, el, ctx, i);
 		if (!row) break;
@@ -98,7 +100,7 @@ static bool list_realize(XtkRt *rt, XtkNode const *committed, XtkEl *el) {
 	ListRealizeCtx ctx;
 	list_realize_ctx(committed, el, &ctx);
 	XTK_EL_DATA(el)->virtual_first = ctx.range.first;
-	size_t  n                      = ( size_t ) (ctx.window ? ctx.window : 1);
+	size_t  n                      = ( size_t ) (ctx.window ? ctx.window : 1) + 1u;
 	XtkEl **rows                   = ( XtkEl ** ) xtk_arena_alloc(xtk_ui_arena(rt->ui), sizeof(XtkEl *) * n);
 	if (!rows) return false;
 	return xtk_el_set_children(el, rows, list_fill_rows(rt, el, &ctx, rows));

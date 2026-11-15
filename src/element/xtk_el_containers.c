@@ -38,6 +38,46 @@ XtkEl *xtk_scroll(XtkUi *ui, XtkScrollDesc desc, XtkEl *children []) {
 	return el;
 }
 
+XtkEl *xtk_colheader(XtkUi *ui, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_COLHEADER, NULL);
+	if (el) xtk_el_adopt(ui, el, children);
+	return el;
+}
+
+XtkEl *xtk_colitem(XtkUi *ui, char const *label, XtkColItemDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_COLITEM, label);
+	if (!el) return NULL;
+	if (desc.width <= 0.0f) desc.width = 200.0f;
+	if (desc.min_width <= 0.0f) desc.min_width = 50.0f;
+	if (desc.max_width <= 0.0f) desc.max_width = 800.0f;
+	return XTK_EL_STORE(el, desc) ? el : NULL;
+}
+
+XtkEl *xtk_commandbar(XtkUi *ui, XtkCommandBarDesc desc, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_COMMANDBAR, NULL);
+	if (!el || !XTK_EL_STORE(el, desc)) return NULL;
+	xtk_el_adopt(ui, el, children);
+	return el;
+}
+
+static XtkEl *appbar(XtkUi *ui, XtkCtrlType type, char const *label, XtkAppBarDesc desc) {
+	XtkEl *el = xtk_el_new(ui, type, label);
+	if (!el) return NULL;
+	desc.icon  = xtk_strdup(ui, desc.icon);
+	desc.accel = xtk_strdup(ui, desc.accel);
+	return XTK_EL_STORE(el, desc) ? el : NULL;
+}
+
+XtkEl *xtk_appbarbutton(XtkUi *ui, char const *label, XtkAppBarDesc desc) {
+	return appbar(ui, XTK_CTRL_APPBARBUTTON, label, desc);
+}
+
+XtkEl *xtk_appbartoggle(XtkUi *ui, char const *label, XtkAppBarDesc desc) {
+	return appbar(ui, XTK_CTRL_APPBARTOGGLE, label, desc);
+}
+
+XtkEl *xtk_appbarsep(XtkUi *ui, XtkAppBarDesc desc) { return appbar(ui, XTK_CTRL_APPBARSEP, NULL, desc); }
+
 XtkEl *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_EXPANDER, header);
 	if (!el) return NULL;

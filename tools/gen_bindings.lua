@@ -121,7 +121,7 @@ local function rust_control(control)
     "",
     "impl<'ui, A: App> Ui<'ui, A> {",
     "    pub fn " .. rust_ident(control.token) .. "(&'ui self) -> " .. name .. "<'ui, A> {",
-    "        " .. name .. "(self.el(sys::XTK_CTRL_" .. control.token:upper() .. "))",
+    "        " .. name .. "(self.el(sys::XTK_CTRL_" .. control.token:upper() .. ", &raw const sys::flux_ctrl_" .. control.token .. "))",
     "    }",
     "}",
     "",
@@ -232,7 +232,7 @@ local function zig_prop(lines, prop)
   if prop.values then
     add(lines,
       "        pub fn " .. name .. "(b: Self, v: " .. enum_name(prop.values) .. ") Self {",
-      "            b.el.prop(c." .. prop[2] .. ", .{ .enumeration = @intCast(@intFromEnum(v)) });",
+      "            b.el.prop(c." .. prop[2] .. ", .{ .enumeration = @intCast(@backingInt(v)) });",
       "            return b;",
       "        }")
     return
@@ -300,7 +300,7 @@ local function zig_control(control)
     "}",
     "",
     "pub fn " .. zig_ident(control.token) .. "(ui: anytype) " .. name .. "(@TypeOf(ui.*).App) {",
-    "    return .{ .el = ui.el(c.XTK_CTRL_" .. control.token:upper() .. ") };",
+    "    return .{ .el = ui.el(c.XTK_CTRL_" .. control.token:upper() .. ", &c.flux_ctrl_" .. control.token .. ") };",
     "}")
   return join(lines)
 end
