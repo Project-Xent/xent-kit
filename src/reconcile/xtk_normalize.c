@@ -26,19 +26,22 @@ static void list_window_fallback(XtkEl const *el, XtkListDesc const *list, XtkRe
 	float cross  = isnan(XTK_EL_DATA(el)->width) ? 0.0f : XTK_EL_DATA(el)->width;
 	w->lanes     = xtk_list_autocolumns(cross, list->itemw, list->ncol);
 	w->first     = 0;
-	w->last      = (( int ) ceilf(extent / list->itemh) + 4) * w->lanes - 1;
+	float pitch  = list->itemh > 0.0f ? list->itemh : 40.0f;
+	w->last      = (( int ) ceilf(extent / pitch) + 4) * w->lanes - 1;
 }
+
+static int  list_rows(XtkListDesc const *list) { return list->nitem + list->ngroup; }
 
 static void list_window(XtkNode const *committed, XtkEl const *el, XtkRealized *w) {
 	XtkListDesc const *list = XTK_EL_DETAIL(el, XtkListDesc);
 	XtkBinding const  *b    = committed ? committed->binding : NULL;
 	if (b && b->realized.lanes > 0) *w = b->realized;
 	else list_window_fallback(el, list, w);
-	if (w->last <= list->nitem - 1) return;
+	if (w->last <= list_rows(list) - 1) return;
 	int span  = w->last - w->first;
-	w->last   = list->nitem - 1;
+	w->last   = list_rows(list) - 1;
 	w->first  = w->last - span > 0 ? w->last - span : 0;
-	w->first -= w->first % w->lanes;
+	if (!list->ngroup) w->first -= w->first % w->lanes;
 }
 
 static bool list_attach(XtkEl *wrap, XtkEl *content) {
@@ -55,12 +58,22 @@ typedef struct ListRealizeCtx {
 	XtkRealized range;
 } ListRealizeCtx;
 
-static XtkEl *list_make_row(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, int i) {
+static XtkEl *list_make_header(XtkRt *rt, XtkListDesc const *list, int group) {
+	XtkEl *head = xtk_el_new(rt->ui, XTK_CTRL_GROUPHEADER, NULL);
+	if (!head) return NULL;
+	xtk_keyed_u64(head, (1ull << 62u) | ( uint64_t ) group);
+	return list_attach(head, list->group_header(rt->ui, list->env, group)) ? head : NULL;
+}
+
+static XtkEl *list_make_row(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, int r) {
 	XtkListDesc list = *XTK_EL_DETAIL(el, XtkListDesc);
-	XtkEl      *row  = xtk_el_new(rt->ui, XTK_CTRL_LISTITEM, NULL);
+	XtkListRow  at   = list.ngroup ? xtk_list_row(list.groups, list.ngroup, r) : (XtkListRow) {-1, r};
+	if (at.item < 0) return list_make_header(rt, &list, at.group);
+	int    i   = at.item;
+	XtkEl *row = xtk_el_new(rt->ui, XTK_CTRL_LISTITEM, NULL);
 	if (!row) return NULL;
-	xtk_keyed_u64(row, ( uint64_t ) (ctx->window ? i % ctx->window : 0));
-	XTK_EL_DATA(row)->height = list.itemh;
+	xtk_keyed_u64(row, ( uint64_t ) (ctx->window ? r % ctx->window : 0));
+	if (list.itemh > 0.0f) XTK_EL_DATA(row)->height = list.itemh;
 	if (ctx->cell_width > 0.0f) XTK_EL_DATA(row)->width = ctx->cell_width;
 	XtkListItemDesc item = {
 	  .index    = i,
@@ -76,7 +89,7 @@ static XtkEl *list_make_row(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ct
 static void list_realize_ctx(XtkNode const *committed, XtkEl const *el, ListRealizeCtx *ctx) {
 	XtkListDesc const *list = XTK_EL_DETAIL(el, XtkListDesc);
 	ctx->range              = (XtkRealized) {0, -1, 1};
-	if (list->nitem > 0 && list->item) list_window(committed, el, &ctx->range);
+	if (list_rows(list) > 0 && list->item) list_window(committed, el, &ctx->range);
 	ctx->window = ctx->range.last - ctx->range.first + 1;
 	if (ctx->window < 0) ctx->window = 0;
 	ctx->kind       = list_kind_for(XTK_EL_DATA(el)->type);
@@ -84,10 +97,19 @@ static void list_realize_ctx(XtkNode const *committed, XtkEl const *el, ListReal
 	ctx->cell_width = ctx->range.lanes > 1 || list->itemw > 0.0f ? list->itemw : 0.0f;
 }
 
+static int list_detached(XtkListDesc const *list, int first) {
+	if (!list->ngroup || first > list_rows(list) - 1) return -1;
+	XtkListRow at = xtk_list_row(list->groups, list->ngroup, first);
+	return at.item >= 0 ? at.group : -1;
+}
+
 static int list_fill_rows(XtkRt *rt, XtkEl const *el, ListRealizeCtx const *ctx, XtkEl **rows) {
-	XtkEl *header = XTK_EL_DETAIL(el, XtkListDesc)->header;
-	int    filled = 0;
-	if (header) rows [filled++] = xtk_keyed(rt->ui, "header", header);
+	XtkListDesc const *list     = XTK_EL_DETAIL(el, XtkListDesc);
+	int                filled   = 0;
+	int                detached = ctx->window > 0 ? list_detached(list, ctx->range.first) : -1;
+	if (list->header) rows [filled++] = xtk_keyed(rt->ui, "header", list->header);
+	XtkEl *head = detached >= 0 ? list_make_header(rt, list, detached) : NULL;
+	if (head) rows [filled++] = head;
 	for (int i = ctx->range.first; i <= ctx->range.last; i++) {
 		XtkEl *row = list_make_row(rt, el, ctx, i);
 		if (!row) break;
@@ -100,7 +122,7 @@ static bool list_realize(XtkRt *rt, XtkNode const *committed, XtkEl *el) {
 	ListRealizeCtx ctx;
 	list_realize_ctx(committed, el, &ctx);
 	XTK_EL_DATA(el)->virtual_first = ctx.range.first;
-	size_t  n                      = ( size_t ) (ctx.window ? ctx.window : 1) + 1u;
+	size_t  n                      = ( size_t ) (ctx.window ? ctx.window : 1) + 2u;
 	XtkEl **rows                   = ( XtkEl ** ) xtk_arena_alloc(xtk_ui_arena(rt->ui), sizeof(XtkEl *) * n);
 	if (!rows) return false;
 	return xtk_el_set_children(el, rows, list_fill_rows(rt, el, &ctx, rows));

@@ -28,6 +28,8 @@ static XtkMsg const *binding_msg_const(XtkBinding const *binding, XtkEventId eve
 
 static XtkBindingSpec const binding_specs [] = {
   BIND(XTK_CTRL_BUTTON, XtkButtonDesc, click, XTK_EVENT_INVOKE),
+  BIND(XTK_CTRL_IMAGE, XtkImageDesc, opened, XTK_EVENT_IMAGE_OPENED),
+  BIND(XTK_CTRL_IMAGE, XtkImageDesc, failed, XTK_EVENT_IMAGE_FAILED),
   BIND(XTK_CTRL_REPEAT, XtkButtonDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_LINK, XtkHyperlinkDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_CHECKBOX, XtkToggleDesc, change, XTK_EVENT_CHANGE_BOOL),
@@ -192,7 +194,7 @@ static uint32_t realize(XtkBinding *b, XtkEvent const *event) {
 
 static void note_user(XtkBinding *b, XtkEvent const *event) {
 	if (event->change.revision > b->echo.revision) b->echo = event->change;
-	if (event->cause == XTK_EVENT_CAUSE_USER) b->user_events |= 1u << event->id;
+	if (event->cause == XTK_EVENT_CAUSE_USER) b->user_events |= 1ull << event->id;
 }
 
 static void post_msg(XtkRt *rt, XtkMsg msg, XtkEventPayload const *p) {

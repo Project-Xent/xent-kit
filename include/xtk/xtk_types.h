@@ -52,6 +52,7 @@ static bool inline xtk_ctrl_islist(XtkCtrlType t) {
 
 typedef enum XtkFontWeight
 {
+	XTK_FONT_INHERIT     = 0,
 	XTK_FONT_THIN        = 100,
 	XTK_FONT_EXTRA_LIGHT = 200,
 	XTK_FONT_LIGHT       = 300,

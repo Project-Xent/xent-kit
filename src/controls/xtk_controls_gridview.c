@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_gridview_create(XtkTxn *txn, XtkNodeRef parent, XtkListProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_GRIDVIEW, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [17];
+	XtkPropPatch   patches [18];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -24,6 +24,9 @@ XtkLocalId xtk_gridview_create(XtkTxn *txn, XtkNodeRef parent, XtkListProps cons
 	xtk_controls_append_i32(patches, &count, (props->set >> 14u) & 1u, XTK_PROP_COLUMN_COUNT, props->ncol, change);
 	xtk_controls_append_enum(patches, &count, (props->set >> 15u) & 1u, XTK_PROP_SELECTION_MODE, props->mode, change);
 	xtk_controls_append_i32(patches, &count, (props->set >> 16u) & 1u, XTK_PROP_REALIZED_FIRST, props->first, change);
+	xtk_controls_append_bool(
+	  patches, &count, (props->set >> 17u) & 1u, XTK_PROP_RECTANGLE_SELECTION, props->rectsel, change
+	);
 	return xtk_txn_create(txn, XTK_CTRL_GRIDVIEW, parent, xtk_ref_none(), patches, count);
 }
 
@@ -93,6 +96,10 @@ bool xtk_gridview_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value
 
 bool xtk_gridview_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change) {
 	return xtk_ctrl_seti32(scene, control, XTK_PROP_REALIZED_FIRST, value, change);
+}
+
+bool xtk_gridview_setrectsel(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
+	return xtk_ctrl_setbool(scene, control, XTK_PROP_RECTANGLE_SELECTION, value, change);
 }
 
 XtkSubRef xtk_gridview_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

@@ -118,6 +118,9 @@ typedef struct XtkBadgeDesc {
 typedef struct XtkImageDesc {
 	XtkResource     source;
 	XtkImageStretch stretch;
+	XentInsets      nine;
+	XtkMsg          opened;
+	XtkMsg          failed;
 } XtkImageDesc;
 
 typedef struct XtkHyperlinkDesc {
@@ -348,7 +351,16 @@ typedef struct XtkListDesc {
 	bool           item_invoked_enabled;
 	XtkMsg         invoke;
 	XtkEl         *header;
+	int32_t const *groups;
+	int            ngroup;
+	XtkEl         *(*group_header)(XtkUi *ui, void *env, int group);
+	bool           rect_select;
 } XtkListDesc;
+
+typedef struct XtkListRow {
+	int32_t group;
+	int32_t item;
+} XtkListRow;
 
 typedef struct XtkListItemDesc {
 	int         index;
@@ -704,6 +716,7 @@ XtkEl                 *xtk_selector(XtkUi *ui, XtkSelectorBarDesc desc);
 XtkEl                 *xtk_breadcrumb(XtkUi *ui, XtkBreadcrumbDesc desc);
 XtkEl                 *xtk_menubar(XtkUi *ui, XtkMenuBarDesc desc);
 XtkEl                 *xtk_list(XtkUi *ui, XtkListDesc desc);
+XtkListRow             xtk_list_row(int32_t const *groups, int32_t ngroup, int32_t row);
 XtkEl                 *xtk_listbox(XtkUi *ui, XtkListDesc desc);
 XtkEl                 *xtk_gridview(XtkUi *ui, XtkListDesc desc);
 XtkEl                 *xtk_repeater(XtkUi *ui, XtkListDesc desc);

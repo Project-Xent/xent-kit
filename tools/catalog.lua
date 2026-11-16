@@ -224,6 +224,10 @@ props = {
     {"tip", "XTK_PROP_TOOLTIP", "string"},
     {"src", "XTK_PROP_IMAGE_SOURCE", "resource"},
     {"fit", "XTK_PROP_IMAGE_STRETCH", "enum", values = "XtkImageStretch"},
+    {"nl", "XTK_PROP_NINE_GRID_LEFT", "f32"},
+    {"nt", "XTK_PROP_NINE_GRID_TOP", "f32"},
+    {"nr", "XTK_PROP_NINE_GRID_RIGHT", "f32"},
+    {"nb", "XTK_PROP_NINE_GRID_BOTTOM", "f32"},
   },
   progress = {
     {"w", "XTK_PROP_WIDTH", "f32"},
@@ -405,6 +409,7 @@ props = {
     {"ncol", "XTK_PROP_COLUMN_COUNT", "i32"},
     {"mode", "XTK_PROP_SELECTION_MODE", "enum", values = "XtkListSelMode"},
     {"first", "XTK_PROP_REALIZED_FIRST", "i32"},
+    {"rectsel", "XTK_PROP_RECTANGLE_SELECTION", "bool"},
   },
   radiogroup = {
     {"w", "XTK_PROP_WIDTH", "f32"},
@@ -988,6 +993,12 @@ properties = {
   {"XTK_PROP_DROP_OPERATION", "accepted-operation", "enum", {"hit_test"}},
   {"XTK_PROP_DRAG_TEXT", "drag-text", "string", {"hit_test"}},
   {"XTK_PROP_DRAG_FILES", "drag-files", "string", {"hit_test"}},
+  {"XTK_PROP_GROUPS", "groups", "bytes", {"layout"}},
+  {"XTK_PROP_RECTANGLE_SELECTION", "rectangle-selection", "bool", {"hit_test"}},
+  {"XTK_PROP_NINE_GRID_LEFT", "nine-grid-left", "f32", {"paint"}},
+  {"XTK_PROP_NINE_GRID_TOP", "nine-grid-top", "f32", {"paint"}},
+  {"XTK_PROP_NINE_GRID_RIGHT", "nine-grid-right", "f32", {"paint"}},
+  {"XTK_PROP_NINE_GRID_BOTTOM", "nine-grid-bottom", "f32", {"paint"}},
 }
 
 event_defs = {
@@ -1019,6 +1030,8 @@ event_defs = {
   {key = "drop_files", id = "XTK_EVENT_DROP_FILES", name = "drop-files", token = "ondropfiles", routing = "target", payload = "string", mirrors = {}},
   {key = "drop_text", id = "XTK_EVENT_DROP_TEXT", name = "drop-text", token = "ondroptext", routing = "target", payload = "string", mirrors = {}},
   {key = "drag_completed", id = "XTK_EVENT_DRAG_COMPLETED", name = "drag-completed", token = "ondragcompleted", routing = "target", payload = "i32", mirrors = {}},
+  {key = "image_opened", id = "XTK_EVENT_IMAGE_OPENED", name = "image-opened", token = "onopened", routing = "capture_bubble", payload = "none", mirrors = {}},
+  {key = "image_failed", id = "XTK_EVENT_IMAGE_FAILED", name = "image-failed", token = "onfailed", routing = "capture_bubble", payload = "none", mirrors = {}},
 }
 
 controls = {
@@ -1032,9 +1045,9 @@ controls = {
   {api = "slider", token = "slider", name = "slider", group = "slider", events = {"change_f32", "change_range"}, access = {"slider", true, true}},
   {api = "text_input", token = "textbox", name = "text-input", group = "textbox", events = {"change_string"}, access = {"edit", true, true}},
   {api = "scroll", token = "scroll", name = "scroll", group = "scroll", events = {"scroll"}, access = {"group", true, true}},
-  {api = "image", token = "image", name = "image", group = "image", events = {}, access = {"image", false, false}},
+  {api = "image", token = "image", name = "image", group = "image", events = {"image_opened", "image_failed"}, access = {"image", false, false}},
   {api = "progress", token = "progress", name = "progress", group = "progress", events = {}, access = {"none", false, false}},
-  {api = "list", token = "list", name = "list", group = "list", events = {"select", "invoke", "realize"}, access = {"list", true, true}},
+  {api = "list", token = "list", name = "list", group = "list", events = {"select", "invoke", "realize"}, extra = {"XTK_PROP_GROUPS"}, access = {"list", true, true}},
   {api = "tab", token = "tab", name = "tab", group = "layout", events = {}, access = {"group", true, true}},
   {api = "card", token = "card", name = "card", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
   {api = "divider", token = "divider", name = "divider", group = "layout", events = {}, access = {"none", false, false}},
@@ -1065,7 +1078,7 @@ controls = {
   {api = "tab_view_item", token = "tabitem", name = "tab-view-item", group = "item", events = {"invoke"}, access = {"list_item", true, true}},
   {api = "list_item", token = "listitem", name = "list-item", group = "item", events = {"invoke"}, access = {"list_item", true, true}},
   {api = "list_box", token = "listbox", name = "list-box", group = "list", events = {"select", "invoke", "realize"}, access = {"list", true, true}},
-  {api = "grid_view", token = "gridview", name = "grid-view", group = "list", events = {"select", "invoke", "realize"}, access = {"list", true, true}},
+  {api = "grid_view", token = "gridview", name = "grid-view", group = "list", events = {"select", "invoke", "realize"}, extra = {"XTK_PROP_GROUPS"}, access = {"list", true, true}},
   {api = "items_repeater", token = "repeater", name = "items-repeater", group = "list", events = {"realize"}, access = {"list", false, false}},
   {api = "items_view", token = "itemsview", name = "items-view", group = "itemsview", events = {"select", "invoke", "realize"}, access = {"list", true, true}},
   {api = "flip_view", token = "flip", name = "flip-view", group = "flip", events = {"select", "invoke"}, access = {"group", true, true}},
@@ -1107,6 +1120,7 @@ controls = {
   {api = "app_bar_separator", token = "appbarsep", name = "app-bar-separator", group = "appbarsep", events = {}, access = {"none", false, false}},
   {token = "cmdmore", name = "command-bar-more-button", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TOOLTIP"}, events = {}, access = {"button", true, true}},
   {token = "colbutton", name = "column-header-button", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TOOLTIP"}, events = {}, access = {"none", false, false}},
+  {api = "group_header", token = "groupheader", name = "group-header", group = "layout", events = {}, access = {"group", true, true}},
 }
 
 enums = {
@@ -1117,7 +1131,7 @@ enums = {
   XtkButtonStyle = {prefix = "XTK_BUTTON_", members = {"STANDARD", "SUBTLE", "TEXT", "ACCENT"}},
   XtkCalendarMode = {prefix = "XTK_CALENDAR_", members = {"SINGLE", "NONE", "MULTIPLE"}},
   XtkClock = {prefix = "XTK_CLOCK_", members = {"SYSTEM", "12H", "24H"}},
-  XtkFontWeight = {prefix = "XTK_FONT_", members = {"THIN", "EXTRA_LIGHT", "LIGHT", "REGULAR", "MEDIUM", "SEMI_BOLD", "BOLD", "EXTRA_BOLD", "BLACK"}},
+  XtkFontWeight = {prefix = "XTK_FONT_", members = {"INHERIT", "THIN", "EXTRA_LIGHT", "LIGHT", "REGULAR", "MEDIUM", "SEMI_BOLD", "BOLD", "EXTRA_BOLD", "BLACK"}},
   XtkImageStretch = {prefix = "XTK_IMAGE_", members = {"NONE", "FILL", "UNIFORM", "UNIFORM_TO_FILL"}},
   XtkInfoBarSeverity = {prefix = "XTK_INFOBAR_", members = {"INFORMATIONAL", "SUCCESS", "WARNING", "ERROR"}},
   XtkListSelMode = {prefix = "XTK_LIST_SELECT_", members = {"SINGLE", "NONE", "MULTIPLE", "EXTENDED"}},

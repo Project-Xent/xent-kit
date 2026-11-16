@@ -2,11 +2,41 @@
 
 #include <string.h>
 
+XtkListRow xtk_list_row(int32_t const *groups, int32_t ngroup, int32_t row) {
+	int32_t item = 0;
+	for (int32_t g = 0; g < ngroup; g++) {
+		int32_t size = groups [g] > 0 ? groups [g] : 0;
+		if (row == 0) return (XtkListRow) {g, -1};
+		if (row <= size) return (XtkListRow) {g, item + row - 1};
+		row  -= 1 + size;
+		item += size;
+	}
+	return (XtkListRow) {-1, row + item};
+}
+
+static bool list_groups_copy(XtkUi *ui, XtkListDesc *desc) {
+	if (desc->ngroup <= 0 || !desc->groups || !desc->group_header) {
+		desc->groups = NULL;
+		desc->ngroup = 0;
+		return true;
+	}
+	int32_t *copy = ( int32_t * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy) * ( size_t ) desc->ngroup);
+	if (!copy) return false;
+	desc->nitem = 0;
+	for (int g = 0; g < desc->ngroup; g++) {
+		copy [g]     = desc->groups [g] > 0 ? desc->groups [g] : 0;
+		desc->nitem += copy [g];
+	}
+	desc->groups = copy;
+	return true;
+}
+
 static XtkEl *items_host(XtkUi *ui, XtkCtrlType type, XtkListDesc desc) {
 	XtkEl *el = xtk_el_new(ui, type, NULL);
 	if (!el) return NULL;
 	if (desc.nitem < 0 || !desc.item) desc.nitem = 0;
-	if (desc.itemh <= 0.0f) desc.itemh = 40.0f;
+	if (!list_groups_copy(ui, &desc)) return NULL;
+	if (desc.itemh < 0.0f) desc.itemh = 0.0f;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	XTK_EL_DATA(el)->virtualized = true;
 	return el;

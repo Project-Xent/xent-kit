@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_image_create(XtkTxn *txn, XtkNodeRef parent, XtkImageProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_IMAGE, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [11];
+	XtkPropPatch   patches [15];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -18,6 +18,10 @@ XtkLocalId xtk_image_create(XtkTxn *txn, XtkNodeRef parent, XtkImageProps const 
 	);
 	xtk_controls_append_resource(patches, &count, (props->set >> 9u) & 1u, XTK_PROP_IMAGE_SOURCE, props->src, change);
 	xtk_controls_append_enum(patches, &count, (props->set >> 10u) & 1u, XTK_PROP_IMAGE_STRETCH, props->fit, change);
+	xtk_controls_append_f32(patches, &count, (props->set >> 11u) & 1u, XTK_PROP_NINE_GRID_LEFT, props->nl, change);
+	xtk_controls_append_f32(patches, &count, (props->set >> 12u) & 1u, XTK_PROP_NINE_GRID_TOP, props->nt, change);
+	xtk_controls_append_f32(patches, &count, (props->set >> 13u) & 1u, XTK_PROP_NINE_GRID_RIGHT, props->nr, change);
+	xtk_controls_append_f32(patches, &count, (props->set >> 14u) & 1u, XTK_PROP_NINE_GRID_BOTTOM, props->nb, change);
 	return xtk_txn_create(txn, XTK_CTRL_IMAGE, parent, xtk_ref_none(), patches, count);
 }
 
@@ -63,4 +67,28 @@ bool xtk_image_setsrc(XtkScene *scene, XtkCtrl control, XtkResource value, XtkCh
 
 bool xtk_image_setfit(XtkScene *scene, XtkCtrl control, XtkImageStretch value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_IMAGE_STRETCH, value, change);
+}
+
+bool xtk_image_setnl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_NINE_GRID_LEFT, value, change);
+}
+
+bool xtk_image_setnt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_NINE_GRID_TOP, value, change);
+}
+
+bool xtk_image_setnr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_NINE_GRID_RIGHT, value, change);
+}
+
+bool xtk_image_setnb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change) {
+	return xtk_ctrl_setf32(scene, control, XTK_PROP_NINE_GRID_BOTTOM, value, change);
+}
+
+XtkSubRef xtk_image_onopened(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_IMAGE_OPENED, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_image_onfailed(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_IMAGE_FAILED, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

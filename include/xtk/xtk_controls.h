@@ -432,6 +432,10 @@ typedef struct XtkImageProps {
 	uint32_t        tip_len;
 	XtkResource     src;
 	XtkImageStretch fit;
+	float           nl;
+	float           nt;
+	float           nr;
+	float           nb;
 } XtkImageProps;
 
 #define XTK_IMAGE_W_MASK    (1ull << 0u)
@@ -445,6 +449,10 @@ typedef struct XtkImageProps {
 #define XTK_IMAGE_TIP_MASK  (1ull << 8u)
 #define XTK_IMAGE_SRC_MASK  (1ull << 9u)
 #define XTK_IMAGE_FIT_MASK  (1ull << 10u)
+#define XTK_IMAGE_NL_MASK   (1ull << 11u)
+#define XTK_IMAGE_NT_MASK   (1ull << 12u)
+#define XTK_IMAGE_NR_MASK   (1ull << 13u)
+#define XTK_IMAGE_NB_MASK   (1ull << 14u)
 
 typedef struct XtkProgressProps {
 	uint64_t         set;
@@ -648,6 +656,7 @@ typedef struct XtkListProps {
 	int32_t        ncol;
 	XtkListSelMode mode;
 	int32_t        first;
+	bool           rectsel;
 } XtkListProps;
 
 #define XTK_LIST_W_MASK       (1ull << 0u)
@@ -667,6 +676,7 @@ typedef struct XtkListProps {
 #define XTK_LIST_NCOL_MASK    (1ull << 14u)
 #define XTK_LIST_MODE_MASK    (1ull << 15u)
 #define XTK_LIST_FIRST_MASK   (1ull << 16u)
+#define XTK_LIST_RECTSEL_MASK (1ull << 17u)
 
 typedef struct XtkRadioGroupProps {
 	uint64_t       set;
@@ -1920,6 +1930,7 @@ XtkLocalId xtk_commandbar_create(XtkTxn *txn, XtkNodeRef parent, XtkCommandBarPr
 XtkLocalId xtk_appbarbutton_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarButtonProps const *props);
 XtkLocalId xtk_appbartoggle_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarToggleProps const *props);
 XtkLocalId xtk_appbarsep_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarSeparatorProps const *props);
+XtkLocalId xtk_groupheader_create(XtkTxn *txn, XtkNodeRef parent, XtkLayoutProps const *props);
 bool       xtk_container_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2116,6 +2127,12 @@ bool      xtk_image_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChan
 bool      xtk_image_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool      xtk_image_setsrc(XtkScene *scene, XtkCtrl control, XtkResource value, XtkChangeStamp change);
 bool      xtk_image_setfit(XtkScene *scene, XtkCtrl control, XtkImageStretch value, XtkChangeStamp change);
+bool      xtk_image_setnl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_image_setnt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_image_setnr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_image_setnb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+XtkSubRef xtk_image_onopened(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_image_onfailed(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_progress_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_progress_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_progress_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2152,6 +2169,7 @@ bool      xtk_list_setitemw(XtkScene *scene, XtkCtrl control, float value, XtkCh
 bool      xtk_list_setncol(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 bool      xtk_list_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value, XtkChangeStamp change);
 bool      xtk_list_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_list_setrectsel(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_list_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_list_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_list_onrealize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -2617,6 +2635,7 @@ bool      xtk_listbox_setitemw(XtkScene *scene, XtkCtrl control, float value, Xt
 bool      xtk_listbox_setncol(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 bool      xtk_listbox_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value, XtkChangeStamp change);
 bool      xtk_listbox_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_listbox_setrectsel(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_listbox_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_listbox_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_listbox_onrealize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -2637,6 +2656,7 @@ bool      xtk_gridview_setitemw(XtkScene *scene, XtkCtrl control, float value, X
 bool      xtk_gridview_setncol(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 bool      xtk_gridview_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value, XtkChangeStamp change);
 bool      xtk_gridview_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_gridview_setrectsel(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_gridview_onselect(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_gridview_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_gridview_onrealize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -2657,6 +2677,7 @@ bool      xtk_repeater_setitemw(XtkScene *scene, XtkCtrl control, float value, X
 bool      xtk_repeater_setncol(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 bool      xtk_repeater_setmode(XtkScene *scene, XtkCtrl control, XtkListSelMode value, XtkChangeStamp change);
 bool      xtk_repeater_setfirst(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_repeater_setrectsel(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_repeater_onrealize(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_itemsview_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_itemsview_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -3226,5 +3247,15 @@ bool      xtk_appbarsep_setmb(XtkScene *scene, XtkCtrl control, float value, Xtk
 bool      xtk_appbarsep_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool      xtk_appbarsep_setsecondary(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_appbarsep_setorder(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool      xtk_groupheader_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_groupheader_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_groupheader_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_groupheader_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 
 #endif

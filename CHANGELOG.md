@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.3.3
+
+- added the column header (`XTK_CTRL_COLHEADER`, `XTK_CTRL_COLITEM`) and
+  CommandBar (`XTK_CTRL_COMMANDBAR`, `APPBARBUTTON`, `APPBARTOGGLE`,
+  `APPBARSEP`) controls, their properties and events, and the declarative
+  `xtk_colheader`, `xtk_colitem`, `xtk_commandbar`, `xtk_appbarbutton`,
+  `xtk_appbartoggle`, `xtk_appbarsep`;
+- added `XTK_TRIM_PATH_ELLIPSIS`;
+- added drag and drop: `DROP_OPERATION`, `DRAG_TEXT`, `DRAG_FILES`, events
+  `DRAG_HOVER`, `DROP_FILES`, `DROP_TEXT`, `DRAG_COMPLETED`, and `xtk_dragdrop`;
+- added list grouping: `XTK_PROP_GROUPS` (int32 group sizes) on List and
+  GridView, the `XTK_CTRL_GROUPHEADER` control, `xtk_list_row` to map a row to
+  its group and item, and `XtkListDesc.groups / ngroup / group_header`;
+- added `XTK_PROP_RECTANGLE_SELECTION` and `XtkListDesc.rect_select`;
+- added `XTK_PROP_NINE_GRID_LEFT/TOP/RIGHT/BOTTOM`, `XtkImageDesc.nine`, and
+  the image events `XTK_EVENT_IMAGE_OPENED` / `XTK_EVENT_IMAGE_FAILED`
+  (`XtkImageDesc.opened / failed`);
+- added `XTK_FONT_INHERIT`; `xtk_text` with `size` 0 or `XTK_FONT_INHERIT`
+  inherits from its ancestors;
+- widened the declarative binding's user-event mask to 64 bits;
+
+### Breaking changes
+
+| Change | Migration |
+| --- | --- |
+| `xtk_list`, `xtk_listbox` and `xtk_repeater` default to measured rows (`itemh` 0) instead of 40 px | Set `itemh` to keep fixed-height rows |
+| `xtk_text` no longer sends 14 px / regular by default; it inherits | Set `size` or `weight` explicitly |
+
 ## 0.3.2
 
 - made `tools/catalog.lua` the single source of the control catalog:

@@ -593,8 +593,14 @@ static bool encode_image(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, 
 	XtkImageDesc const *old  = prev ? XTK_EL_DETAIL(prev, XtkImageDesc) : NULL;
 	if ((!old || old->source != desc->source) && !value_resource(batch, target, XTK_PROP_IMAGE_SOURCE, desc->source))
 		return false;
-	return (old && old->stretch == desc->stretch)
-	    || value_enum(batch, target, XTK_PROP_IMAGE_STRETCH, ( uint32_t ) desc->stretch);
+	if ((!old || old->stretch != desc->stretch)
+	    && !value_enum(batch, target, XTK_PROP_IMAGE_STRETCH, ( uint32_t ) desc->stretch))
+		return false;
+	XentInsets const n = desc->nine, o = old ? old->nine : (XentInsets) {0};
+	return (n.left == o.left || value_f32(batch, target, XTK_PROP_NINE_GRID_LEFT, n.left))
+	    && (n.top == o.top || value_f32(batch, target, XTK_PROP_NINE_GRID_TOP, n.top))
+	    && (n.right == o.right || value_f32(batch, target, XTK_PROP_NINE_GRID_RIGHT, n.right))
+	    && (n.bottom == o.bottom || value_f32(batch, target, XTK_PROP_NINE_GRID_BOTTOM, n.bottom));
 }
 
 static bool encode_badge(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
@@ -608,10 +614,10 @@ static bool encode_badge(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, 
 }
 
 static bool encode_text_font(XtkBatch *batch, XtkNodeRef target, XtkTextDesc const *old, XtkTextDesc const *text) {
-	float size     = text->size > 0.0f ? text->size : 14.0f;
-	float old_size = old && old->size > 0.0f ? old->size : 14.0f;
-	if ((!old || old_size != size) && !value_f32(batch, target, XTK_PROP_FONT_SIZE, size)) return false;
-	if ((!old || old->weight != text->weight)
+	if ((old ? old->size != text->size : text->size > 0.0f)
+	    && !value_f32(batch, target, XTK_PROP_FONT_SIZE, text->size > 0.0f ? text->size : 0.0f))
+		return false;
+	if ((old ? old->weight != text->weight : text->weight != XTK_FONT_INHERIT)
 	    && !value_enum(batch, target, XTK_PROP_FONT_WEIGHT, ( uint32_t ) text->weight))
 		return false;
 	if ((!old || old->align != text->align)
@@ -654,20 +660,36 @@ static bool encode_scroll(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev,
 
 static bool encode_list_selection(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
 
+static bool list_groups_equal(XtkListDesc const *a, XtkListDesc const *b) {
+	if (a->ngroup != b->ngroup) return false;
+	return a->ngroup == 0 || memcmp(a->groups, b->groups, sizeof(int32_t) * ( size_t ) a->ngroup) == 0;
+}
+
+static bool encode_list_groups(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkListDesc const *desc = XTK_EL_DETAIL(el, XtkListDesc);
+	if (XTK_EL_DATA(el)->type != XTK_CTRL_LIST && XTK_EL_DATA(el)->type != XTK_CTRL_GRIDVIEW) return true;
+	if (prev ? list_groups_equal(XTK_EL_DETAIL(prev, XtkListDesc), desc) : desc->ngroup == 0) return true;
+	return value_bytes(batch, target, XTK_PROP_GROUPS, desc->groups, sizeof(int32_t) * ( uint32_t ) desc->ngroup);
+}
+
 static bool encode_list_host(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	if (!xtk_ctrl_islist(XTK_EL_DATA(el)->type)) return true;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->nitem != XTK_EL_DETAIL(el, XtkListDesc)->nitem)
 	    && !value_i32(batch, target, XTK_PROP_ITEM_COUNT, XTK_EL_DETAIL(el, XtkListDesc)->nitem))
 		return false;
-	float item_h = XTK_EL_DETAIL(el, XtkListDesc)->itemh > 0.0f ? XTK_EL_DETAIL(el, XtkListDesc)->itemh : 40.0f;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->itemh != XTK_EL_DETAIL(el, XtkListDesc)->itemh)
-	    && !value_f32(batch, target, XTK_PROP_ITEM_HEIGHT, item_h))
+	    && !value_f32(batch, target, XTK_PROP_ITEM_HEIGHT, XTK_EL_DETAIL(el, XtkListDesc)->itemh))
 		return false;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->itemw != XTK_EL_DETAIL(el, XtkListDesc)->itemw)
 	    && !value_f32(batch, target, XTK_PROP_ITEM_WIDTH, XTK_EL_DETAIL(el, XtkListDesc)->itemw))
 		return false;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->ncol != XTK_EL_DETAIL(el, XtkListDesc)->ncol)
 	    && !value_i32(batch, target, XTK_PROP_COLUMN_COUNT, XTK_EL_DETAIL(el, XtkListDesc)->ncol))
+		return false;
+	if (!encode_list_groups(batch, target, prev, el)) return false;
+	if ((prev ? XTK_EL_DETAIL(prev, XtkListDesc)->rect_select != XTK_EL_DETAIL(el, XtkListDesc)->rect_select
+	          : XTK_EL_DETAIL(el, XtkListDesc)->rect_select)
+	    && !value_bool(batch, target, XTK_PROP_RECTANGLE_SELECTION, XTK_EL_DETAIL(el, XtkListDesc)->rect_select))
 		return false;
 	return encode_list_selection(batch, target, prev, el);
 }

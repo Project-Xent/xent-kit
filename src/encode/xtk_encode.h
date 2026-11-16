@@ -12,13 +12,13 @@ typedef struct XtkRealized {
 	int lanes;
 } XtkRealized;
 
-static_assert(XTK_EVENT_STANDARD_COUNT <= 32, "XtkBinding.user_events is a 32-bit event mask");
+static_assert(XTK_EVENT_STANDARD_COUNT <= 64, "XtkBinding.user_events is a 64-bit event mask");
 
 typedef struct XtkBinding {
 	XtkRt         *rt;
 	XtkRealized    realized;
 	XtkChangeStamp echo;
-	uint32_t       user_events;
+	uint64_t       user_events;
 	XtkMsg         msgs [XTK_EVENT_STANDARD_COUNT];
 } XtkBinding;
 

@@ -339,7 +339,7 @@ static XtkEcho node_echo(XtkNode const *committed) {
 	if (!b) return echo;
 	echo.stamp = b->echo;
 	for (XtkEventId event = 1; event < ( XtkEventId ) XTK_EVENT_STANDARD_COUNT; event++) {
-		if (!(b->user_events & (1u << event))) continue;
+		if (!(b->user_events & (1ull << event))) continue;
 		XtkPropertyId ids [XTK_MIRROR_MAX];
 		uint32_t      n = xtk_catalog_mirrors(committed->type_id, event, ids);
 		for (uint32_t i = 0; i < n && echo.nforce < 8u; i++) echo.force [echo.nforce++] = ids [i];
