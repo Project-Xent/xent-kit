@@ -1096,6 +1096,7 @@ controls = {
   {api = "app_bar_toggle_button", token = "appbartoggle", name = "app-bar-toggle-button", group = "appbartoggle", events = {"change_bool"}, access = {"checkbox", true, true}},
   {api = "app_bar_separator", token = "appbarsep", name = "app-bar-separator", group = "appbarsep", events = {}, access = {"none", false, false}},
   {token = "cmdmore", name = "command-bar-more-button", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TOOLTIP"}, events = {}, access = {"button", true, true}},
+  {token = "colbutton", name = "column-header-button", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TOOLTIP"}, events = {}, access = {"none", false, false}},
 }
 
 enums = {
@@ -1129,7 +1130,7 @@ enums = {
   XtkTeachingTipPlacement = {prefix = "XTK_TIP_PLACE_", members = {"AUTO", "TOP", "BOTTOM", "LEFT", "RIGHT", "TOP_RIGHT", "TOP_LEFT", "BOTTOM_RIGHT", "BOTTOM_LEFT", "LEFT_TOP", "LEFT_BOTTOM", "RIGHT_TOP", "RIGHT_BOTTOM", "CENTER"}},
   XtkTeachingTipTail = {prefix = "XTK_TIP_TAIL_", members = {"AUTO", "VISIBLE", "COLLAPSED"}},
   XtkTextAlign = {prefix = "XTK_TEXT_", members = {"LEFT", "CENTER", "RIGHT", "JUSTIFY"}},
-  XtkTextTrim = {prefix = "XTK_TRIM_", members = {"NONE", "CHAR", "CHAR_ELLIPSIS", "WORD", "WORD_ELLIPSIS"}},
+  XtkTextTrim = {prefix = "XTK_TRIM_", members = {"NONE", "CHAR", "CHAR_ELLIPSIS", "WORD", "WORD_ELLIPSIS", "PATH_ELLIPSIS"}},
   XtkTickPlacement = {prefix = "XTK_TICK_", members = {"INLINE", "TOP_LEFT", "BOTTOM_RIGHT", "OUTSIDE", "NONE"}},
 }
 

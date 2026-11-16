@@ -78,6 +78,7 @@ typedef enum XtkTextTrim
 	XTK_TRIM_CHAR_ELLIPSIS,
 	XTK_TRIM_WORD,
 	XTK_TRIM_WORD_ELLIPSIS,
+	XTK_TRIM_PATH_ELLIPSIS,
 } XtkTextTrim;
 
 typedef enum XtkButtonStyle

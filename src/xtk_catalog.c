@@ -1956,6 +1956,17 @@ static XtkPropertyId const cmdmore_props [] = {
   XTK_PROP_MARGIN_BOTTOM,
   XTK_PROP_TOOLTIP,
 };
+static XtkPropertyId const colbutton_props [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+};
 
 static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
   [XTK_CTRL_CONTAINER]
@@ -2119,6 +2130,8 @@ static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
   = {XTK_CTRL_APPBARSEP,     "app-bar-separator",       appbarsep_props,     COUNT_OF(appbarsep_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
   [XTK_CTRL_CMDMORE]
   = {XTK_CTRL_CMDMORE,       "command-bar-more-button", cmdmore_props,       COUNT_OF(cmdmore_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+  [XTK_CTRL_COLBUTTON]
+  = {XTK_CTRL_COLBUTTON,     "column-header-button",    colbutton_props,     COUNT_OF(colbutton_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
 };
 
 static bool id_in(uint32_t id, uint32_t const *ids, uint32_t count) {
