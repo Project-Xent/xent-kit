@@ -280,6 +280,12 @@ static XtkPropDesc const properties [XTK_PROP_STANDARD_COUNT] = {
   = {XTK_PROP_LABEL_POSITION,             "label-position",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ACCELERATOR_TEXT]
   = {XTK_PROP_ACCELERATOR_TEXT,           "keyboard-accelerator-text",   XTK_PROP_KIND_STRING,   0u, GEOMETRY | XTK_INVALIDATE_PAINT,                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_DROP_OPERATION]
+  = {XTK_PROP_DROP_OPERATION,             "accepted-operation",          XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_DRAG_TEXT]
+  = {XTK_PROP_DRAG_TEXT,                  "drag-text",                   XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_DRAG_FILES]
+  = {XTK_PROP_DRAG_FILES,                 "drag-files",                  XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
 };
 
 static XtkEventDesc const events [XTK_EVENT_STANDARD_COUNT] = {
@@ -310,12 +316,17 @@ static XtkEventDesc const events [XTK_EVENT_STANDARD_COUNT] = {
   = {XTK_EVENT_VALUE_CHANGED,  "value-changed",  XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_I32       },
   [XTK_EVENT_DATE_SELECT]
   = {XTK_EVENT_DATE_SELECT,    "date-select",    XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_INDEX_BOOL},
-  [XTK_EVENT_REALIZE] = {XTK_EVENT_REALIZE,        "realize",        XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_WINDOW    },
-  [XTK_EVENT_SCROLL]  = {XTK_EVENT_SCROLL,         "scroll",         XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_SCROLL    },
-  [XTK_EVENT_RESIZE]  = {XTK_EVENT_RESIZE,         "resize",         XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_F32       },
-  [XTK_EVENT_FIT]     = {XTK_EVENT_FIT,            "fit",            XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_NONE      },
-  [XTK_EVENT_REORDER] = {XTK_EVENT_REORDER,        "reorder",        XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_I32       },
-  [XTK_EVENT_OPEN]    = {XTK_EVENT_OPEN,           "open",           XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_BOOL      },
+  [XTK_EVENT_REALIZE]    = {XTK_EVENT_REALIZE,        "realize",        XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_WINDOW    },
+  [XTK_EVENT_SCROLL]     = {XTK_EVENT_SCROLL,         "scroll",         XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_SCROLL    },
+  [XTK_EVENT_RESIZE]     = {XTK_EVENT_RESIZE,         "resize",         XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_F32       },
+  [XTK_EVENT_FIT]        = {XTK_EVENT_FIT,            "fit",            XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_NONE      },
+  [XTK_EVENT_REORDER]    = {XTK_EVENT_REORDER,        "reorder",        XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_I32       },
+  [XTK_EVENT_OPEN]       = {XTK_EVENT_OPEN,           "open",           XTK_EVENT_ROUTE_CAPTURE_BUBBLE, XTK_EVENT_PAYLOAD_BOOL      },
+  [XTK_EVENT_DRAG_HOVER] = {XTK_EVENT_DRAG_HOVER,     "drag-hover",     XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_BOOL      },
+  [XTK_EVENT_DROP_FILES] = {XTK_EVENT_DROP_FILES,     "drop-files",     XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_STRING    },
+  [XTK_EVENT_DROP_TEXT]  = {XTK_EVENT_DROP_TEXT,      "drop-text",      XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_STRING    },
+  [XTK_EVENT_DRAG_COMPLETED]
+  = {XTK_EVENT_DRAG_COMPLETED, "drag-completed", XTK_EVENT_ROUTE_TARGET,         XTK_EVENT_PAYLOAD_I32       },
 };
 
 static XtkPropertyId const mirrors [XTK_EVENT_STANDARD_COUNT][XTK_MIRROR_CANDIDATES] = {
@@ -358,6 +369,15 @@ static XtkPropertyId const container_props [] = {
   XTK_PROP_FIT_WIDTH,
   XTK_PROP_FIT_HEIGHT,
   XTK_PROP_WRAP,
+  XTK_PROP_DROP_OPERATION,
+  XTK_PROP_DRAG_TEXT,
+  XTK_PROP_DRAG_FILES,
+};
+static XtkEventId const container_events [] = {
+  XTK_EVENT_DRAG_HOVER,
+  XTK_EVENT_DROP_FILES,
+  XTK_EVENT_DROP_TEXT,
+  XTK_EVENT_DRAG_COMPLETED,
 };
 static XtkPropertyId const text_props [] = {
   XTK_PROP_WIDTH,
@@ -642,6 +662,15 @@ static XtkPropertyId const card_props [] = {
   XTK_PROP_FIT_WIDTH,
   XTK_PROP_FIT_HEIGHT,
   XTK_PROP_WRAP,
+  XTK_PROP_DROP_OPERATION,
+  XTK_PROP_DRAG_TEXT,
+  XTK_PROP_DRAG_FILES,
+};
+static XtkEventId const card_events [] = {
+  XTK_EVENT_DRAG_HOVER,
+  XTK_EVENT_DROP_FILES,
+  XTK_EVENT_DROP_TEXT,
+  XTK_EVENT_DRAG_COMPLETED,
 };
 static XtkPropertyId const divider_props [] = {
   XTK_PROP_WIDTH,
@@ -927,6 +956,15 @@ static XtkPropertyId const expbody_props [] = {
   XTK_PROP_FIT_WIDTH,
   XTK_PROP_FIT_HEIGHT,
   XTK_PROP_WRAP,
+  XTK_PROP_DROP_OPERATION,
+  XTK_PROP_DRAG_TEXT,
+  XTK_PROP_DRAG_FILES,
+};
+static XtkEventId const expbody_events [] = {
+  XTK_EVENT_DRAG_HOVER,
+  XTK_EVENT_DROP_FILES,
+  XTK_EVENT_DROP_TEXT,
+  XTK_EVENT_DRAG_COMPLETED,
 };
 static XtkPropertyId const infobar_props [] = {
   XTK_PROP_WIDTH,
@@ -991,6 +1029,15 @@ static XtkPropertyId const dialogbody_props [] = {
   XTK_PROP_FIT_WIDTH,
   XTK_PROP_FIT_HEIGHT,
   XTK_PROP_WRAP,
+  XTK_PROP_DROP_OPERATION,
+  XTK_PROP_DRAG_TEXT,
+  XTK_PROP_DRAG_FILES,
+};
+static XtkEventId const dialogbody_events [] = {
+  XTK_EVENT_DRAG_HOVER,
+  XTK_EVENT_DROP_FILES,
+  XTK_EVENT_DROP_TEXT,
+  XTK_EVENT_DRAG_COMPLETED,
 };
 static XtkPropertyId const menubar_props [] = {
   XTK_PROP_WIDTH,
@@ -1588,6 +1635,15 @@ static XtkPropertyId const splitpane_props [] = {
   XTK_PROP_FIT_WIDTH,
   XTK_PROP_FIT_HEIGHT,
   XTK_PROP_WRAP,
+  XTK_PROP_DROP_OPERATION,
+  XTK_PROP_DRAG_TEXT,
+  XTK_PROP_DRAG_FILES,
+};
+static XtkEventId const splitpane_events [] = {
+  XTK_EVENT_DRAG_HOVER,
+  XTK_EVENT_DROP_FILES,
+  XTK_EVENT_DROP_TEXT,
+  XTK_EVENT_DRAG_COMPLETED,
 };
 static XtkPropertyId const splitbody_props [] = {
   XTK_PROP_WIDTH,
@@ -1612,6 +1668,15 @@ static XtkPropertyId const splitbody_props [] = {
   XTK_PROP_FIT_WIDTH,
   XTK_PROP_FIT_HEIGHT,
   XTK_PROP_WRAP,
+  XTK_PROP_DROP_OPERATION,
+  XTK_PROP_DRAG_TEXT,
+  XTK_PROP_DRAG_FILES,
+};
+static XtkEventId const splitbody_events [] = {
+  XTK_EVENT_DRAG_HOVER,
+  XTK_EVENT_DROP_FILES,
+  XTK_EVENT_DROP_TEXT,
+  XTK_EVENT_DRAG_COMPLETED,
 };
 static XtkPropertyId const titlebar_props [] = {
   XTK_PROP_WIDTH,
@@ -1968,170 +2033,167 @@ static XtkPropertyId const colbutton_props [] = {
   XTK_PROP_TOOLTIP,
 };
 
-static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT] = {
-  [XTK_CTRL_CONTAINER]
-  = {XTK_CTRL_CONTAINER,     "container",               container_props,     COUNT_OF(container_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TEXT]
-  = {XTK_CTRL_TEXT,          "text",                    text_props,          COUNT_OF(text_props),          NULL,                0u,                            {XTK_ACCESS_ROLE_TEXT, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_BUTTON]
-  = {XTK_CTRL_BUTTON,        "button",                  button_props,        COUNT_OF(button_props),        button_events,       COUNT_OF(button_events),       {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TOGGLE]
-  = {XTK_CTRL_TOGGLE,        "toggle-button",           toggle_props,        COUNT_OF(toggle_props),        toggle_events,       COUNT_OF(toggle_events),       {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CHECKBOX]
-  = {XTK_CTRL_CHECKBOX,      "checkbox",                checkbox_props,      COUNT_OF(checkbox_props),      checkbox_events,     COUNT_OF(checkbox_events),     {XTK_ACCESS_ROLE_CHECKBOX, true, true},    NULL, 0u, TREE, TREE},
-  [XTK_CTRL_RADIO]
-  = {XTK_CTRL_RADIO,         "radio",                   radio_props,         COUNT_OF(radio_props),         radio_events,        COUNT_OF(radio_events),        {XTK_ACCESS_ROLE_RADIO, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SWITCH]
-  = {XTK_CTRL_SWITCH,        "switch",                  switch_props,        COUNT_OF(switch_props),        switch_events,       COUNT_OF(switch_events),       {XTK_ACCESS_ROLE_CHECKBOX, true, true},    NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SLIDER]
-  = {XTK_CTRL_SLIDER,        "slider",                  slider_props,        COUNT_OF(slider_props),        slider_events,       COUNT_OF(slider_events),       {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TEXTBOX]
-  = {XTK_CTRL_TEXTBOX,       "text-input",              textbox_props,       COUNT_OF(textbox_props),       textbox_events,      COUNT_OF(textbox_events),      {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SCROLL]
-  = {XTK_CTRL_SCROLL,        "scroll",                  scroll_props,        COUNT_OF(scroll_props),        scroll_events,       COUNT_OF(scroll_events),       {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_IMAGE]
-  = {XTK_CTRL_IMAGE,         "image",                   image_props,         COUNT_OF(image_props),         NULL,                0u,                            {XTK_ACCESS_ROLE_IMAGE, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_PROGRESS]
-  = {XTK_CTRL_PROGRESS,      "progress",                progress_props,      COUNT_OF(progress_props),      NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_LIST]
-  = {XTK_CTRL_LIST,          "list",                    list_props,          COUNT_OF(list_props),          list_events,         COUNT_OF(list_events),         {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TAB]
-  = {XTK_CTRL_TAB,           "tab",                     tab_props,           COUNT_OF(tab_props),           NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CARD]
-  = {XTK_CTRL_CARD,          "card",                    card_props,          COUNT_OF(card_props),          NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_DIVIDER]
-  = {XTK_CTRL_DIVIDER,       "divider",                 divider_props,       COUNT_OF(divider_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CANVAS]
-  = {XTK_CTRL_CANVAS,        "canvas",                  canvas_props,        COUNT_OF(canvas_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_PASSWORD]
-  = {XTK_CTRL_PASSWORD,      "password-box",            password_props,      COUNT_OF(password_props),      password_events,     COUNT_OF(password_events),     {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_NUMBER]
-  = {XTK_CTRL_NUMBER,        "number-box",              number_props,        COUNT_OF(number_props),        number_events,       COUNT_OF(number_events),       {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_LINK]
-  = {XTK_CTRL_LINK,          "hyperlink",               link_props,          COUNT_OF(link_props),          link_events,         COUNT_OF(link_events),         {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_REPEAT]
-  = {XTK_CTRL_REPEAT,        "repeat-button",           repeat_props,        COUNT_OF(repeat_props),        repeat_events,       COUNT_OF(repeat_events),       {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_PROGRESSRING]
-  = {XTK_CTRL_PROGRESSRING,  "progress-ring",           progressring_props,  COUNT_OF(progressring_props),  NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_BADGE]
-  = {XTK_CTRL_BADGE,         "info-badge",              badge_props,         COUNT_OF(badge_props),         NULL,                0u,                            {XTK_ACCESS_ROLE_TEXT, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TOOLTIP] = {XTK_CTRL_TOOLTIP,       "tooltip",                 tooltip_props,       COUNT_OF(tooltip_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_FLYOUT]
-  = {XTK_CTRL_FLYOUT,        "flyout",                  flyout_props,        COUNT_OF(flyout_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_MENUFLY]
-  = {XTK_CTRL_MENUFLY,       "menu-flyout",             menufly_props,       COUNT_OF(menufly_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_DROPDOWN]
-  = {XTK_CTRL_DROPDOWN,      "dropdown-button",         dropdown_props,      COUNT_OF(dropdown_props),      dropdown_events,     COUNT_OF(dropdown_events),     {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SPLIT]
-  = {XTK_CTRL_SPLIT,         "split-button",            split_props,         COUNT_OF(split_props),         split_events,        COUNT_OF(split_events),        {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COMBO]
-  = {XTK_CTRL_COMBO,         "combo-box",               combo_props,         COUNT_OF(combo_props),         combo_events,        COUNT_OF(combo_events),        {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_EXPANDER]
-  = {XTK_CTRL_EXPANDER,      "expander",                expander_props,      COUNT_OF(expander_props),      expander_events,     COUNT_OF(expander_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_EXPHEAD]
-  = {XTK_CTRL_EXPHEAD,       "expander-header",         exphead_props,       COUNT_OF(exphead_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_EXPBODY]
-  = {XTK_CTRL_EXPBODY,       "expander-content",        expbody_props,       COUNT_OF(expbody_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_INFOBAR]
-  = {XTK_CTRL_INFOBAR,       "info-bar",                infobar_props,       COUNT_OF(infobar_props),       infobar_events,      COUNT_OF(infobar_events),      {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_DIALOG]
-  = {XTK_CTRL_DIALOG,        "content-dialog",          dialog_props,        COUNT_OF(dialog_props),        dialog_events,       COUNT_OF(dialog_events),       {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_DIALOGBODY]
-  = {XTK_CTRL_DIALOGBODY,    "dialog-content",          dialogbody_props,    COUNT_OF(dialogbody_props),    NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_MENUBAR]
-  = {XTK_CTRL_MENUBAR,       "menu-bar",                menubar_props,       COUNT_OF(menubar_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_MENUITEM]
-  = {XTK_CTRL_MENUITEM,      "menu-flyout-item",        menuitem_props,      COUNT_OF(menuitem_props),      menuitem_events,     COUNT_OF(menuitem_events),     {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_NAV]
-  = {XTK_CTRL_NAV,           "nav-view",                nav_props,           COUNT_OF(nav_props),           nav_events,          COUNT_OF(nav_events),          {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_NAVITEM]
-  = {XTK_CTRL_NAVITEM,       "nav-view-item",           navitem_props,       COUNT_OF(navitem_props),       navitem_events,      COUNT_OF(navitem_events),      {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TABS]
-  = {XTK_CTRL_TABS,          "tab-view",                tabs_props,          COUNT_OF(tabs_props),          tabs_events,         COUNT_OF(tabs_events),         {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TABITEM]
-  = {XTK_CTRL_TABITEM,       "tab-view-item",           tabitem_props,       COUNT_OF(tabitem_props),       tabitem_events,      COUNT_OF(tabitem_events),      {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
-  [XTK_CTRL_LISTITEM] = {XTK_CTRL_LISTITEM,      "list-item",               listitem_props,      COUNT_OF(listitem_props),      listitem_events,     COUNT_OF(listitem_events),     {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
-  [XTK_CTRL_LISTBOX]
-  = {XTK_CTRL_LISTBOX,       "list-box",                listbox_props,       COUNT_OF(listbox_props),       listbox_events,      COUNT_OF(listbox_events),      {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_GRIDVIEW]
-  = {XTK_CTRL_GRIDVIEW,      "grid-view",               gridview_props,      COUNT_OF(gridview_props),      gridview_events,     COUNT_OF(gridview_events),     {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_REPEATER]
-  = {XTK_CTRL_REPEATER,      "items-repeater",          repeater_props,      COUNT_OF(repeater_props),      repeater_events,     COUNT_OF(repeater_events),     {XTK_ACCESS_ROLE_LIST, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_ITEMSVIEW]
-  = {XTK_CTRL_ITEMSVIEW,     "items-view",              itemsview_props,     COUNT_OF(itemsview_props),     itemsview_events,    COUNT_OF(itemsview_events),    {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_FLIP]
-  = {XTK_CTRL_FLIP,          "flip-view",               flip_props,          COUNT_OF(flip_props),          flip_events,         COUNT_OF(flip_events),         {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_PIPS] = {XTK_CTRL_PIPS,          "pips-pager",              pips_props,          COUNT_OF(pips_props),          pips_events,         COUNT_OF(pips_events),         {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SUGGEST]
-  = {XTK_CTRL_SUGGEST,       "auto-suggest",            suggest_props,       COUNT_OF(suggest_props),       suggest_events,      COUNT_OF(suggest_events),      {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TOGGLESPLIT]
-  = {XTK_CTRL_TOGGLESPLIT,   "toggle-split-button",     togglesplit_props,   COUNT_OF(togglesplit_props),   togglesplit_events,  COUNT_OF(togglesplit_events),  {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_RADIOGROUP]
-  = {XTK_CTRL_RADIOGROUP,    "radio-buttons",           radiogroup_props,    COUNT_OF(radiogroup_props),    radiogroup_events,   COUNT_OF(radiogroup_events),   {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_RATING]
-  = {XTK_CTRL_RATING,        "rating",                  rating_props,        COUNT_OF(rating_props),        rating_events,       COUNT_OF(rating_events),       {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SELECTOR] = {XTK_CTRL_SELECTOR,      "selector-bar",            selector_props,      COUNT_OF(selector_props),      selector_events,     COUNT_OF(selector_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SELECTORITEM]
-  = {XTK_CTRL_SELECTORITEM,  "selector-bar-item",       selectoritem_props,  COUNT_OF(selectoritem_props),  selectoritem_events, COUNT_OF(selectoritem_events), {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
-  [XTK_CTRL_BREADCRUMB]
-  = {XTK_CTRL_BREADCRUMB,    "breadcrumb-bar",          breadcrumb_props,    COUNT_OF(breadcrumb_props),    breadcrumb_events,   COUNT_OF(breadcrumb_events),   {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CRUMB]
-  = {XTK_CTRL_CRUMB,         "breadcrumb-item",         crumb_props,         COUNT_OF(crumb_props),         crumb_events,        COUNT_OF(crumb_events),        {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TEACHTIP] = {XTK_CTRL_TEACHTIP,      "teaching-tip",            teachtip_props,      COUNT_OF(teachtip_props),      teachtip_events,     COUNT_OF(teachtip_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TREE]
-  = {XTK_CTRL_TREE,          "tree-view",               tree_props,          COUNT_OF(tree_props),          tree_events,         COUNT_OF(tree_events),         {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TREEITEM]
-  = {XTK_CTRL_TREEITEM,      "tree-item",               treeitem_props,      COUNT_OF(treeitem_props),      treeitem_events,     COUNT_OF(treeitem_events),     {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
-  [XTK_CTRL_REFRESH]
-  = {XTK_CTRL_REFRESH,       "refresh",                 refresh_props,       COUNT_OF(refresh_props),       refresh_events,      COUNT_OF(refresh_events),      {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_AVATAR]
-  = {XTK_CTRL_AVATAR,        "person-picture",          avatar_props,        COUNT_OF(avatar_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_IMAGE, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_PAGER]
-  = {XTK_CTRL_PAGER,         "pager",                   pager_props,         COUNT_OF(pager_props),         pager_events,        COUNT_OF(pager_events),        {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SPLITVIEW]
-  = {XTK_CTRL_SPLITVIEW,     "split-view",              splitview_props,     COUNT_OF(splitview_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SPLITPANE]
-  = {XTK_CTRL_SPLITPANE,     "split-view-pane",         splitpane_props,     COUNT_OF(splitpane_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SPLITBODY]
-  = {XTK_CTRL_SPLITBODY,     "split-view-content",      splitbody_props,     COUNT_OF(splitbody_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TITLEBAR] = {XTK_CTRL_TITLEBAR,      "title-bar",               titlebar_props,      COUNT_OF(titlebar_props),      titlebar_events,     COUNT_OF(titlebar_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
-  [XTK_CTRL_SCROLLBAR]
-  = {XTK_CTRL_SCROLLBAR,     "scroll-bar",              scrollbar_props,     COUNT_OF(scrollbar_props),     scrollbar_events,    COUNT_OF(scrollbar_events),    {XTK_ACCESS_ROLE_SCROLLBAR, false, false}, NULL, 0u, TREE, TREE},
-  [XTK_CTRL_LOOPING]
-  = {XTK_CTRL_LOOPING,       "looping-selector",        looping_props,       COUNT_OF(looping_props),       looping_events,      COUNT_OF(looping_events),      {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_LOOPITEM]
-  = {XTK_CTRL_LOOPITEM,      "looping-selector-item",   loopitem_props,      COUNT_OF(loopitem_props),      NULL,                0u,                            {XTK_ACCESS_ROLE_LIST_ITEM, false, false}, NULL, 0u, TREE, TREE},
-  [XTK_CTRL_DATEPICKER]
-  = {XTK_CTRL_DATEPICKER,    "date-picker",             datepicker_props,    COUNT_OF(datepicker_props),    datepicker_events,   COUNT_OF(datepicker_events),   {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_TIMEPICKER]
-  = {XTK_CTRL_TIMEPICKER,    "time-picker",             timepicker_props,    COUNT_OF(timepicker_props),    timepicker_events,   COUNT_OF(timepicker_events),   {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_PICKERFLYOUT]
-  = {XTK_CTRL_PICKERFLYOUT,  "picker-flyout",           pickerflyout_props,  COUNT_OF(pickerflyout_props),  NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CALENDAR]
-  = {XTK_CTRL_CALENDAR,      "calendar-view",           calendar_props,      COUNT_OF(calendar_props),      calendar_events,     COUNT_OF(calendar_events),     {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CALDAY]
-  = {XTK_CTRL_CALDAY,        "calendar-view-day-item",  calday_props,        COUNT_OF(calday_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_LIST_ITEM, false, false}, NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COLORPICKER]
-  = {XTK_CTRL_COLORPICKER,   "color-picker",            colorpicker_props,   COUNT_OF(colorpicker_props),   colorpicker_events,  COUNT_OF(colorpicker_events),  {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COLORSPECTRUM]
-  = {XTK_CTRL_COLORSPECTRUM, "color-spectrum",          colorspectrum_props, COUNT_OF(colorspectrum_props), NULL,                0u,                            {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COLORSLIDER] = {XTK_CTRL_COLORSLIDER,   "color-picker-slider",     colorslider_props,   COUNT_OF(colorslider_props),   NULL,                0u,                            {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COLHEADER]
-  = {XTK_CTRL_COLHEADER,     "column-header",           colheader_props,     COUNT_OF(colheader_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COLITEM]
-  = {XTK_CTRL_COLITEM,       "column-header-item",      colitem_props,       COUNT_OF(colitem_props),       colitem_events,      COUNT_OF(colitem_events),      {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COMMANDBAR]
-  = {XTK_CTRL_COMMANDBAR,    "command-bar",             commandbar_props,    COUNT_OF(commandbar_props),    commandbar_events,   COUNT_OF(commandbar_events),   {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
-  [XTK_CTRL_APPBARBUTTON]
-  = {XTK_CTRL_APPBARBUTTON,  "app-bar-button",          appbarbutton_props,  COUNT_OF(appbarbutton_props),  appbarbutton_events, COUNT_OF(appbarbutton_events), {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_APPBARTOGGLE]
-  = {XTK_CTRL_APPBARTOGGLE,  "app-bar-toggle-button",   appbartoggle_props,  COUNT_OF(appbartoggle_props),  appbartoggle_events, COUNT_OF(appbartoggle_events), {XTK_ACCESS_ROLE_CHECKBOX, true, true},    NULL, 0u, TREE, TREE},
-  [XTK_CTRL_APPBARSEP]
-  = {XTK_CTRL_APPBARSEP,     "app-bar-separator",       appbarsep_props,     COUNT_OF(appbarsep_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_CMDMORE]
-  = {XTK_CTRL_CMDMORE,       "command-bar-more-button", cmdmore_props,       COUNT_OF(cmdmore_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
-  [XTK_CTRL_COLBUTTON]
-  = {XTK_CTRL_COLBUTTON,     "column-header-button",    colbutton_props,     COUNT_OF(colbutton_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+static XtkCtrlDesc const controls [XTK_CTRL_TYPE_COUNT]
+  = {
+	[XTK_CTRL_CONTAINER]
+    = {XTK_CTRL_CONTAINER,     "container",               container_props,     COUNT_OF(container_props),     container_events,    COUNT_OF(container_events),    {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TEXT]
+    = {XTK_CTRL_TEXT,          "text",                    text_props,          COUNT_OF(text_props),          NULL,                0u,                            {XTK_ACCESS_ROLE_TEXT, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_BUTTON]
+    = {XTK_CTRL_BUTTON,        "button",                  button_props,        COUNT_OF(button_props),        button_events,       COUNT_OF(button_events),       {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TOGGLE]
+    = {XTK_CTRL_TOGGLE,        "toggle-button",           toggle_props,        COUNT_OF(toggle_props),        toggle_events,       COUNT_OF(toggle_events),       {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CHECKBOX]
+    = {XTK_CTRL_CHECKBOX,      "checkbox",                checkbox_props,      COUNT_OF(checkbox_props),      checkbox_events,     COUNT_OF(checkbox_events),     {XTK_ACCESS_ROLE_CHECKBOX, true, true},    NULL, 0u, TREE, TREE},
+	[XTK_CTRL_RADIO]
+    = {XTK_CTRL_RADIO,         "radio",                   radio_props,         COUNT_OF(radio_props),         radio_events,        COUNT_OF(radio_events),        {XTK_ACCESS_ROLE_RADIO, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SWITCH]
+    = {XTK_CTRL_SWITCH,        "switch",                  switch_props,        COUNT_OF(switch_props),        switch_events,       COUNT_OF(switch_events),       {XTK_ACCESS_ROLE_CHECKBOX, true, true},    NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SLIDER] = {XTK_CTRL_SLIDER,        "slider",                  slider_props,        COUNT_OF(slider_props),        slider_events,       COUNT_OF(slider_events),       {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TEXTBOX]
+    = {XTK_CTRL_TEXTBOX,       "text-input",              textbox_props,       COUNT_OF(textbox_props),       textbox_events,      COUNT_OF(textbox_events),      {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SCROLL]
+    = {XTK_CTRL_SCROLL,        "scroll",                  scroll_props,        COUNT_OF(scroll_props),        scroll_events,       COUNT_OF(scroll_events),       {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_IMAGE]
+    = {XTK_CTRL_IMAGE,         "image",                   image_props,         COUNT_OF(image_props),         NULL,                0u,                            {XTK_ACCESS_ROLE_IMAGE, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_PROGRESS]
+    = {XTK_CTRL_PROGRESS,      "progress",                progress_props,      COUNT_OF(progress_props),      NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_LIST]
+    = {XTK_CTRL_LIST,          "list",                    list_props,          COUNT_OF(list_props),          list_events,         COUNT_OF(list_events),         {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TAB]
+    = {XTK_CTRL_TAB,           "tab",                     tab_props,           COUNT_OF(tab_props),           NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CARD]
+    = {XTK_CTRL_CARD,          "card",                    card_props,          COUNT_OF(card_props),          card_events,         COUNT_OF(card_events),         {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_DIVIDER]
+    = {XTK_CTRL_DIVIDER,       "divider",                 divider_props,       COUNT_OF(divider_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CANVAS]
+    = {XTK_CTRL_CANVAS,        "canvas",                  canvas_props,        COUNT_OF(canvas_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_PASSWORD]
+    = {XTK_CTRL_PASSWORD,      "password-box",            password_props,      COUNT_OF(password_props),      password_events,     COUNT_OF(password_events),     {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_NUMBER] = {XTK_CTRL_NUMBER,        "number-box",              number_props,        COUNT_OF(number_props),        number_events,       COUNT_OF(number_events),       {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_LINK]
+    = {XTK_CTRL_LINK,          "hyperlink",               link_props,          COUNT_OF(link_props),          link_events,         COUNT_OF(link_events),         {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_REPEAT]
+    = {XTK_CTRL_REPEAT,        "repeat-button",           repeat_props,        COUNT_OF(repeat_props),        repeat_events,       COUNT_OF(repeat_events),       {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_PROGRESSRING]
+    = {XTK_CTRL_PROGRESSRING,  "progress-ring",           progressring_props,  COUNT_OF(progressring_props),  NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_BADGE]
+    = {XTK_CTRL_BADGE,         "info-badge",              badge_props,         COUNT_OF(badge_props),         NULL,                0u,                            {XTK_ACCESS_ROLE_TEXT, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TOOLTIP]
+    = {XTK_CTRL_TOOLTIP,       "tooltip",                 tooltip_props,       COUNT_OF(tooltip_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_FLYOUT]
+    = {XTK_CTRL_FLYOUT,        "flyout",                  flyout_props,        COUNT_OF(flyout_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_MENUFLY]
+    = {XTK_CTRL_MENUFLY,       "menu-flyout",             menufly_props,       COUNT_OF(menufly_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_DROPDOWN]
+    = {XTK_CTRL_DROPDOWN,      "dropdown-button",         dropdown_props,      COUNT_OF(dropdown_props),      dropdown_events,     COUNT_OF(dropdown_events),     {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SPLIT]
+    = {XTK_CTRL_SPLIT,         "split-button",            split_props,         COUNT_OF(split_props),         split_events,        COUNT_OF(split_events),        {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COMBO]
+    = {XTK_CTRL_COMBO,         "combo-box",               combo_props,         COUNT_OF(combo_props),         combo_events,        COUNT_OF(combo_events),        {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_EXPANDER]
+    = {XTK_CTRL_EXPANDER,      "expander",                expander_props,      COUNT_OF(expander_props),      expander_events,     COUNT_OF(expander_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_EXPHEAD]
+    = {XTK_CTRL_EXPHEAD,       "expander-header",         exphead_props,       COUNT_OF(exphead_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_EXPBODY]
+    = {XTK_CTRL_EXPBODY,       "expander-content",        expbody_props,       COUNT_OF(expbody_props),       expbody_events,      COUNT_OF(expbody_events),      {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_INFOBAR]
+    = {XTK_CTRL_INFOBAR,       "info-bar",                infobar_props,       COUNT_OF(infobar_props),       infobar_events,      COUNT_OF(infobar_events),      {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_DIALOG]
+    = {XTK_CTRL_DIALOG,        "content-dialog",          dialog_props,        COUNT_OF(dialog_props),        dialog_events,       COUNT_OF(dialog_events),       {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_DIALOGBODY] = {XTK_CTRL_DIALOGBODY,    "dialog-content",          dialogbody_props,    COUNT_OF(dialogbody_props),    dialogbody_events,   COUNT_OF(dialogbody_events),   {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_MENUBAR]
+    = {XTK_CTRL_MENUBAR,       "menu-bar",                menubar_props,       COUNT_OF(menubar_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_MENUITEM]
+    = {XTK_CTRL_MENUITEM,      "menu-flyout-item",        menuitem_props,      COUNT_OF(menuitem_props),      menuitem_events,     COUNT_OF(menuitem_events),     {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_NAV]
+    = {XTK_CTRL_NAV,           "nav-view",                nav_props,           COUNT_OF(nav_props),           nav_events,          COUNT_OF(nav_events),          {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_NAVITEM]
+    = {XTK_CTRL_NAVITEM,       "nav-view-item",           navitem_props,       COUNT_OF(navitem_props),       navitem_events,      COUNT_OF(navitem_events),      {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TABS]
+    = {XTK_CTRL_TABS,          "tab-view",                tabs_props,          COUNT_OF(tabs_props),          tabs_events,         COUNT_OF(tabs_events),         {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TABITEM]
+    = {XTK_CTRL_TABITEM,       "tab-view-item",           tabitem_props,       COUNT_OF(tabitem_props),       tabitem_events,      COUNT_OF(tabitem_events),      {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
+	[XTK_CTRL_LISTITEM] = {XTK_CTRL_LISTITEM,      "list-item",               listitem_props,      COUNT_OF(listitem_props),      listitem_events,     COUNT_OF(listitem_events),     {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
+	[XTK_CTRL_LISTBOX]
+    = {XTK_CTRL_LISTBOX,       "list-box",                listbox_props,       COUNT_OF(listbox_props),       listbox_events,      COUNT_OF(listbox_events),      {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_GRIDVIEW]
+    = {XTK_CTRL_GRIDVIEW,      "grid-view",               gridview_props,      COUNT_OF(gridview_props),      gridview_events,     COUNT_OF(gridview_events),     {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_REPEATER]
+    = {XTK_CTRL_REPEATER,      "items-repeater",          repeater_props,      COUNT_OF(repeater_props),      repeater_events,     COUNT_OF(repeater_events),     {XTK_ACCESS_ROLE_LIST, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_ITEMSVIEW]
+    = {XTK_CTRL_ITEMSVIEW,     "items-view",              itemsview_props,     COUNT_OF(itemsview_props),     itemsview_events,    COUNT_OF(itemsview_events),    {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_FLIP] = {XTK_CTRL_FLIP,          "flip-view",               flip_props,          COUNT_OF(flip_props),          flip_events,         COUNT_OF(flip_events),         {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_PIPS]
+    = {XTK_CTRL_PIPS,          "pips-pager",              pips_props,          COUNT_OF(pips_props),          pips_events,         COUNT_OF(pips_events),         {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SUGGEST]
+    = {XTK_CTRL_SUGGEST,       "auto-suggest",            suggest_props,       COUNT_OF(suggest_props),       suggest_events,      COUNT_OF(suggest_events),      {XTK_ACCESS_ROLE_EDIT, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TOGGLESPLIT]
+    = {XTK_CTRL_TOGGLESPLIT,   "toggle-split-button",     togglesplit_props,   COUNT_OF(togglesplit_props),   togglesplit_events,  COUNT_OF(togglesplit_events),  {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_RADIOGROUP]
+    = {XTK_CTRL_RADIOGROUP,    "radio-buttons",           radiogroup_props,    COUNT_OF(radiogroup_props),    radiogroup_events,   COUNT_OF(radiogroup_events),   {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_RATING] = {XTK_CTRL_RATING,        "rating",                  rating_props,        COUNT_OF(rating_props),        rating_events,       COUNT_OF(rating_events),       {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SELECTOR]
+    = {XTK_CTRL_SELECTOR,      "selector-bar",            selector_props,      COUNT_OF(selector_props),      selector_events,     COUNT_OF(selector_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SELECTORITEM]
+    = {XTK_CTRL_SELECTORITEM,  "selector-bar-item",       selectoritem_props,  COUNT_OF(selectoritem_props),  selectoritem_events, COUNT_OF(selectoritem_events), {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
+	[XTK_CTRL_BREADCRUMB]
+    = {XTK_CTRL_BREADCRUMB,    "breadcrumb-bar",          breadcrumb_props,    COUNT_OF(breadcrumb_props),    breadcrumb_events,   COUNT_OF(breadcrumb_events),   {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CRUMB]
+    = {XTK_CTRL_CRUMB,         "breadcrumb-item",         crumb_props,         COUNT_OF(crumb_props),         crumb_events,        COUNT_OF(crumb_events),        {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TEACHTIP]
+    = {XTK_CTRL_TEACHTIP,      "teaching-tip",            teachtip_props,      COUNT_OF(teachtip_props),      teachtip_events,     COUNT_OF(teachtip_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TREE]
+    = {XTK_CTRL_TREE,          "tree-view",               tree_props,          COUNT_OF(tree_props),          tree_events,         COUNT_OF(tree_events),         {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TREEITEM]
+    = {XTK_CTRL_TREEITEM,      "tree-item",               treeitem_props,      COUNT_OF(treeitem_props),      treeitem_events,     COUNT_OF(treeitem_events),     {XTK_ACCESS_ROLE_LIST_ITEM, true, true},   NULL, 0u, TREE, TREE},
+	[XTK_CTRL_REFRESH]
+    = {XTK_CTRL_REFRESH,       "refresh",                 refresh_props,       COUNT_OF(refresh_props),       refresh_events,      COUNT_OF(refresh_events),      {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_AVATAR]
+    = {XTK_CTRL_AVATAR,        "person-picture",          avatar_props,        COUNT_OF(avatar_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_IMAGE, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_PAGER]
+    = {XTK_CTRL_PAGER,         "pager",                   pager_props,         COUNT_OF(pager_props),         pager_events,        COUNT_OF(pager_events),        {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SPLITVIEW]
+    = {XTK_CTRL_SPLITVIEW,     "split-view",              splitview_props,     COUNT_OF(splitview_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SPLITPANE] = {XTK_CTRL_SPLITPANE,     "split-view-pane",         splitpane_props,     COUNT_OF(splitpane_props),     splitpane_events,    COUNT_OF(splitpane_events),    {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SPLITBODY]
+    = {XTK_CTRL_SPLITBODY,     "split-view-content",      splitbody_props,     COUNT_OF(splitbody_props),     splitbody_events,    COUNT_OF(splitbody_events),    {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TITLEBAR]
+    = {XTK_CTRL_TITLEBAR,      "title-bar",               titlebar_props,      COUNT_OF(titlebar_props),      titlebar_events,     COUNT_OF(titlebar_events),     {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+	[XTK_CTRL_SCROLLBAR]
+    = {XTK_CTRL_SCROLLBAR,     "scroll-bar",              scrollbar_props,     COUNT_OF(scrollbar_props),     scrollbar_events,    COUNT_OF(scrollbar_events),    {XTK_ACCESS_ROLE_SCROLLBAR, false, false}, NULL, 0u, TREE, TREE},
+	[XTK_CTRL_LOOPING] = {XTK_CTRL_LOOPING,       "looping-selector",        looping_props,       COUNT_OF(looping_props),       looping_events,      COUNT_OF(looping_events),      {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_LOOPITEM]
+    = {XTK_CTRL_LOOPITEM,      "looping-selector-item",   loopitem_props,      COUNT_OF(loopitem_props),      NULL,                0u,                            {XTK_ACCESS_ROLE_LIST_ITEM, false, false}, NULL, 0u, TREE, TREE},
+	[XTK_CTRL_DATEPICKER]
+    = {XTK_CTRL_DATEPICKER,    "date-picker",             datepicker_props,    COUNT_OF(datepicker_props),    datepicker_events,   COUNT_OF(datepicker_events),   {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_TIMEPICKER]
+    = {XTK_CTRL_TIMEPICKER,    "time-picker",             timepicker_props,    COUNT_OF(timepicker_props),    timepicker_events,   COUNT_OF(timepicker_events),   {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_PICKERFLYOUT]
+    = {XTK_CTRL_PICKERFLYOUT,  "picker-flyout",           pickerflyout_props,  COUNT_OF(pickerflyout_props),  NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CALENDAR]
+    = {XTK_CTRL_CALENDAR,      "calendar-view",           calendar_props,      COUNT_OF(calendar_props),      calendar_events,     COUNT_OF(calendar_events),     {XTK_ACCESS_ROLE_LIST, true, true},        NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CALDAY] = {XTK_CTRL_CALDAY,        "calendar-view-day-item",  calday_props,        COUNT_OF(calday_props),        NULL,                0u,                            {XTK_ACCESS_ROLE_LIST_ITEM, false, false}, NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COLORPICKER]
+    = {XTK_CTRL_COLORPICKER,   "color-picker",            colorpicker_props,   COUNT_OF(colorpicker_props),   colorpicker_events,  COUNT_OF(colorpicker_events),  {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COLORSPECTRUM]
+    = {XTK_CTRL_COLORSPECTRUM, "color-spectrum",          colorspectrum_props, COUNT_OF(colorspectrum_props), NULL,                0u,                            {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COLORSLIDER]
+    = {XTK_CTRL_COLORSLIDER,   "color-picker-slider",     colorslider_props,   COUNT_OF(colorslider_props),   NULL,                0u,                            {XTK_ACCESS_ROLE_SLIDER, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COLHEADER]
+    = {XTK_CTRL_COLHEADER,     "column-header",           colheader_props,     COUNT_OF(colheader_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COLITEM]
+    = {XTK_CTRL_COLITEM,       "column-header-item",      colitem_props,       COUNT_OF(colitem_props),       colitem_events,      COUNT_OF(colitem_events),      {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COMMANDBAR] = {XTK_CTRL_COMMANDBAR,    "command-bar",             commandbar_props,    COUNT_OF(commandbar_props),    commandbar_events,   COUNT_OF(commandbar_events),   {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+	[XTK_CTRL_APPBARBUTTON]
+    = {XTK_CTRL_APPBARBUTTON,  "app-bar-button",          appbarbutton_props,  COUNT_OF(appbarbutton_props),  appbarbutton_events, COUNT_OF(appbarbutton_events), {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_APPBARTOGGLE]
+    = {XTK_CTRL_APPBARTOGGLE,  "app-bar-toggle-button",   appbartoggle_props,  COUNT_OF(appbartoggle_props),  appbartoggle_events, COUNT_OF(appbartoggle_events), {XTK_ACCESS_ROLE_CHECKBOX, true, true},    NULL, 0u, TREE, TREE},
+	[XTK_CTRL_APPBARSEP] = {XTK_CTRL_APPBARSEP,     "app-bar-separator",       appbarsep_props,     COUNT_OF(appbarsep_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_CMDMORE]
+    = {XTK_CTRL_CMDMORE,       "command-bar-more-button", cmdmore_props,       COUNT_OF(cmdmore_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_BUTTON, true, true},      NULL, 0u, TREE, TREE},
+	[XTK_CTRL_COLBUTTON]
+    = {XTK_CTRL_COLBUTTON,     "column-header-button",    colbutton_props,     COUNT_OF(colbutton_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
 };
 
 static bool id_in(uint32_t id, uint32_t const *ids, uint32_t count) {

@@ -55,6 +55,11 @@ typedef struct XtkScrollDetail {
 	XtkScrollDesc scroll;
 } XtkScrollDetail;
 
+typedef struct XtkDragDropDetail {
+	XtkStackDesc    stack;
+	XtkDragDropDesc dnd;
+} XtkDragDropDetail;
+
 typedef struct XtkMenuItemDetail {
 	char const *icon;
 	bool        disabled;

@@ -59,30 +59,38 @@ typedef struct XtkContainerProps {
 	bool              fitw;
 	bool              fith;
 	XentFlexWrap      wrap;
+	XtkDropOperation  drop;
+	char const       *dragtext;
+	uint32_t          dragtext_len;
+	char const       *dragfiles;
+	uint32_t          dragfiles_len;
 } XtkContainerProps;
 
-#define XTK_CONTAINER_W_MASK       (1ull << 0u)
-#define XTK_CONTAINER_H_MASK       (1ull << 1u)
-#define XTK_CONTAINER_GROW_MASK    (1ull << 2u)
-#define XTK_CONTAINER_SHRINK_MASK  (1ull << 3u)
-#define XTK_CONTAINER_SELF_MASK    (1ull << 4u)
-#define XTK_CONTAINER_ML_MASK      (1ull << 5u)
-#define XTK_CONTAINER_MT_MASK      (1ull << 6u)
-#define XTK_CONTAINER_MR_MASK      (1ull << 7u)
-#define XTK_CONTAINER_MB_MASK      (1ull << 8u)
-#define XTK_CONTAINER_TIP_MASK     (1ull << 9u)
-#define XTK_CONTAINER_DIR_MASK     (1ull << 10u)
-#define XTK_CONTAINER_ITEMS_MASK   (1ull << 11u)
-#define XTK_CONTAINER_JUSTIFY_MASK (1ull << 12u)
-#define XTK_CONTAINER_GAP_MASK     (1ull << 13u)
-#define XTK_CONTAINER_PL_MASK      (1ull << 14u)
-#define XTK_CONTAINER_PT_MASK      (1ull << 15u)
-#define XTK_CONTAINER_PR_MASK      (1ull << 16u)
-#define XTK_CONTAINER_PB_MASK      (1ull << 17u)
-#define XTK_CONTAINER_FILL_MASK    (1ull << 18u)
-#define XTK_CONTAINER_FITW_MASK    (1ull << 19u)
-#define XTK_CONTAINER_FITH_MASK    (1ull << 20u)
-#define XTK_CONTAINER_WRAP_MASK    (1ull << 21u)
+#define XTK_CONTAINER_W_MASK         (1ull << 0u)
+#define XTK_CONTAINER_H_MASK         (1ull << 1u)
+#define XTK_CONTAINER_GROW_MASK      (1ull << 2u)
+#define XTK_CONTAINER_SHRINK_MASK    (1ull << 3u)
+#define XTK_CONTAINER_SELF_MASK      (1ull << 4u)
+#define XTK_CONTAINER_ML_MASK        (1ull << 5u)
+#define XTK_CONTAINER_MT_MASK        (1ull << 6u)
+#define XTK_CONTAINER_MR_MASK        (1ull << 7u)
+#define XTK_CONTAINER_MB_MASK        (1ull << 8u)
+#define XTK_CONTAINER_TIP_MASK       (1ull << 9u)
+#define XTK_CONTAINER_DIR_MASK       (1ull << 10u)
+#define XTK_CONTAINER_ITEMS_MASK     (1ull << 11u)
+#define XTK_CONTAINER_JUSTIFY_MASK   (1ull << 12u)
+#define XTK_CONTAINER_GAP_MASK       (1ull << 13u)
+#define XTK_CONTAINER_PL_MASK        (1ull << 14u)
+#define XTK_CONTAINER_PT_MASK        (1ull << 15u)
+#define XTK_CONTAINER_PR_MASK        (1ull << 16u)
+#define XTK_CONTAINER_PB_MASK        (1ull << 17u)
+#define XTK_CONTAINER_FILL_MASK      (1ull << 18u)
+#define XTK_CONTAINER_FITW_MASK      (1ull << 19u)
+#define XTK_CONTAINER_FITH_MASK      (1ull << 20u)
+#define XTK_CONTAINER_WRAP_MASK      (1ull << 21u)
+#define XTK_CONTAINER_DROP_MASK      (1ull << 22u)
+#define XTK_CONTAINER_DRAGTEXT_MASK  (1ull << 23u)
+#define XTK_CONTAINER_DRAGFILES_MASK (1ull << 24u)
 
 typedef struct XtkScrollProps {
 	uint64_t          set;
@@ -1921,19 +1929,28 @@ bool       xtk_container_setml(XtkScene *scene, XtkCtrl control, float value, Xt
 bool       xtk_container_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool      xtk_container_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool      xtk_container_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change);
-bool      xtk_container_setitems(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
-bool      xtk_container_setjustify(XtkScene *scene, XtkCtrl control, XentFlexJustify value, XtkChangeStamp change);
-bool      xtk_container_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool      xtk_container_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool      xtk_container_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool      xtk_container_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool      xtk_container_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool      xtk_container_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool      xtk_container_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool      xtk_container_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool      xtk_container_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
+bool xtk_container_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_container_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change);
+bool xtk_container_setitems(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool xtk_container_setjustify(XtkScene *scene, XtkCtrl control, XentFlexJustify value, XtkChangeStamp change);
+bool xtk_container_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_container_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_container_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_container_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_container_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_container_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_container_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_container_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_container_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
+bool xtk_container_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
+bool xtk_container_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_container_setdragfiles(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+XtkSubRef xtk_container_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_container_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_container_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_container_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_text_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_text_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_text_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2170,6 +2187,13 @@ bool      xtk_card_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChan
 bool      xtk_card_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_card_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_card_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
+bool      xtk_card_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
+bool      xtk_card_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_card_setdragfiles(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+XtkSubRef xtk_card_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_card_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_card_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_card_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_divider_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_divider_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_divider_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2406,6 +2430,13 @@ bool      xtk_expbody_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkC
 bool      xtk_expbody_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_expbody_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool      xtk_expbody_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
+bool      xtk_expbody_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
+bool xtk_expbody_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_expbody_setdragfiles(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+XtkSubRef xtk_expbody_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_expbody_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_expbody_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_expbody_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_infobar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_infobar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_infobar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2460,30 +2491,41 @@ bool xtk_dialogbody_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkCha
 bool xtk_dialogbody_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_dialogbody_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_dialogbody_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
-bool xtk_menubar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
-bool xtk_menubar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menubar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool xtk_menuitem_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
-bool xtk_menuitem_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_menuitem_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool xtk_menuitem_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool xtk_menuitem_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool xtk_menuitem_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool xtk_menuitem_setselected(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool xtk_menuitem_setexpanded(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_dialogbody_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
+bool xtk_dialogbody_setdragtext(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+bool xtk_dialogbody_setdragfiles(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+XtkSubRef xtk_dialogbody_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_dialogbody_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_dialogbody_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_dialogbody_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_menubar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_menubar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menubar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_menuitem_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_menuitem_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_menuitem_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_menuitem_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_menuitem_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_menuitem_setenabled(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_menuitem_setselected(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_menuitem_setexpanded(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 XtkSubRef xtk_menuitem_oninvoke(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 bool      xtk_nav_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool      xtk_nav_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -2942,39 +2984,57 @@ bool xtk_splitpane_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChan
 bool xtk_splitpane_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_splitpane_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_splitpane_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
-bool xtk_splitbody_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
-bool xtk_splitbody_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool xtk_splitbody_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change);
-bool xtk_splitbody_setitems(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
-bool xtk_splitbody_setjustify(XtkScene *scene, XtkCtrl control, XentFlexJustify value, XtkChangeStamp change);
-bool xtk_splitbody_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_splitbody_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool xtk_splitbody_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool xtk_splitbody_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
-bool xtk_splitbody_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
-bool xtk_titlebar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
-bool xtk_titlebar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
-bool xtk_titlebar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
-bool xtk_titlebar_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_splitpane_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
+bool xtk_splitpane_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_splitpane_setdragfiles(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+XtkSubRef xtk_splitpane_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_splitpane_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_splitpane_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_splitpane_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_splitbody_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_splitbody_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_splitbody_setdir(XtkScene *scene, XtkCtrl control, XtkStackDirection value, XtkChangeStamp change);
+bool      xtk_splitbody_setitems(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_splitbody_setjustify(XtkScene *scene, XtkCtrl control, XentFlexJustify value, XtkChangeStamp change);
+bool      xtk_splitbody_setgap(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setpl(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setpt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setpr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setpb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_splitbody_setfill(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_splitbody_setfitw(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_splitbody_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool      xtk_splitbody_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change);
+bool      xtk_splitbody_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
+bool xtk_splitbody_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_splitbody_setdragfiles(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+XtkSubRef xtk_splitbody_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_splitbody_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_splitbody_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+XtkSubRef xtk_splitbody_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
+bool      xtk_titlebar_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool      xtk_titlebar_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool      xtk_titlebar_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool      xtk_titlebar_settext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_titlebar_setsubtitle(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_titlebar_seticon(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_titlebar_setshowback(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);

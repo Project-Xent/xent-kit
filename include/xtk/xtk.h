@@ -141,6 +141,16 @@ typedef struct XtkScrollDesc {
 	XtkMsg scroll;
 } XtkScrollDesc;
 
+typedef struct XtkDragDropDesc {
+	XtkDropOperation drop;
+	char const      *drag_text;
+	char const      *drag_files;
+	XtkMsg           hover;
+	XtkMsg           drop_files;
+	XtkMsg           drop_text;
+	XtkMsg           dragged;
+} XtkDragDropDesc;
+
 typedef struct XtkLoopingDesc {
 	char const *const *items;
 	int                nitem;
@@ -711,6 +721,7 @@ XtkEl                 *xtk_appbarsep(XtkUi *ui, XtkAppBarDesc desc);
 XtkEl                 *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl                 *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
 XtkEl                 *xtk_card(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
+XtkEl                 *xtk_dragdrop(XtkUi *ui, XtkDragDropDesc desc, XtkEl *child);
 XtkEl                 *xtk_scroll(XtkUi *ui, XtkScrollDesc desc, XtkEl *children []);
 XtkEl                 *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []);
 XtkEl                 *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []);

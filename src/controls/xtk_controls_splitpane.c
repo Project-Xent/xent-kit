@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_splitpane_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_SPLITPANE, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [22];
+	XtkPropPatch   patches [25];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -31,6 +31,13 @@ XtkLocalId xtk_splitpane_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProp
 	xtk_controls_append_bool(patches, &count, (props->set >> 19u) & 1u, XTK_PROP_FIT_WIDTH, props->fitw, change);
 	xtk_controls_append_bool(patches, &count, (props->set >> 20u) & 1u, XTK_PROP_FIT_HEIGHT, props->fith, change);
 	xtk_controls_append_enum(patches, &count, (props->set >> 21u) & 1u, XTK_PROP_WRAP, props->wrap, change);
+	xtk_controls_append_enum(patches, &count, (props->set >> 22u) & 1u, XTK_PROP_DROP_OPERATION, props->drop, change);
+	xtk_controls_append_string(
+	  patches, &count, (props->set >> 23u) & 1u, XTK_PROP_DRAG_TEXT, props->dragtext, props->dragtext_len, change
+	);
+	xtk_controls_append_string(
+	  patches, &count, (props->set >> 24u) & 1u, XTK_PROP_DRAG_FILES, props->dragfiles, props->dragfiles_len, change
+	);
 	return xtk_txn_create(txn, XTK_CTRL_SPLITPANE, parent, xtk_ref_none(), patches, count);
 }
 
@@ -120,4 +127,36 @@ bool xtk_splitpane_setfith(XtkScene *scene, XtkCtrl control, bool value, XtkChan
 
 bool xtk_splitpane_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value, XtkChangeStamp change) {
 	return xtk_ctrl_setenum(scene, control, XTK_PROP_WRAP, value, change);
+}
+
+bool xtk_splitpane_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change) {
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_DROP_OPERATION, value, change);
+}
+
+bool xtk_splitpane_setdragtext(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+) {
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_DRAG_TEXT, data, xtk_controls_text_len(data, len), change);
+}
+
+bool xtk_splitpane_setdragfiles(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+) {
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_DRAG_FILES, data, xtk_controls_text_len(data, len), change);
+}
+
+XtkSubRef xtk_splitpane_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_DRAG_HOVER, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_splitpane_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_DROP_FILES, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_splitpane_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_DROP_TEXT, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
+}
+
+XtkSubRef xtk_splitpane_ondragcompleted(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {
+	return xtk_txn_on(txn, target, XTK_EVENT_DRAG_COMPLETED, XTK_EVENT_PHASE_MASK_TARGET, fn, arg);
 }

@@ -42,6 +42,9 @@ props = {
     {"fitw", "XTK_PROP_FIT_WIDTH", "bool"},
     {"fith", "XTK_PROP_FIT_HEIGHT", "bool"},
     {"wrap", "XTK_PROP_WRAP", "enum", values = "XentFlexWrap"},
+    {"drop", "XTK_PROP_DROP_OPERATION", "enum", values = "XtkDropOperation"},
+    {"dragtext", "XTK_PROP_DRAG_TEXT", "string"},
+    {"dragfiles", "XTK_PROP_DRAG_FILES", "string"},
   },
   scroll = {
     {"w", "XTK_PROP_WIDTH", "f32"},
@@ -982,6 +985,9 @@ properties = {
   {"XTK_PROP_DYNAMIC_OVERFLOW_ORDER", "dynamic-overflow-order", "i32", {"geometry"}},
   {"XTK_PROP_LABEL_POSITION", "label-position", "enum", {"geometry"}},
   {"XTK_PROP_ACCELERATOR_TEXT", "keyboard-accelerator-text", "string", {"geometry", "paint"}},
+  {"XTK_PROP_DROP_OPERATION", "accepted-operation", "enum", {"hit_test"}},
+  {"XTK_PROP_DRAG_TEXT", "drag-text", "string", {"hit_test"}},
+  {"XTK_PROP_DRAG_FILES", "drag-files", "string", {"hit_test"}},
 }
 
 event_defs = {
@@ -1009,10 +1015,14 @@ event_defs = {
   {key = "fit", id = "XTK_EVENT_FIT", name = "fit", token = "onfit", routing = "capture_bubble", payload = "none", mirrors = {}},
   {key = "reorder", id = "XTK_EVENT_REORDER", name = "reorder", token = "onreorder", routing = "capture_bubble", payload = "i32", mirrors = {}},
   {key = "open", id = "XTK_EVENT_OPEN", name = "open", token = "onopen", routing = "capture_bubble", payload = "bool", mirrors = {"XTK_PROP_OPEN"}},
+  {key = "drag_hover", id = "XTK_EVENT_DRAG_HOVER", name = "drag-hover", token = "ondraghover", routing = "target", payload = "bool", mirrors = {}},
+  {key = "drop_files", id = "XTK_EVENT_DROP_FILES", name = "drop-files", token = "ondropfiles", routing = "target", payload = "string", mirrors = {}},
+  {key = "drop_text", id = "XTK_EVENT_DROP_TEXT", name = "drop-text", token = "ondroptext", routing = "target", payload = "string", mirrors = {}},
+  {key = "drag_completed", id = "XTK_EVENT_DRAG_COMPLETED", name = "drag-completed", token = "ondragcompleted", routing = "target", payload = "i32", mirrors = {}},
 }
 
 controls = {
-  {api = "container", token = "container", name = "container", group = "container", events = {}, access = {"group", false, false}},
+  {api = "container", token = "container", name = "container", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
   {api = "text", token = "text", name = "text", group = "text", events = {}, access = {"text", false, false}},
   {api = "button", token = "button", name = "button", group = "button", events = {"invoke"}, access = {"button", true, true}},
   {api = "toggle_button", token = "toggle", name = "toggle-button", group = "toggle", events = {"change_bool"}, extra = {"XTK_PROP_ICON"}, access = {"button", true, true}},
@@ -1026,7 +1036,7 @@ controls = {
   {api = "progress", token = "progress", name = "progress", group = "progress", events = {}, access = {"none", false, false}},
   {api = "list", token = "list", name = "list", group = "list", events = {"select", "invoke", "realize"}, access = {"list", true, true}},
   {api = "tab", token = "tab", name = "tab", group = "layout", events = {}, access = {"group", true, true}},
-  {api = "card", token = "card", name = "card", group = "container", events = {}, access = {"group", false, false}},
+  {api = "card", token = "card", name = "card", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
   {api = "divider", token = "divider", name = "divider", group = "layout", events = {}, access = {"none", false, false}},
   {api = "canvas", token = "canvas", name = "canvas", group = "layout", events = {}, access = {"none", false, false}},
   {api = "password_box", token = "password", name = "password-box", group = "input", events = {"change_string"}, access = {"edit", true, true}},
@@ -1043,10 +1053,10 @@ controls = {
   {api = "combo_box", token = "combo", name = "combo-box", group = "combo", events = {"select", "invoke", "submit_string"}, extra = {"XTK_PROP_ITEMS"}, access = {"edit", true, true}},
   {api = "expander", token = "expander", name = "expander", group = "expander", events = {"toggle"}, access = {"group", true, true}},
   {api = "expander_header", token = "exphead", name = "expander-header", group = "item", events = {}, access = {"button", true, true}},
-  {api = "expander_content", token = "expbody", name = "expander-content", group = "container", events = {}, access = {"group", false, false}},
+  {api = "expander_content", token = "expbody", name = "expander-content", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
   {api = "info_bar", token = "infobar", name = "info-bar", group = "infobar", events = {"close"}, access = {"group", true, true}},
   {api = "content_dialog", token = "dialog", name = "content-dialog", group = "dialog", events = {"close", "invoke"}, access = {"group", true, true}},
-  {api = "dialog_content", token = "dialogbody", name = "dialog-content", group = "container", events = {}, access = {"group", false, false}},
+  {api = "dialog_content", token = "dialogbody", name = "dialog-content", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
   {api = "menu_bar", token = "menubar", name = "menu-bar", group = "layout", events = {}, access = {"group", true, true}},
   {api = "menu_bar_item", token = "menuitem", name = "menu-flyout-item", group = "item", events = {"invoke"}, access = {"button", true, true}},
   {api = "nav_view", token = "nav", name = "nav-view", group = "nav", events = {"select", "invoke"}, extra = {"XTK_PROP_NAV_MODEL"}, access = {"group", true, true}},
@@ -1075,8 +1085,8 @@ controls = {
   {api = "person_picture", token = "avatar", name = "person-picture", group = "avatar", events = {}, extra = {"XTK_PROP_IMAGE_STRETCH"}, access = {"image", false, false}},
   {api = "pager", token = "pager", name = "pager", group = "pager", events = {"select", "invoke"}, access = {"group", true, true}},
   {api = "split_view", token = "splitview", name = "split-view", group = "splitview", events = {}, access = {"group", false, false}},
-  {api = "split_view_pane", token = "splitpane", name = "split-view-pane", group = "container", events = {}, access = {"group", false, false}},
-  {api = "split_view_content", token = "splitbody", name = "split-view-content", group = "container", events = {}, access = {"group", false, false}},
+  {api = "split_view_pane", token = "splitpane", name = "split-view-pane", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
+  {api = "split_view_content", token = "splitbody", name = "split-view-content", group = "container", events = {"drag_hover", "drop_files", "drop_text", "drag_completed"}, access = {"group", false, false}},
   {api = "title_bar", token = "titlebar", name = "title-bar", group = "titlebar", events = {"invoke", "toggle"}, extra = {"XTK_PROP_ENABLED"}, access = {"group", true, true}},
   {api = "scroll_bar", token = "scrollbar", name = "scroll-bar", group = "scrollbar", events = {"change_f64"}, access = {"scrollbar", false, false}},
   {api = "looping_selector", token = "looping", name = "looping-selector", group = "looping", events = {"select", "invoke"}, extra = {"XTK_PROP_ITEMS"}, access = {"list", true, true}},
@@ -1130,6 +1140,7 @@ enums = {
   XtkTeachingTipPlacement = {prefix = "XTK_TIP_PLACE_", members = {"AUTO", "TOP", "BOTTOM", "LEFT", "RIGHT", "TOP_RIGHT", "TOP_LEFT", "BOTTOM_RIGHT", "BOTTOM_LEFT", "LEFT_TOP", "LEFT_BOTTOM", "RIGHT_TOP", "RIGHT_BOTTOM", "CENTER"}},
   XtkTeachingTipTail = {prefix = "XTK_TIP_TAIL_", members = {"AUTO", "VISIBLE", "COLLAPSED"}},
   XtkTextAlign = {prefix = "XTK_TEXT_", members = {"LEFT", "CENTER", "RIGHT", "JUSTIFY"}},
+  XtkDropOperation = {prefix = "XTK_DROP_", members = {"NONE", "COPY", "MOVE", "LINK"}},
   XtkTextTrim = {prefix = "XTK_TRIM_", members = {"NONE", "CHAR", "CHAR_ELLIPSIS", "WORD", "WORD_ELLIPSIS", "PATH_ELLIPSIS"}},
   XtkTickPlacement = {prefix = "XTK_TICK_", members = {"INLINE", "TOP_LEFT", "BOTTOM_RIGHT", "OUTSIDE", "NONE"}},
 }

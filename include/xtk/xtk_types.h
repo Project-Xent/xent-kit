@@ -81,6 +81,14 @@ typedef enum XtkTextTrim
 	XTK_TRIM_PATH_ELLIPSIS,
 } XtkTextTrim;
 
+typedef enum XtkDropOperation
+{
+	XTK_DROP_NONE,
+	XTK_DROP_COPY,
+	XTK_DROP_MOVE,
+	XTK_DROP_LINK,
+} XtkDropOperation;
+
 typedef enum XtkButtonStyle
 {
 	XTK_BUTTON_STANDARD,

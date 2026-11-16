@@ -298,6 +298,18 @@ static InputFields input_fields(XtkEl const *el) {
 	return (InputFields) {d->content, d->disabled};
 }
 
+static bool encode_dragdrop(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkDragDropDesc          zero = {0};
+	XtkDragDropDetail const *now  = XTK_EL_DETAIL(el, XtkDragDropDetail);
+	XtkDragDropDetail const *was  = prev ? XTK_EL_DETAIL(prev, XtkDragDropDetail) : NULL;
+	XtkDragDropDesc const   *dnd  = now ? &now->dnd : &zero;
+	XtkDragDropDesc const   *old  = was ? &was->dnd : &zero;
+	if (old->drop != dnd->drop && !value_enum(batch, target, XTK_PROP_DROP_OPERATION, ( uint32_t ) dnd->drop))
+		return false;
+	return encode_string_change(batch, target, XTK_PROP_DRAG_TEXT, true, old->drag_text, dnd->drag_text)
+	    && encode_string_change(batch, target, XTK_PROP_DRAG_FILES, true, old->drag_files, dnd->drag_files);
+}
+
 static bool encode_textbox_mode(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	if (XTK_EL_DATA(el)->type != XTK_CTRL_TEXTBOX) return true;
 	XtkTextBoxDesc const *desc = XTK_EL_DETAIL(el, XtkTextBoxDesc);
@@ -1142,6 +1154,7 @@ static bool  encode_element_props(XtkBatch *batch, XtkNodeRef target, XtkEl cons
 	  [XTK_CTRL_TIMEPICKER]   = xtk_encode_time_picker,
 	  [XTK_CTRL_CALENDAR]     = xtk_encode_calendar,
 	  [XTK_CTRL_COLORPICKER]  = xtk_encode_color_picker,
+	  [XTK_CTRL_CONTAINER]    = encode_dragdrop,
 	};
 	if (!encode_common(batch, target, prev, el)) return false;
 	if (!encode_stack(batch, target, prev, el)) return false;
