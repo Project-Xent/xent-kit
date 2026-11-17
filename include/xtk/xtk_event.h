@@ -53,6 +53,7 @@ typedef enum XtkEventDisposition
 	XTK_EVENT_STOP_IMMEDIATE   = 1u << 3,
 } XtkEventDisposition;
 
+/** `string` and `query.text` are valid only for the duration of the callback. */
 typedef struct XtkEventPayload {
 	XtkEventPayloadKind kind;
 

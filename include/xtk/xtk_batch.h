@@ -235,10 +235,12 @@ XtkLocalId      xtk_batch_create(
   XtkBatch *batch, XtkCtrlId type, XtkNodeRef parent, XtkNodeRef before, XtkPropPatch const *props, uint32_t prop_count
 );
 bool      xtk_batch_drop(XtkBatch *batch, XtkNodeRef target);
+/** Copies string and bytes. The caller may free them. `len > 0` with a NULL pointer fails and appends nothing. A resource id is copied; `res_retain` is not called. */
 bool      xtk_batch_set(XtkBatch *batch, XtkNodeRef target, XtkPropertyId id, XtkValue value, XtkChangeStamp change);
 bool      xtk_batch_insert(XtkBatch *batch, XtkNodeRef parent, XtkNodeRef child, XtkNodeRef before);
 bool      xtk_batch_move(XtkBatch *batch, XtkNodeRef parent, XtkNodeRef child, XtkNodeRef before);
 bool      xtk_batch_reparent(XtkBatch *batch, XtkNodeRef child, XtkNodeRef new_parent, XtkNodeRef before);
+/** Borrows `arg` until unsubscribe or the host is destroyed. */
 XtkSubRef xtk_batch_on(XtkBatch *batch, XtkNodeRef target, XtkEventId event, uint32_t phases, XtkEventFn fn, void *arg);
 bool      xtk_batch_off(XtkBatch *batch, XtkSubId id);
 

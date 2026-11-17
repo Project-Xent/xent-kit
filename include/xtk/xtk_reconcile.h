@@ -102,7 +102,9 @@ XtkRt *xtk_rt_create(
 );
 bool              xtk_rt_destroy(XtkRt *rt);
 XtkFrameResult    xtk_rt_frame(XtkRt *rt);
+/** Must run on the thread that created `rt`. */
 XtkPostStatus     xtk_rt_post(XtkRt *rt, XtkMsg msg);
+/** Must run on the thread that created `rt`. Copies `data`; the caller may free it. `len > 0` with NULL `data` is rejected. */
 XtkPostStatus     xtk_rt_poststring(XtkRt *rt, XtkMsg msg, char const *data, uint32_t len);
 void              xtk_rt_invalidate(XtkRt *rt);
 

@@ -10,6 +10,7 @@ typedef struct XtkPrepare XtkPrepare;
 
 #define XTK_HOST_ABI_VERSION 1u
 
+/** `string` and `bytes` point at the host's stored copy, until that property changes or the host is destroyed. */
 typedef struct XtkValueView {
 	XtkValueKind kind;
 
@@ -55,7 +56,9 @@ typedef struct XtkHostVtable {
 	  XtkHost const *host, XtkCtrl control, XtkPropertyId property, XtkValueView *out_value, XtkChangeStamp *out_change
 	);
 	bool     (*res_valid)(XtkHost const *host, XtkResource resource, XtkResourceTypeId type);
+	/** Batch commit copies the id and does not call this. */
 	bool     (*res_retain)(XtkHost *host, XtkResource resource, XtkResourceTypeId type);
+	/** Batch commit copies the id and does not call this. */
 	void     (*res_release)(XtkHost *host, XtkResource resource, XtkResourceTypeId type);
 	uint32_t (*dispatch)(XtkHost *host, XtkEvent const *event);
 } XtkHostVtable;
