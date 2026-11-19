@@ -415,6 +415,8 @@ local function cython_ids()
   declare("XTK_PROP_ITEM_COUNT")
   declare("XTK_PROP_ITEM_HEIGHT")
   declare("XTK_PROP_ENABLED")
+  declare("XTK_PROP_ITEMS")
+  declare("XTK_PROP_NAV_MODEL")
   declare("XTK_EVENT_REALIZE")
   add(lines, "")
   return join(lines)
@@ -459,13 +461,29 @@ local function cython_py()
   return join(lines)
 end
 
+-- item models xenthon encodes itself (XTK_PROP_ITEMS / XTK_PROP_NAV_MODEL); see _reconcile.pyx
+local py_strings = "items: Sequence[str] | None = None"
+local py_models = {
+  selector = {"items: Sequence[str | tuple[str | None, str] | tuple[str | None, str, bool]] | None = None"},
+  tabs = {"items: Sequence[str | tuple[str | None, str]] | None = None"},
+  combo = {py_strings},
+  suggest = {py_strings},
+  breadcrumb = {py_strings},
+  looping = {py_strings},
+  nav = {
+    "items: Sequence[NavKind | tuple[NavKind, str | None, str | None]] | None = None",
+    "titlebar: bool | None = None",
+    "title: str | None = None",
+  },
+}
+
 local function cython_pyi()
   local lines = {
-    "from collections.abc import Callable",
+    "from collections.abc import Callable, Sequence",
     "from enum import IntEnum",
     "from typing import Any",
     "",
-    "from ._reconcile import El, ScrollPos",
+    "from ._reconcile import El, NavKind, ScrollPos",
     "",
     "Msg = Any",
   }
@@ -485,6 +503,7 @@ local function cython_pyi()
     if virtualized(control) then
       params[#params + 1] = "items: tuple[int, Callable[[int], El]] | None = None"
     end
+    for _, param in ipairs(py_models[control.token] or {}) do params[#params + 1] = param end
     add(lines, "", "", "def " .. py_ident(control.token) .. "(", "    " .. table.concat(params, ",\n    ") .. ",",
       ") -> El: ...")
   end
