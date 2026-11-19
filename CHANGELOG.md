@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4 (unreleased)
+
+- the generated Cython stubs (`_controls.pyi`) list the `focus` argument that
+  xenthon accepts on every element.
+
 ## 0.3.3
 
 - added the column header (`XTK_CTRL_COLHEADER`, `XTK_CTRL_COLITEM`) and
