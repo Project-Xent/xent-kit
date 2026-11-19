@@ -23,12 +23,25 @@ local function validate_unique(values, label)
   end
 end
 
+local item_models = {strings = "XTK_PROP_ITEMS", tabs = "XTK_PROP_ITEMS", selector = "XTK_PROP_ITEMS",
+  tree = "XTK_PROP_ITEMS", nav = "XTK_PROP_NAV_MODEL"}
+
+local function validate_model(control)
+  local carrier
+  for _, id in ipairs(control.extra or {}) do
+    if id == "XTK_PROP_ITEMS" or id == "XTK_PROP_NAV_MODEL" then carrier = id end
+  end
+  assert(not control.model or item_models[control.model], control.token .. ": unknown model " .. tostring(control.model))
+  assert(item_models[control.model] == carrier, control.token .. ": model must match its item property")
+end
+
 local function validate_catalog()
   local known = {}
   for _, prop in ipairs(catalog.properties) do known[prop[1]] = true end
   for _, control in ipairs(catalog.controls) do
     for _, id in ipairs(control.props or control.extra or {}) do assert(known[id], control.token .. ": " .. id) end
     for _, event in ipairs(control.events or {}) do assert(catalog.events[event], control.token .. ": " .. event) end
+    validate_model(control)
   end
   for _, def in ipairs(catalog.event_defs) do
     for _, id in ipairs(def.mirrors) do assert(known[id], def.key .. ": mirror " .. id) end

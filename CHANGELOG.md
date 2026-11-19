@@ -4,10 +4,11 @@
 
 - the generated Cython stubs (`_controls.pyi`) list the `focus` argument that
   xenthon accepts on every element.
-- the generated Cython bindings declare `XTK_PROP_ITEMS` / `XTK_PROP_NAV_MODEL` and
-  list xenthon's `items=` argument on Combo, AutoSuggestBox, Breadcrumb,
-  LoopingSelector, TabView and SelectorBar, and `items= / titlebar= / title=` on
-  NavigationView.
+- each control that takes an item model names its kind in the catalog
+  (`model`: strings, tabs, selector, tree or nav), checked against its item
+  property; the generated Cython `Spec` carries it, and `_controls.pyi` lists
+  xenthon's `items=` (and `titlebar= / title=` for NavigationView) from it.
+- `XtkNavKind` is a catalog enum, so every binding generates `NavKind`.
 
 ## 0.3.3
 
