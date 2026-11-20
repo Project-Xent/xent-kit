@@ -38,9 +38,9 @@ static void list_window(XtkNode const *committed, XtkEl const *el, XtkRealized *
 	if (b && b->realized.lanes > 0) *w = b->realized;
 	else list_window_fallback(el, list, w);
 	if (w->last <= list_rows(list) - 1) return;
-	int span  = w->last - w->first;
-	w->last   = list_rows(list) - 1;
-	w->first  = w->last - span > 0 ? w->last - span : 0;
+	int span = w->last - w->first;
+	w->last  = list_rows(list) - 1;
+	w->first = w->last - span > 0 ? w->last - span : 0;
 	if (!list->ngroup) w->first -= w->first % w->lanes;
 }
 
