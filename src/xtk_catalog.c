@@ -2082,6 +2082,20 @@ static XtkPropertyId const groupheader_props [] = {
   XTK_PROP_MARGIN_BOTTOM,
   XTK_PROP_TOOLTIP,
 };
+static XtkPropertyId const comboitem_props [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TEXT,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_ENABLED,
+  XTK_PROP_SELECTED,
+};
 
 static XtkCtrlDesc const
 			controls
@@ -2252,6 +2266,8 @@ static XtkCtrlDesc const
                 = {XTK_CTRL_COLBUTTON,     "column-header-button",    colbutton_props,     COUNT_OF(colbutton_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
 				[XTK_CTRL_GROUPHEADER]
                 = {XTK_CTRL_GROUPHEADER,   "group-header",            groupheader_props,   COUNT_OF(groupheader_props),   NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, true, true},       NULL, 0u, TREE, TREE},
+				[XTK_CTRL_COMBOITEM]
+                = {XTK_CTRL_COMBOITEM,     "combo-box-item",          comboitem_props,     COUNT_OF(comboitem_props),     NULL,                0u,                            {XTK_ACCESS_ROLE_LIST_ITEM, false, false}, NULL, 0u, TREE, TREE},
 };
 
 static bool id_in(uint32_t id, uint32_t const *ids, uint32_t count) {
