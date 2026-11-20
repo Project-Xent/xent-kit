@@ -438,9 +438,9 @@ local function cython_pxi()
     for _, def in ipairs(control_events(control)) do
       events[#events + 1] = string.format('"%s": (%s, %s)', py_event_name(def), def.id, py_payload[def.payload][1])
     end
-    add(lines, string.format("SPEC_%s = Spec(XTK_CTRL_%s, {%s}, {%s}, %s)", control.token:upper(),
+    add(lines, string.format("SPEC_%s = Spec(XTK_CTRL_%s, {%s}, {%s}, %s, %s)", control.token:upper(),
       control.token:upper(), table.concat(props, ", "), table.concat(events, ", "),
-      virtualized(control) and "True" or "False"))
+      virtualized(control) and "True" or "False", control.model and ('"' .. control.model .. '"') or "None"))
   end
   add(lines, "")
   return join(lines)
@@ -459,9 +459,20 @@ local function cython_py()
   return join(lines)
 end
 
+local py_models = {
+  strings = {"items: Sequence[str] | None = None"},
+  tabs = {"items: Sequence[str | tuple[str | None, str]] | None = None"},
+  selector = {"items: Sequence[str | tuple[str | None, str] | tuple[str | None, str, bool]] | None = None"},
+  nav = {
+    "items: Sequence[NavKind | tuple[NavKind, str | None, str | None]] | None = None",
+    "titlebar: bool | None = None",
+    "title: str | None = None",
+  },
+}
+
 local function cython_pyi()
   local lines = {
-    "from collections.abc import Callable",
+    "from collections.abc import Callable, Sequence",
     "from enum import IntEnum",
     "from typing import Any",
     "",
@@ -485,6 +496,7 @@ local function cython_pyi()
     if virtualized(control) then
       params[#params + 1] = "items: tuple[int, Callable[[int], El]] | None = None"
     end
+    for _, param in ipairs(py_models[control.model] or {}) do params[#params + 1] = param end
     add(lines, "", "", "def " .. py_ident(control.token) .. "(", "    " .. table.concat(params, ",\n    ") .. ",",
       ") -> El: ...")
   end
