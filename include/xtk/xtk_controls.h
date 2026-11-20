@@ -64,6 +64,7 @@ typedef struct XtkContainerProps {
 	uint32_t          dragtext_len;
 	char const       *dragfiles;
 	uint32_t          dragfiles_len;
+	XentDirection     flow;
 } XtkContainerProps;
 
 #define XTK_CONTAINER_W_MASK         (1ull << 0u)
@@ -91,6 +92,7 @@ typedef struct XtkContainerProps {
 #define XTK_CONTAINER_DROP_MASK      (1ull << 22u)
 #define XTK_CONTAINER_DRAGTEXT_MASK  (1ull << 23u)
 #define XTK_CONTAINER_DRAGFILES_MASK (1ull << 24u)
+#define XTK_CONTAINER_FLOW_MASK      (1ull << 25u)
 
 typedef struct XtkScrollProps {
 	uint64_t          set;
@@ -1958,6 +1960,7 @@ bool xtk_container_setdragtext(XtkScene *scene, XtkCtrl control, char const *dat
 bool xtk_container_setdragfiles(
   XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
 );
+bool      xtk_container_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change);
 XtkSubRef xtk_container_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_container_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_container_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -2208,6 +2211,7 @@ bool      xtk_card_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap value,
 bool      xtk_card_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
 bool      xtk_card_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_card_setdragfiles(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_card_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change);
 XtkSubRef xtk_card_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_card_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_card_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -2451,6 +2455,7 @@ bool      xtk_expbody_setwrap(XtkScene *scene, XtkCtrl control, XentFlexWrap val
 bool      xtk_expbody_setdrop(XtkScene *scene, XtkCtrl control, XtkDropOperation value, XtkChangeStamp change);
 bool xtk_expbody_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_expbody_setdragfiles(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_expbody_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change);
 XtkSubRef xtk_expbody_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_expbody_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_expbody_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -2516,6 +2521,7 @@ bool xtk_dialogbody_setdragtext(
 bool xtk_dialogbody_setdragfiles(
   XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
 );
+bool      xtk_dialogbody_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change);
 XtkSubRef xtk_dialogbody_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_dialogbody_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_dialogbody_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -3010,6 +3016,7 @@ bool xtk_splitpane_setdragtext(XtkScene *scene, XtkCtrl control, char const *dat
 bool xtk_splitpane_setdragfiles(
   XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
 );
+bool      xtk_splitpane_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change);
 XtkSubRef xtk_splitpane_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_splitpane_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_splitpane_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
@@ -3041,6 +3048,7 @@ bool xtk_splitbody_setdragtext(XtkScene *scene, XtkCtrl control, char const *dat
 bool xtk_splitbody_setdragfiles(
   XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
 );
+bool      xtk_splitbody_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change);
 XtkSubRef xtk_splitbody_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_splitbody_ondropfiles(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);
 XtkSubRef xtk_splitbody_ondroptext(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg);

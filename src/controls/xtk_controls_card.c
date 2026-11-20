@@ -2,7 +2,7 @@
 
 XtkLocalId xtk_card_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props) {
 	if (!props) return xtk_txn_create(txn, XTK_CTRL_CARD, parent, xtk_ref_none(), NULL, 0u);
-	XtkPropPatch   patches [25];
+	XtkPropPatch   patches [26];
 	uint32_t       count  = 0u;
 	XtkChangeStamp change = props->stamp;
 	xtk_controls_append_f32(patches, &count, (props->set >> 0u) & 1u, XTK_PROP_WIDTH, props->w, change);
@@ -38,6 +38,7 @@ XtkLocalId xtk_card_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps con
 	xtk_controls_append_string(
 	  patches, &count, (props->set >> 24u) & 1u, XTK_PROP_DRAG_FILES, props->dragfiles, props->dragfiles_len, change
 	);
+	xtk_controls_append_enum(patches, &count, (props->set >> 25u) & 1u, XTK_PROP_FLOW_DIRECTION, props->flow, change);
 	return xtk_txn_create(txn, XTK_CTRL_CARD, parent, xtk_ref_none(), patches, count);
 }
 
@@ -139,6 +140,10 @@ bool xtk_card_setdragtext(XtkScene *scene, XtkCtrl control, char const *data, ui
 
 bool xtk_card_setdragfiles(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
 	return xtk_ctrl_setstring(scene, control, XTK_PROP_DRAG_FILES, data, xtk_controls_text_len(data, len), change);
+}
+
+bool xtk_card_setflow(XtkScene *scene, XtkCtrl control, XentDirection value, XtkChangeStamp change) {
+	return xtk_ctrl_setenum(scene, control, XTK_PROP_FLOW_DIRECTION, value, change);
 }
 
 XtkSubRef xtk_card_ondraghover(XtkTxn *txn, XtkNodeRef target, XtkEventFn fn, void *arg) {

@@ -8,296 +8,298 @@
 #define TREE    (GEOMETRY | XTK_INVALIDATE_SEMANTICS | XTK_INVALIDATE_ACCESS)
 
 static XtkPropDesc const properties [XTK_PROP_STANDARD_COUNT] = {
-  [XTK_PROP_WIDTH]  = {XTK_PROP_WIDTH,                      "width",                       XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_HEIGHT] = {XTK_PROP_HEIGHT,                     "height",                      XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_GROW]   = {XTK_PROP_GROW,                       "grow",                        XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_WIDTH]  = {XTK_PROP_WIDTH,                      "width",                       XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_HEIGHT] = {XTK_PROP_HEIGHT,                     "height",                      XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_GROW]   = {XTK_PROP_GROW,                       "grow",                        XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SHRINK]
-  = {XTK_PROP_SHRINK,                     "shrink",                      XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SHRINK,                     "shrink",                      XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ALIGN_SELF]
-  = {XTK_PROP_ALIGN_SELF,                 "align-self",                  XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ALIGN_SELF,                 "align-self",                  XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MARGIN_LEFT]
-  = {XTK_PROP_MARGIN_LEFT,                "margin-left",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MARGIN_LEFT,                "margin-left",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MARGIN_TOP]
-  = {XTK_PROP_MARGIN_TOP,                 "margin-top",                  XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MARGIN_TOP,                 "margin-top",                  XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MARGIN_RIGHT]
-  = {XTK_PROP_MARGIN_RIGHT,               "margin-right",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MARGIN_RIGHT,               "margin-right",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MARGIN_BOTTOM]
-  = {XTK_PROP_MARGIN_BOTTOM,              "margin-bottom",               XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_TEXT] = {XTK_PROP_TEXT,                       "text",                        XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MARGIN_BOTTOM,              "margin-bottom",               XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_TEXT] = {XTK_PROP_TEXT,                       "text",                        XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TOOLTIP]
-  = {XTK_PROP_TOOLTIP,                    "tooltip",                     XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_SEMANTICS | XTK_INVALIDATE_ACCESS, XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_ENABLED] = {XTK_PROP_ENABLED,                    "enabled",                     XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_ICON]    = {XTK_PROP_ICON,                       "icon",                        XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TOOLTIP,                    "tooltip",                     XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_SEMANTICS | XTK_INVALIDATE_ACCESS,                       XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_ENABLED] = {XTK_PROP_ENABLED,                    "enabled",                     XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_ICON]    = {XTK_PROP_ICON,                       "icon",                        XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ORIENTATION]
-  = {XTK_PROP_ORIENTATION,                "orientation",                 XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ORIENTATION,                "orientation",                 XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ALIGN_ITEMS]
-  = {XTK_PROP_ALIGN_ITEMS,                "align-items",                 XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ALIGN_ITEMS,                "align-items",                 XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_JUSTIFY_CONTENT]
-  = {XTK_PROP_JUSTIFY_CONTENT,            "justify-content",             XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_GAP] = {XTK_PROP_GAP,                        "gap",                         XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_JUSTIFY_CONTENT,            "justify-content",             XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_GAP] = {XTK_PROP_GAP,                        "gap",                         XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PADDING_LEFT]
-  = {XTK_PROP_PADDING_LEFT,               "padding-left",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PADDING_LEFT,               "padding-left",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PADDING_TOP]
-  = {XTK_PROP_PADDING_TOP,                "padding-top",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PADDING_TOP,                "padding-top",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PADDING_RIGHT]
-  = {XTK_PROP_PADDING_RIGHT,              "padding-right",               XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PADDING_RIGHT,              "padding-right",               XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PADDING_BOTTOM]
-  = {XTK_PROP_PADDING_BOTTOM,             "padding-bottom",              XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_FILL] = {XTK_PROP_FILL,                       "fill",                        XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PADDING_BOTTOM,             "padding-bottom",              XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_FILL] = {XTK_PROP_FILL,                       "fill",                        XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FIT_WIDTH]
-  = {XTK_PROP_FIT_WIDTH,                  "fit-width",                   XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_FIT_WIDTH,                  "fit-width",                   XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FIT_HEIGHT]
-  = {XTK_PROP_FIT_HEIGHT,                 "fit-height",                  XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_FONT_SIZE] = {XTK_PROP_FONT_SIZE,                  "font-size",                   XTK_PROP_KIND_F32,      0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_FIT_HEIGHT,                 "fit-height",                  XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_FONT_SIZE] = {XTK_PROP_FONT_SIZE,                  "font-size",                   XTK_PROP_KIND_F32,      0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FONT_WEIGHT]
-  = {XTK_PROP_FONT_WEIGHT,                "font-weight",                 XTK_PROP_KIND_ENUM,     0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_FONT_WEIGHT,                "font-weight",                 XTK_PROP_KIND_ENUM,     0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TEXT_ALIGN]
-  = {XTK_PROP_TEXT_ALIGN,                 "text-align",                  XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TEXT_ALIGN,                 "text-align",                  XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FOREGROUND]
-  = {XTK_PROP_FOREGROUND,                 "foreground",                  XTK_PROP_KIND_COLOR,    0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_FOREGROUND,                 "foreground",                  XTK_PROP_KIND_COLOR,    0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_BUTTON_STYLE]
-  = {XTK_PROP_BUTTON_STYLE,               "button-style",                XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_CHECKED] = {XTK_PROP_CHECKED,                    "checked",                     XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_BUTTON_STYLE,               "button-style",                XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_CHECKED] = {XTK_PROP_CHECKED,                    "checked",                     XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MIN_F32]
-  = {XTK_PROP_MIN_F32,                    "minimum-f32",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MIN_F32,                    "minimum-f32",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MAX_F32]
-  = {XTK_PROP_MAX_F32,                    "maximum-f32",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MAX_F32,                    "maximum-f32",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_VALUE_F32]
-  = {XTK_PROP_VALUE_F32,                  "value-f32",                   XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_VALUE_F32,                  "value-f32",                   XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_STEP_F32]
-  = {XTK_PROP_STEP_F32,                   "step-f32",                    XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_STEP_F32,                   "step-f32",                    XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PLACEHOLDER]
-  = {XTK_PROP_PLACEHOLDER,                "placeholder",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PLACEHOLDER,                "placeholder",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_IMAGE_SOURCE]
-  = {XTK_PROP_IMAGE_SOURCE,               "image-source",                XTK_PROP_KIND_RESOURCE, 0u, CONTENT,                                          XTK_RESOURCE_TYPE_IMAGE  },
+  = {XTK_PROP_IMAGE_SOURCE,               "image-source",                XTK_PROP_KIND_RESOURCE, 0u, CONTENT,                                                                XTK_RESOURCE_TYPE_IMAGE  },
   [XTK_PROP_IMAGE_STRETCH]
-  = {XTK_PROP_IMAGE_STRETCH,              "image-stretch",               XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_IMAGE_STRETCH,              "image-stretch",               XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_INDETERMINATE]
-  = {XTK_PROP_INDETERMINATE,              "indeterminate",               XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_INDETERMINATE,              "indeterminate",               XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_VALUE_F64]
-  = {XTK_PROP_VALUE_F64,                  "value-f64",                   XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_VALUE_F64,                  "value-f64",                   XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MIN_F64]
-  = {XTK_PROP_MIN_F64,                    "minimum-f64",                 XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MIN_F64,                    "minimum-f64",                 XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MAX_F64]
-  = {XTK_PROP_MAX_F64,                    "maximum-f64",                 XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MAX_F64,                    "maximum-f64",                 XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_STEP_F64]
-  = {XTK_PROP_STEP_F64,                   "step-f64",                    XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_STEP_F64,                   "step-f64",                    XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SELECTED_INDEX]
-  = {XTK_PROP_SELECTED_INDEX,             "selected-index",              XTK_PROP_KIND_I32,      0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_SELECTED] = {XTK_PROP_SELECTED,                   "selected",                    XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SELECTED_INDEX,             "selected-index",              XTK_PROP_KIND_I32,      0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_SELECTED] = {XTK_PROP_SELECTED,                   "selected",                    XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ITEM_COUNT]
-  = {XTK_PROP_ITEM_COUNT,                 "item-count",                  XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_ITEMS] = {XTK_PROP_ITEMS,                      "items",                       XTK_PROP_KIND_BYTES,    0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ITEM_COUNT,                 "item-count",                  XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_ITEMS] = {XTK_PROP_ITEMS,                      "items",                       XTK_PROP_KIND_BYTES,    0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ITEM_HEIGHT]
-  = {XTK_PROP_ITEM_HEIGHT,                "item-height",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ITEM_HEIGHT,                "item-height",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ITEM_WIDTH]
-  = {XTK_PROP_ITEM_WIDTH,                 "item-width",                  XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ITEM_WIDTH,                 "item-width",                  XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_COLUMN_COUNT]
-  = {XTK_PROP_COLUMN_COUNT,               "column-count",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_COLUMN_COUNT,               "column-count",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SELECTION_MODE]
-  = {XTK_PROP_SELECTION_MODE,             "selection-mode",              XTK_PROP_KIND_ENUM,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SELECTION_MODE,             "selection-mode",              XTK_PROP_KIND_ENUM,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ITEM_INVOKED_ENABLED]
-  = {XTK_PROP_ITEM_INVOKED_ENABLED,       "item-invoked-enabled",        XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ITEM_INVOKED_ENABLED,       "item-invoked-enabled",        XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MAX_VISIBLE]
-  = {XTK_PROP_MAX_VISIBLE,                "max-visible",                 XTK_PROP_KIND_I32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MAX_VISIBLE,                "max-visible",                 XTK_PROP_KIND_I32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_NAV_VISIBILITY]
-  = {XTK_PROP_NAV_VISIBILITY,             "navigation-visibility",       XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_EXPANDED] = {XTK_PROP_EXPANDED,                   "expanded",                    XTK_PROP_KIND_BOOL,     0u, TREE,                                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_NAV_VISIBILITY,             "navigation-visibility",       XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_EXPANDED] = {XTK_PROP_EXPANDED,                   "expanded",                    XTK_PROP_KIND_BOOL,     0u, TREE,                                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_CONTENT_HEIGHT]
-  = {XTK_PROP_CONTENT_HEIGHT,             "content-height",              XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_OPEN]    = {XTK_PROP_OPEN,                       "open",                        XTK_PROP_KIND_BOOL,     0u, TREE,                                             XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_MESSAGE] = {XTK_PROP_MESSAGE,                    "message",                     XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_CONTENT_HEIGHT,             "content-height",              XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_OPEN]    = {XTK_PROP_OPEN,                       "open",                        XTK_PROP_KIND_BOOL,     0u, TREE,                                                                   XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_MESSAGE] = {XTK_PROP_MESSAGE,                    "message",                     XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SEVERITY]
-  = {XTK_PROP_SEVERITY,                   "severity",                    XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SEVERITY,                   "severity",                    XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_CLOSABLE]
-  = {XTK_PROP_CLOSABLE,                   "closable",                    XTK_PROP_KIND_BOOL,     0u, STATE | XTK_INVALIDATE_LAYOUT,                    XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_CLOSABLE,                   "closable",                    XTK_PROP_KIND_BOOL,     0u, STATE | XTK_INVALIDATE_LAYOUT,                                          XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PULL_DIRECTION]
-  = {XTK_PROP_PULL_DIRECTION,             "pull-direction",              XTK_PROP_KIND_ENUM,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PULL_DIRECTION,             "pull-direction",              XTK_PROP_KIND_ENUM,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_VISUALIZER_SIZE]
-  = {XTK_PROP_VISUALIZER_SIZE,            "visualizer-size",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_VISUALIZER_SIZE,            "visualizer-size",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_THRESHOLD_RATIO]
-  = {XTK_PROP_THRESHOLD_RATIO,            "threshold-ratio",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_REFRESHING] = {XTK_PROP_REFRESHING,                 "refreshing",                  XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_NAV_MODEL]  = {XTK_PROP_NAV_MODEL,                  "nav-model",                   XTK_PROP_KIND_BYTES,    0u, TREE,                                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_THRESHOLD_RATIO,            "threshold-ratio",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_REFRESHING] = {XTK_PROP_REFRESHING,                 "refreshing",                  XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_NAV_MODEL]  = {XTK_PROP_NAV_MODEL,                  "nav-model",                   XTK_PROP_KIND_BYTES,    0u, TREE,                                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_COMPONENT_PROPS]
-  = {XTK_PROP_COMPONENT_PROPS,            "component-props",             XTK_PROP_KIND_BYTES,    0u, TREE,                                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_COMPONENT_PROPS,            "component-props",             XTK_PROP_KIND_BYTES,    0u, TREE,                                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TICK_FREQUENCY]
-  = {XTK_PROP_TICK_FREQUENCY,             "tick-frequency",              XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TICK_FREQUENCY,             "tick-frequency",              XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TICK_PLACEMENT]
-  = {XTK_PROP_TICK_PLACEMENT,             "tick-placement",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TICK_PLACEMENT,             "tick-placement",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SLIDER_SNAPS_TO]
-  = {XTK_PROP_SLIDER_SNAPS_TO,            "slider-snaps-to",             XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SLIDER_SNAPS_TO,            "slider-snaps-to",             XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SMALL_CHANGE]
-  = {XTK_PROP_SMALL_CHANGE,               "small-change",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SMALL_CHANGE,               "small-change",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_LARGE_CHANGE]
-  = {XTK_PROP_LARGE_CHANGE,               "large-change",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_WRAP] = {XTK_PROP_WRAP,                       "wrap",                        XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_SUBTITLE] = {XTK_PROP_SUBTITLE,                   "subtitle",                    XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_LARGE_CHANGE,               "large-change",                XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_WRAP] = {XTK_PROP_WRAP,                       "wrap",                        XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_SUBTITLE] = {XTK_PROP_SUBTITLE,                   "subtitle",                    XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PRIMARY_TEXT]
-  = {XTK_PROP_PRIMARY_TEXT,               "primary-text",                XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PRIMARY_TEXT,               "primary-text",                XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SECONDARY_TEXT]
-  = {XTK_PROP_SECONDARY_TEXT,             "secondary-text",              XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SECONDARY_TEXT,             "secondary-text",              XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_CLOSE_TEXT]
-  = {XTK_PROP_CLOSE_TEXT,                 "close-text",                  XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_CLOSE_TEXT,                 "close-text",                  XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ACTION_TEXT]
-  = {XTK_PROP_ACTION_TEXT,                "action-text",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_PREFIX]   = {XTK_PROP_PREFIX,                     "prefix",                      XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_SUFFIX]   = {XTK_PROP_SUFFIX,                     "suffix",                      XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_INITIALS] = {XTK_PROP_INITIALS,                   "initials",                    XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ACTION_TEXT,                "action-text",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_PREFIX]   = {XTK_PROP_PREFIX,                     "prefix",                      XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_SUFFIX]   = {XTK_PROP_SUFFIX,                     "suffix",                      XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_INITIALS] = {XTK_PROP_INITIALS,                   "initials",                    XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_BADGE_GLYPH]
-  = {XTK_PROP_BADGE_GLYPH,                "badge-glyph",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_BADGE_GLYPH,                "badge-glyph",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_BADGE_MODE]
-  = {XTK_PROP_BADGE_MODE,                 "badge-mode",                  XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_BADGE_MODE,                 "badge-mode",                  XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_BADGE_VALUE]
-  = {XTK_PROP_BADGE_VALUE,                "badge-value",                 XTK_PROP_KIND_I32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_BADGE_VALUE,                "badge-value",                 XTK_PROP_KIND_I32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DISPLAY_MODE]
-  = {XTK_PROP_DISPLAY_MODE,               "display-mode",                XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_PLACEMENT] = {XTK_PROP_PLACEMENT,                  "placement",                   XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DISPLAY_MODE,               "display-mode",                XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_PLACEMENT] = {XTK_PROP_PLACEMENT,                  "placement",                   XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TAIL_VISIBILITY]
-  = {XTK_PROP_TAIL_VISIBILITY,            "tail-visibility",             XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TAIL_VISIBILITY,            "tail-visibility",             XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FIRST_BUTTON]
-  = {XTK_PROP_FIRST_BUTTON,               "first-button",                XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_FIRST_BUTTON,               "first-button",                XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PREVIOUS_BUTTON]
-  = {XTK_PROP_PREVIOUS_BUTTON,            "previous-button",             XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PREVIOUS_BUTTON,            "previous-button",             XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_NEXT_BUTTON]
-  = {XTK_PROP_NEXT_BUTTON,                "next-button",                 XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_NEXT_BUTTON,                "next-button",                 XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_LAST_BUTTON]
-  = {XTK_PROP_LAST_BUTTON,                "last-button",                 XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_LAST_BUTTON,                "last-button",                 XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PANE_PLACEMENT]
-  = {XTK_PROP_PANE_PLACEMENT,             "pane-placement",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PANE_PLACEMENT,             "pane-placement",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ACTION_ACCENT]
-  = {XTK_PROP_ACTION_ACCENT,              "action-accent",               XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ACTION_ACCENT,              "action-accent",               XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_UNTARGETED]
-  = {XTK_PROP_UNTARGETED,                 "untargeted",                  XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_UNTARGETED,                 "untargeted",                  XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_LIGHT_DISMISS]
-  = {XTK_PROP_LIGHT_DISMISS,              "light-dismiss",               XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_LIGHT_DISMISS,              "light-dismiss",               XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_IS_GROUP]
-  = {XTK_PROP_IS_GROUP,                   "is-group",                    XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_READ_ONLY] = {XTK_PROP_READ_ONLY,                  "read-only",                   XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_IS_GROUP,                   "is-group",                    XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_READ_ONLY] = {XTK_PROP_READ_ONLY,                  "read-only",                   XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_CLEAR_ENABLED]
-  = {XTK_PROP_CLEAR_ENABLED,              "clear-enabled",               XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_CLEAR_ENABLED,              "clear-enabled",               XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_BACK_DISABLED]
-  = {XTK_PROP_BACK_DISABLED,              "back-disabled",               XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_BACK_DISABLED,              "back-disabled",               XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_INTEGRATE_WINDOW]
-  = {XTK_PROP_INTEGRATE_WINDOW,           "integrate-window",            XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_HIDE_SPIN] = {XTK_PROP_HIDE_SPIN,                  "hide-spin",                   XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_SHOW_BACK] = {XTK_PROP_SHOW_BACK,                  "show-back",                   XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_INTEGRATE_WINDOW,           "integrate-window",            XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_HIDE_SPIN] = {XTK_PROP_HIDE_SPIN,                  "hide-spin",                   XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_SHOW_BACK] = {XTK_PROP_SHOW_BACK,                  "show-back",                   XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SHOW_PANE_TOGGLE]
-  = {XTK_PROP_SHOW_PANE_TOGGLE,           "show-pane-toggle",            XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SHOW_PANE_TOGGLE,           "show-pane-toggle",            XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_OPEN_PANE_LENGTH]
-  = {XTK_PROP_OPEN_PANE_LENGTH,           "open-pane-length",            XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_OPEN_PANE_LENGTH,           "open-pane-length",            XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_COMPACT_PANE_LENGTH]
-  = {XTK_PROP_COMPACT_PANE_LENGTH,        "compact-pane-length",         XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_COMPACT_PANE_LENGTH,        "compact-pane-length",         XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PLACEMENT_MARGIN]
-  = {XTK_PROP_PLACEMENT_MARGIN,           "placement-margin",            XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PLACEMENT_MARGIN,           "placement-margin",            XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PLACEHOLDER_F64]
-  = {XTK_PROP_PLACEHOLDER_F64,            "placeholder-f64",             XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PLACEHOLDER_F64,            "placeholder-f64",             XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_INITIAL_VALUE]
-  = {XTK_PROP_INITIAL_VALUE,              "initial-value",               XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_URL] = {XTK_PROP_URL,                        "url",                         XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_NONE,                              XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_INITIAL_VALUE,              "initial-value",               XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_URL] = {XTK_PROP_URL,                        "url",                         XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_NONE,                                                    XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ADD_VISIBLE]
-  = {XTK_PROP_ADD_VISIBLE,                "add-visible",                 XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ADD_VISIBLE,                "add-visible",                 XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_VIEWPORT_SIZE]
-  = {XTK_PROP_VIEWPORT_SIZE,              "viewport-size",               XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_VIEWPORT_SIZE,              "viewport-size",               XTK_PROP_KIND_F64,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_INDICATOR_MODE]
-  = {XTK_PROP_INDICATOR_MODE,             "indicator-mode",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_INDICATOR_MODE,             "indicator-mode",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SHOULD_LOOP]
-  = {XTK_PROP_SHOULD_LOOP,                "should-loop",                 XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SHOULD_LOOP,                "should-loop",                 XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_IS_THREE_STATE]
-  = {XTK_PROP_IS_THREE_STATE,             "is-three-state",              XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_IS_THREE_STATE,             "is-three-state",              XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PROGRESS_STATE]
-  = {XTK_PROP_PROGRESS_STATE,             "progress-state",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PROGRESS_STATE,             "progress-state",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_IS_RANGE]
-  = {XTK_PROP_IS_RANGE,                   "is-range",                    XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_IS_RANGE,                   "is-range",                    XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_RANGE_START]
-  = {XTK_PROP_RANGE_START,                "range-start",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_RANGE_START,                "range-start",                 XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_RANGE_END]
-  = {XTK_PROP_RANGE_END,                  "range-end",                   XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_RANGE_END,                  "range-end",                   XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_IS_EDITABLE]
-  = {XTK_PROP_IS_EDITABLE,                "is-editable",                 XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,     XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_HEADER] = {XTK_PROP_HEADER,                     "header",                      XTK_PROP_KIND_STRING,   0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_DATE]   = {XTK_PROP_DATE,                       "date",                        XTK_PROP_KIND_I32,      0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_TIME]   = {XTK_PROP_TIME,                       "time",                        XTK_PROP_KIND_I32,      0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_IS_EDITABLE,                "is-editable",                 XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT,                           XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_HEADER] = {XTK_PROP_HEADER,                     "header",                      XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_DATE]   = {XTK_PROP_DATE,                       "date",                        XTK_PROP_KIND_I32,      0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_TIME]   = {XTK_PROP_TIME,                       "time",                        XTK_PROP_KIND_I32,      0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MIN_YEAR]
-  = {XTK_PROP_MIN_YEAR,                   "minimum-year",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MIN_YEAR,                   "minimum-year",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MAX_YEAR]
-  = {XTK_PROP_MAX_YEAR,                   "maximum-year",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MAX_YEAR,                   "maximum-year",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MIN_DATE]
-  = {XTK_PROP_MIN_DATE,                   "minimum-date",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MIN_DATE,                   "minimum-date",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MAX_DATE]
-  = {XTK_PROP_MAX_DATE,                   "maximum-date",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MAX_DATE,                   "maximum-date",                XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FIRST_DAY]
-  = {XTK_PROP_FIRST_DAY,                  "first-day-of-week",           XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_CLOCK] = {XTK_PROP_CLOCK,                      "clock",                       XTK_PROP_KIND_ENUM,     0u, CONTENT,                                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_FIRST_DAY,                  "first-day-of-week",           XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_CLOCK] = {XTK_PROP_CLOCK,                      "clock",                       XTK_PROP_KIND_ENUM,     0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MINUTE_INCREMENT]
-  = {XTK_PROP_MINUTE_INCREMENT,           "minute-increment",            XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MINUTE_INCREMENT,           "minute-increment",            XTK_PROP_KIND_I32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_COLOR]
-  = {XTK_PROP_COLOR,                      "color",                       XTK_PROP_KIND_COLOR,    0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_COLOR,                      "color",                       XTK_PROP_KIND_COLOR,    0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ALPHA_ENABLED]
-  = {XTK_PROP_ALPHA_ENABLED,              "alpha-enabled",               XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ALPHA_ENABLED,              "alpha-enabled",               XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_MORE_BUTTON_VISIBLE]
-  = {XTK_PROP_MORE_BUTTON_VISIBLE,        "more-button-visible",         XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_MORE_BUTTON_VISIBLE,        "more-button-visible",         XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SPECTRUM]
-  = {XTK_PROP_SPECTRUM,                   "spectrum-components",         XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SPECTRUM,                   "spectrum-components",         XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PROGRESS_ACTIVE]
-  = {XTK_PROP_PROGRESS_ACTIVE,            "is-active",                   XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PROGRESS_ACTIVE,            "is-active",                   XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_PROGRESS_BORDER_WIDTH]
-  = {XTK_PROP_PROGRESS_BORDER_WIDTH,      "progress-border-width",       XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_MULTILINE] = {XTK_PROP_MULTILINE,                  "multiline",                   XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_MAX_LINES] = {XTK_PROP_MAX_LINES,                  "max-lines",                   XTK_PROP_KIND_I32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_PROGRESS_BORDER_WIDTH,      "progress-border-width",       XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_MULTILINE] = {XTK_PROP_MULTILINE,                  "multiline",                   XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_MAX_LINES] = {XTK_PROP_MAX_LINES,                  "max-lines",                   XTK_PROP_KIND_I32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TEXT_TRIM]
-  = {XTK_PROP_TEXT_TRIM,                  "text-trimming",               XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TEXT_TRIM,                  "text-trimming",               XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_TEXT_WRAP]
-  = {XTK_PROP_TEXT_WRAP,                  "text-wrapping",               XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_TEXT_WRAP,                  "text-wrapping",               XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SELECTABLE]
-  = {XTK_PROP_SELECTABLE,                 "is-text-selection-enabled",   XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SELECTABLE,                 "is-text-selection-enabled",   XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_REALIZED_FIRST]
-  = {XTK_PROP_REALIZED_FIRST,             "realized-first",              XTK_PROP_KIND_I32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_REALIZED_FIRST,             "realized-first",              XTK_PROP_KIND_I32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SCROLL_X]
-  = {XTK_PROP_SCROLL_X,                   "horizontal-offset",           XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_HIT_TEST,   XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SCROLL_X,                   "horizontal-offset",           XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_HIT_TEST,                         XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SCROLL_Y]
-  = {XTK_PROP_SCROLL_Y,                   "vertical-offset",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_HIT_TEST,   XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_MIN_WIDTH] = {XTK_PROP_MIN_WIDTH,                  "min-width",                   XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_MAX_WIDTH] = {XTK_PROP_MAX_WIDTH,                  "max-width",                   XTK_PROP_KIND_F32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SCROLL_Y,                   "vertical-offset",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_HIT_TEST,                         XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_MIN_WIDTH] = {XTK_PROP_MIN_WIDTH,                  "min-width",                   XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_MAX_WIDTH] = {XTK_PROP_MAX_WIDTH,                  "max-width",                   XTK_PROP_KIND_F32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_RESIZABLE]
-  = {XTK_PROP_RESIZABLE,                  "is-resizable",                XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_RESIZABLE,                  "is-resizable",                XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_HIT_TEST,                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SORT_DIRECTION]
-  = {XTK_PROP_SORT_DIRECTION,             "sort-direction",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,  XTK_RESOURCE_TYPE_INVALID},
-  [XTK_PROP_IS_STICKY] = {XTK_PROP_IS_STICKY,                  "is-sticky",                   XTK_PROP_KIND_BOOL,     0u, STATE,                                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SORT_DIRECTION,             "sort-direction",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_PAINT | XTK_INVALIDATE_SEMANTICS,                        XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_IS_STICKY] = {XTK_PROP_IS_STICKY,                  "is-sticky",                   XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_CLOSED_DISPLAY_MODE]
-  = {XTK_PROP_CLOSED_DISPLAY_MODE,        "closed-display-mode",         XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_CLOSED_DISPLAY_MODE,        "closed-display-mode",         XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DEFAULT_LABEL_POSITION]
-  = {XTK_PROP_DEFAULT_LABEL_POSITION,     "default-label-position",      XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DEFAULT_LABEL_POSITION,     "default-label-position",      XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_OVERFLOW_BUTTON_VISIBILITY]
-  = {XTK_PROP_OVERFLOW_BUTTON_VISIBILITY, "overflow-button-visibility",  XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_OVERFLOW_BUTTON_VISIBILITY, "overflow-button-visibility",  XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DYNAMIC_OVERFLOW]
-  = {XTK_PROP_DYNAMIC_OVERFLOW,           "is-dynamic-overflow-enabled", XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DYNAMIC_OVERFLOW,           "is-dynamic-overflow-enabled", XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_SECONDARY]
-  = {XTK_PROP_SECONDARY,                  "is-secondary",                XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_SECONDARY,                  "is-secondary",                XTK_PROP_KIND_BOOL,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DYNAMIC_OVERFLOW_ORDER]
-  = {XTK_PROP_DYNAMIC_OVERFLOW_ORDER,     "dynamic-overflow-order",      XTK_PROP_KIND_I32,      0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DYNAMIC_OVERFLOW_ORDER,     "dynamic-overflow-order",      XTK_PROP_KIND_I32,      0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_LABEL_POSITION]
-  = {XTK_PROP_LABEL_POSITION,             "label-position",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                         XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_LABEL_POSITION,             "label-position",              XTK_PROP_KIND_ENUM,     0u, GEOMETRY,                                                               XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_ACCELERATOR_TEXT]
-  = {XTK_PROP_ACCELERATOR_TEXT,           "keyboard-accelerator-text",   XTK_PROP_KIND_STRING,   0u, GEOMETRY | XTK_INVALIDATE_PAINT,                  XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_ACCELERATOR_TEXT,           "keyboard-accelerator-text",   XTK_PROP_KIND_STRING,   0u, GEOMETRY | XTK_INVALIDATE_PAINT,                                        XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DROP_OPERATION]
-  = {XTK_PROP_DROP_OPERATION,             "accepted-operation",          XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DROP_OPERATION,             "accepted-operation",          XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_HIT_TEST,                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DRAG_TEXT]
-  = {XTK_PROP_DRAG_TEXT,                  "drag-text",                   XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DRAG_TEXT,                  "drag-text",                   XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_HIT_TEST,                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_DRAG_FILES]
-  = {XTK_PROP_DRAG_FILES,                 "drag-files",                  XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_DRAG_FILES,                 "drag-files",                  XTK_PROP_KIND_STRING,   0u, XTK_INVALIDATE_HIT_TEST,                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_GROUPS]
-  = {XTK_PROP_GROUPS,                     "groups",                      XTK_PROP_KIND_BYTES,    0u, XTK_INVALIDATE_LAYOUT,                            XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_GROUPS,                     "groups",                      XTK_PROP_KIND_BYTES,    0u, XTK_INVALIDATE_LAYOUT,                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_RECTANGLE_SELECTION]
-  = {XTK_PROP_RECTANGLE_SELECTION,        "rectangle-selection",         XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_HIT_TEST,                          XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_RECTANGLE_SELECTION,        "rectangle-selection",         XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_HIT_TEST,                                                XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_NINE_GRID_LEFT]
-  = {XTK_PROP_NINE_GRID_LEFT,             "nine-grid-left",              XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_NINE_GRID_LEFT,             "nine-grid-left",              XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_NINE_GRID_TOP]
-  = {XTK_PROP_NINE_GRID_TOP,              "nine-grid-top",               XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_NINE_GRID_TOP,              "nine-grid-top",               XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_NINE_GRID_RIGHT]
-  = {XTK_PROP_NINE_GRID_RIGHT,            "nine-grid-right",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_NINE_GRID_RIGHT,            "nine-grid-right",             XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_NINE_GRID_BOTTOM]
-  = {XTK_PROP_NINE_GRID_BOTTOM,           "nine-grid-bottom",            XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                             XTK_RESOURCE_TYPE_INVALID},
+  = {XTK_PROP_NINE_GRID_BOTTOM,           "nine-grid-bottom",            XTK_PROP_KIND_F32,      0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_FLOW_DIRECTION]
+  = {XTK_PROP_FLOW_DIRECTION,             "flow-direction",              XTK_PROP_KIND_ENUM,     0u, XTK_INVALIDATE_LAYOUT | XTK_INVALIDATE_PAINT | XTK_INVALIDATE_HIT_TEST, XTK_RESOURCE_TYPE_INVALID},
 };
 
 static XtkEventDesc const events [XTK_EVENT_STANDARD_COUNT] = {
@@ -388,6 +390,7 @@ static XtkPropertyId const container_props [] = {
   XTK_PROP_DROP_OPERATION,
   XTK_PROP_DRAG_TEXT,
   XTK_PROP_DRAG_FILES,
+  XTK_PROP_FLOW_DIRECTION,
 };
 static XtkEventId const container_events [] = {
   XTK_EVENT_DRAG_HOVER,
@@ -691,6 +694,7 @@ static XtkPropertyId const card_props [] = {
   XTK_PROP_DROP_OPERATION,
   XTK_PROP_DRAG_TEXT,
   XTK_PROP_DRAG_FILES,
+  XTK_PROP_FLOW_DIRECTION,
 };
 static XtkEventId const card_events [] = {
   XTK_EVENT_DRAG_HOVER,
@@ -985,6 +989,7 @@ static XtkPropertyId const expbody_props [] = {
   XTK_PROP_DROP_OPERATION,
   XTK_PROP_DRAG_TEXT,
   XTK_PROP_DRAG_FILES,
+  XTK_PROP_FLOW_DIRECTION,
 };
 static XtkEventId const expbody_events [] = {
   XTK_EVENT_DRAG_HOVER,
@@ -1058,6 +1063,7 @@ static XtkPropertyId const dialogbody_props [] = {
   XTK_PROP_DROP_OPERATION,
   XTK_PROP_DRAG_TEXT,
   XTK_PROP_DRAG_FILES,
+  XTK_PROP_FLOW_DIRECTION,
 };
 static XtkEventId const dialogbody_events [] = {
   XTK_EVENT_DRAG_HOVER,
@@ -1668,6 +1674,7 @@ static XtkPropertyId const splitpane_props [] = {
   XTK_PROP_DROP_OPERATION,
   XTK_PROP_DRAG_TEXT,
   XTK_PROP_DRAG_FILES,
+  XTK_PROP_FLOW_DIRECTION,
 };
 static XtkEventId const splitpane_events [] = {
   XTK_EVENT_DRAG_HOVER,
@@ -1701,6 +1708,7 @@ static XtkPropertyId const splitbody_props [] = {
   XTK_PROP_DROP_OPERATION,
   XTK_PROP_DRAG_TEXT,
   XTK_PROP_DRAG_FILES,
+  XTK_PROP_FLOW_DIRECTION,
 };
 static XtkEventId const splitbody_events [] = {
   XTK_EVENT_DRAG_HOVER,

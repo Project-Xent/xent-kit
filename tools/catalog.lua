@@ -45,6 +45,7 @@ props = {
     {"drop", "XTK_PROP_DROP_OPERATION", "enum", values = "XtkDropOperation"},
     {"dragtext", "XTK_PROP_DRAG_TEXT", "string"},
     {"dragfiles", "XTK_PROP_DRAG_FILES", "string"},
+    {"flow", "XTK_PROP_FLOW_DIRECTION", "enum", values = "XentDirection"},
   },
   scroll = {
     {"w", "XTK_PROP_WIDTH", "f32"},
@@ -999,6 +1000,7 @@ properties = {
   {"XTK_PROP_NINE_GRID_TOP", "nine-grid-top", "f32", {"paint"}},
   {"XTK_PROP_NINE_GRID_RIGHT", "nine-grid-right", "f32", {"paint"}},
   {"XTK_PROP_NINE_GRID_BOTTOM", "nine-grid-bottom", "f32", {"paint"}},
+  {"XTK_PROP_FLOW_DIRECTION", "flow-direction", "enum", {"layout", "paint", "hit_test"}},
 }
 
 event_defs = {
@@ -1127,6 +1129,7 @@ enums = {
   XentFlexAlign = {prefix = "XENT_FLEX_ALIGN_", members = {"AUTO", "START", "END", "CENTER", "STRETCH", "BASELINE"}},
   XentFlexJustify = {prefix = "XENT_FLEX_JUSTIFY_", members = {"START", "END", "CENTER", "SPACE_BETWEEN", "SPACE_AROUND", "SPACE_EVENLY"}},
   XentFlexWrap = {prefix = "XENT_FLEX_", members = {"NO_WRAP", "WRAP"}},
+  XentDirection = {prefix = "XENT_DIRECTION_", members = {"INHERIT", "LTR", "RTL"}},
   XtkNavKind = {prefix = "XTK_NAV_", members = {"ITEM", "HEADER", "SEPARATOR", "FOOTER", "CHILD"}},
   XtkBadgeMode = {prefix = "XTK_BADGE_", members = {"DOT", "NUMBER", "ICON"}},
   XtkButtonStyle = {prefix = "XTK_BUTTON_", members = {"STANDARD", "SUBTLE", "TEXT", "ACCENT"}},
