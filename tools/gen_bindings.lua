@@ -474,7 +474,7 @@ local function cython_pyi()
     for _, member in ipairs(catalog.enums[name].members) do add(lines, "    " .. py_member(member) .. ": int") end
   end
   for _, control in ipairs(catalog.public) do
-    local params = {"*children: El", "key: int | str | None = None"}
+    local params = {"*children: El", "key: int | str | None = None", "focus: bool | int | str | None = None"}
     for _, prop in ipairs(control_props(control)) do
       local ptype = prop.values and enum_name(prop.values) or py_kind[prop[3]][2]
       params[#params + 1] = py_ident(prop[1]) .. ": " .. ptype .. " | None = None"
