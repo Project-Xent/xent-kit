@@ -9,6 +9,8 @@
   property; the generated Cython `Spec` carries it, and `_controls.pyi` lists
   xenthon's `items=` (and `titlebar= / title=` for NavigationView) from it.
 - `XtkNavKind` is a catalog enum, so every binding generates `NavKind`.
+- added `XTK_PROP_FLOW_DIRECTION` (`XentDirection`: inherit, LTR, RTL), with a
+  typed setter on containers; any node takes it through `xtk_txn_set`.
 
 ## 0.3.3
 
