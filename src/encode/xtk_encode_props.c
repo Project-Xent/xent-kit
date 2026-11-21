@@ -672,6 +672,18 @@ static bool encode_list_groups(XtkBatch *batch, XtkNodeRef target, XtkEl const *
 	return value_bytes(batch, target, XTK_PROP_GROUPS, desc->groups, sizeof(int32_t) * ( uint32_t ) desc->ngroup);
 }
 
+static bool encode_string_items(
+  XtkBatch *batch, XtkNodeRef target, char const *const *old_items, int old_count, char const *const *items, int count
+);
+
+static bool encode_list_names(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkListDesc const *desc = XTK_EL_DETAIL(el, XtkListDesc);
+	XtkListDesc const *old  = prev ? XTK_EL_DETAIL(prev, XtkListDesc) : NULL;
+	if (XTK_EL_DATA(el)->type == XTK_CTRL_REPEATER || XTK_EL_DATA(el)->type == XTK_CTRL_ITEMSVIEW) return true;
+	if (!old && desc->nname == 0) return true;
+	return encode_string_items(batch, target, old ? old->names : NULL, old ? old->nname : 0, desc->names, desc->nname);
+}
+
 static bool encode_list_host(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	if (!xtk_ctrl_islist(XTK_EL_DATA(el)->type)) return true;
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->nitem != XTK_EL_DETAIL(el, XtkListDesc)->nitem)
@@ -686,7 +698,7 @@ static bool encode_list_host(XtkBatch *batch, XtkNodeRef target, XtkEl const *pr
 	if ((!prev || XTK_EL_DETAIL(prev, XtkListDesc)->ncol != XTK_EL_DETAIL(el, XtkListDesc)->ncol)
 	    && !value_i32(batch, target, XTK_PROP_COLUMN_COUNT, XTK_EL_DETAIL(el, XtkListDesc)->ncol))
 		return false;
-	if (!encode_list_groups(batch, target, prev, el)) return false;
+	if (!encode_list_groups(batch, target, prev, el) || !encode_list_names(batch, target, prev, el)) return false;
 	if ((prev ? XTK_EL_DETAIL(prev, XtkListDesc)->rect_select != XTK_EL_DETAIL(el, XtkListDesc)->rect_select
 	          : XTK_EL_DETAIL(el, XtkListDesc)->rect_select)
 	    && !value_bool(batch, target, XTK_PROP_RECTANGLE_SELECTION, XTK_EL_DETAIL(el, XtkListDesc)->rect_select))

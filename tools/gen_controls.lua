@@ -23,7 +23,7 @@ local function validate_unique(values, label)
   end
 end
 
-local item_models = {strings = "XTK_PROP_ITEMS", tabs = "XTK_PROP_ITEMS", selector = "XTK_PROP_ITEMS",
+local item_models = {strings = "XTK_PROP_ITEMS", names = "XTK_PROP_ITEMS", tabs = "XTK_PROP_ITEMS", selector = "XTK_PROP_ITEMS",
   tree = "XTK_PROP_ITEMS", nav = "XTK_PROP_NAV_MODEL"}
 
 local function validate_model(control)

@@ -461,6 +461,7 @@ end
 
 local py_models = {
   strings = {"items: Sequence[str] | None = None"},
+  names = {"names: Sequence[str] | None = None"},
   tabs = {"items: Sequence[str | tuple[str | None, str]] | None = None"},
   selector = {"items: Sequence[str | tuple[str | None, str] | tuple[str | None, str, bool]] | None = None"},
   nav = {

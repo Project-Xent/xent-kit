@@ -650,6 +650,7 @@ static XtkPropertyId const list_props [] = {
   XTK_PROP_REALIZED_FIRST,
   XTK_PROP_RECTANGLE_SELECTION,
   XTK_PROP_GROUPS,
+  XTK_PROP_ITEMS,
 };
 static XtkEventId const list_events [] = {
   XTK_EVENT_SELECT,
@@ -1217,6 +1218,7 @@ static XtkPropertyId const listbox_props [] = {
   XTK_PROP_SELECTION_MODE,
   XTK_PROP_REALIZED_FIRST,
   XTK_PROP_RECTANGLE_SELECTION,
+  XTK_PROP_ITEMS,
 };
 static XtkEventId const listbox_events [] = {
   XTK_EVENT_SELECT,
@@ -1243,6 +1245,7 @@ static XtkPropertyId const gridview_props [] = {
   XTK_PROP_REALIZED_FIRST,
   XTK_PROP_RECTANGLE_SELECTION,
   XTK_PROP_GROUPS,
+  XTK_PROP_ITEMS,
 };
 static XtkEventId const gridview_events [] = {
   XTK_EVENT_SELECT,

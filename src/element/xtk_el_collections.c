@@ -31,11 +31,24 @@ static bool list_groups_copy(XtkUi *ui, XtkListDesc *desc) {
 	return true;
 }
 
+static bool list_names_copy(XtkUi *ui, XtkListDesc *desc) {
+	if (desc->nname <= 0 || !desc->names) {
+		desc->names = NULL;
+		desc->nname = 0;
+		return true;
+	}
+	char const **copy = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy) * ( size_t ) desc->nname);
+	if (!copy) return false;
+	for (int i = 0; i < desc->nname; i++) copy [i] = xtk_strdup(ui, desc->names [i]);
+	desc->names = copy;
+	return true;
+}
+
 static XtkEl *items_host(XtkUi *ui, XtkCtrlType type, XtkListDesc desc) {
 	XtkEl *el = xtk_el_new(ui, type, NULL);
 	if (!el) return NULL;
 	if (desc.nitem < 0 || !desc.item) desc.nitem = 0;
-	if (!list_groups_copy(ui, &desc)) return NULL;
+	if (!list_groups_copy(ui, &desc) || !list_names_copy(ui, &desc)) return NULL;
 	if (desc.itemh < 0.0f) desc.itemh = 0.0f;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	XTK_EL_DATA(el)->virtualized = true;

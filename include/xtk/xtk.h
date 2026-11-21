@@ -338,23 +338,25 @@ typedef enum XtkListKind
 } XtkListKind;
 
 typedef struct XtkListDesc {
-	int            nitem;
-	float          itemh;
-	float          itemw;
-	int            ncol;
-	XtkEl         *(*item)(XtkUi *ui, void *env, int index);
-	void          *env;
-	XtkListSelMode sel_mode;
-	int            sel;
-	XtkMsg         select;
-	float          gap;
-	bool           item_invoked_enabled;
-	XtkMsg         invoke;
-	XtkEl         *header;
-	int32_t const *groups;
-	int            ngroup;
-	XtkEl         *(*group_header)(XtkUi *ui, void *env, int group);
-	bool           rect_select;
+	int                nitem;
+	float              itemh;
+	float              itemw;
+	int                ncol;
+	XtkEl             *(*item)(XtkUi *ui, void *env, int index);
+	void              *env;
+	XtkListSelMode     sel_mode;
+	int                sel;
+	XtkMsg             select;
+	float              gap;
+	bool               item_invoked_enabled;
+	XtkMsg             invoke;
+	XtkEl             *header;
+	int32_t const     *groups;
+	int                ngroup;
+	XtkEl             *(*group_header)(XtkUi *ui, void *env, int group);
+	bool               rect_select;
+	char const *const *names;
+	int                nname;
 } XtkListDesc;
 
 typedef struct XtkListRow {
