@@ -10,6 +10,7 @@ enum
 {
 	XTK_NAV_MODEL_VERSION          = 1u,
 	XTK_NAV_MODEL_WINDOW_TITLE_BAR = 1u << 0,
+	XTK_NAV_MODEL_TALL_TITLE_BAR   = 1u << 1,
 };
 
 typedef struct XtkNavModelView {

@@ -235,20 +235,49 @@ static bool stage_fresh_children(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl c
 	return true;
 }
 
+static unsigned child_slot(bool nav, XtkEl const *child) {
+	unsigned slot         = XTK_EL_DATA(child)->nav_slot;
+	bool     content_slot = slot == XTK_NAV_SLOT_PAGE_HEADER || slot == XTK_NAV_SLOT_CONTENT_OVERLAY;
+	return nav && (slot <= XTK_NAV_SLOT_SEARCH || content_slot) ? slot : XTK_NAV_SLOT_CONTENT;
+}
+
+static bool changed_child_slot(XtkNode const *old, unsigned slot) {
+	if (!old || old->type_id != XTK_CTRL_NAVSLOT || !old->props) return false;
+	for (uint32_t i = 0; i < old->props->count; i++) {
+		XtkPropPatch const *prop = &old->props->items [i];
+		if (prop->id == XTK_PROP_NAV_SLOT) return prop->value.u.u32 != slot;
+	}
+	return slot != XTK_NAV_SLOT_CONTENT;
+}
+
+static bool stage_child(
+  XtkReconcileTxn *txn, XtkPlanRec *plan, XtkStagedChild *staged, XtkNode *old, XtkNodeRef *anchor, bool changed_slot
+) {
+	XtkPlanRec *child = NULL;
+	if (!plan_node(txn, plan, staged->el, old, *anchor, &child)) {
+		staged->plan = child;
+		return false;
+	}
+	staged->plan = child;
+	bool move    = staged->do_move || changed_slot;
+	if (!child->is_create && move && !xtk_batch_move(txn->batch, plan->ref, child->ref, *anchor)) return false;
+	*anchor = child->ref;
+	return true;
+}
+
 static bool stage_children(XtkReconcileTxn *txn, XtkPlanRec *plan, XtkEl const *el, XtkNode *node, int new_n) {
 	if (plan->is_create) return stage_fresh_children(txn, plan, el, new_n);
-	XtkNodeRef before = xtk_ref_none();
+	XtkNodeRef anchors [XTK_NAV_SLOT_CONTENT_OVERLAY + 1];
+	for (unsigned i = 0; i <= XTK_NAV_SLOT_CONTENT_OVERLAY; i++) anchors [i] = xtk_ref_none();
+	bool nav = XTK_EL_DATA(el)->type == XTK_CTRL_NAV;
 	for (int i = new_n - 1; i >= 0; i--) {
-		int         oi          = plan->children [i].old_index;
-		XtkNode    *oldn        = (oi >= 0 && node && oi < node->child_count) ? node->children [oi] : NULL;
-		XtkPlanRec *cp          = NULL;
-		bool        ok          = plan_node(txn, plan, xtk_el_child(el, i), oldn, before, &cp);
-		plan->children [i].plan = cp;
-		if (!ok) return false;
-		plan->children [i].el = xtk_el_child(el, i);
-		if (!cp->is_create && plan->children [i].do_move && !xtk_batch_move(txn->batch, plan->ref, cp->ref, before))
-			return false;
-		before = cp->ref;
+		XtkStagedChild *staged = &plan->children [i];
+		int             index  = staged->old_index;
+		XtkNode        *old    = index >= 0 && node && index < node->child_count ? node->children [index] : NULL;
+		staged->el             = xtk_el_child(el, i);
+		unsigned slot          = child_slot(nav, staged->el);
+		bool     changed_slot  = nav && changed_child_slot(old, slot);
+		if (!stage_child(txn, plan, staged, old, &anchors [slot], changed_slot)) return false;
 	}
 	return true;
 }

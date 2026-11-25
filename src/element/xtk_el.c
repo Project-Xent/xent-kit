@@ -371,6 +371,20 @@ XtkEl *xtk_tooltip(XtkUi *ui, XtkEl *el, char const *text) {
 	return el;
 }
 
+XtkEl *xtk_automation(XtkUi *ui, XtkEl *el, XtkAutomation const *automation) {
+	XtkAutomation *copy
+	  = el && automation ? ( XtkAutomation * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy)) : NULL;
+	if (!copy) return el;
+	*copy                  = *automation;
+	char const **text [15] = {
+	  &copy->name, &copy->id, &copy->help, &copy->description, &copy->item_status, &copy->item_type,
+	  &copy->control_type, &copy->accelerator, &copy->access_key, &copy->landmark_name, &copy->labeled_by,
+	  &copy->described_by, &copy->flows_to, &copy->flows_from, &copy->controls};
+	for (int i = 0; i < 15; i++) *text [i] = xtk_strdup(ui, *text [i]);
+	XTK_EL_DATA(el)->automation = copy;
+	return el;
+}
+
 XtkEl *xtk_spacer(XtkUi *ui) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_CONTAINER, NULL);
 	if (!el) return NULL;

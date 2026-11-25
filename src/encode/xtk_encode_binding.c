@@ -44,6 +44,7 @@ static XtkBindingSpec const binding_specs [] = {
   BIND(XTK_CTRL_COLITEM, XtkColItemDesc, fit, XTK_EVENT_FIT),
   BIND(XTK_CTRL_COLITEM, XtkColItemDesc, reorder, XTK_EVENT_REORDER),
   BIND(XTK_CTRL_COMMANDBAR, XtkCommandBarDesc, change, XTK_EVENT_OPEN),
+  BIND(XTK_CTRL_SPLITVIEW, XtkSplitViewDesc, change, XTK_EVENT_OPEN),
   BIND(XTK_CTRL_APPBARBUTTON, XtkAppBarDesc, click, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_APPBARTOGGLE, XtkAppBarDesc, change, XTK_EVENT_CHANGE_BOOL),
   BIND(XTK_CTRL_SCROLL, XtkScrollDetail, scroll.scroll, XTK_EVENT_SCROLL),
@@ -82,6 +83,7 @@ static XtkBindingSpec const binding_specs [] = {
   BIND(XTK_CTRL_TABS, XtkTabViewDesc, add, XTK_EVENT_INVOKE),
   BIND(XTK_CTRL_DIALOG, XtkDialogDesc, result, XTK_EVENT_CLOSE),
   BIND(XTK_CTRL_NAV, XtkNavDesc, select, XTK_EVENT_SELECT),
+  BIND(XTK_CTRL_NAV, XtkNavDesc, back_requested, XTK_EVENT_BACK_REQUESTED),
   BIND(XTK_CTRL_FLIP, XtkFlipDesc, select, XTK_EVENT_SELECT),
   BIND(XTK_CTRL_PIPS, XtkPipsDesc, select, XTK_EVENT_SELECT),
   BIND(XTK_CTRL_PAGER, XtkPagerDesc, select, XTK_EVENT_SELECT),
@@ -172,8 +174,7 @@ static XtkMsg msg_from_pair(XtkMsg msg, XtkEvent const *event) {
 	return msg;
 }
 
-static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
-	XtkMsg msg = base;
+static XtkMsg msg_from_payload(XtkMsg msg, XtkEvent const *event) {
 	switch (event->payload.kind) {
 	case XTK_EVENT_PAYLOAD_BOOL   : msg.b = event->payload.u.b; break;
 	case XTK_EVENT_PAYLOAD_F32    : msg.f = event->payload.u.f32; break;
@@ -182,6 +183,12 @@ static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
 	case XTK_EVENT_PAYLOAD_STRING : msg.ptr = ( void * ) event->payload.u.string.data; break;
 	default                       : msg = msg_from_pair(msg, event); break;
 	}
+	return msg;
+}
+
+static XtkMsg msg_from_event(XtkMsg base, XtkEvent const *event) {
+	XtkMsg msg = msg_from_payload(base, event);
+	if (event->id == XTK_EVENT_TREE_SELECT) msg.i = msg.i >= 0 ? msg.i + 1 : 0;
 	return msg;
 }
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.4 (unreleased)
+## 0.4.0 (unreleased)
 
 - the generated Cython stubs (`_controls.pyi`) list the `focus` argument that
   xenthon accepts on every element.
@@ -11,6 +11,49 @@
 - `XtkNavKind` is a catalog enum, so every binding generates `NavKind`.
 - added `XTK_PROP_FLOW_DIRECTION` (`XentDirection`: inherit, LTR, RTL), with a
   typed setter on containers; any node takes it through `xtk_txn_set`.
+- added `XtkNavDesc.pane_mode` and the NavigationView typed setter for
+  `XTK_PROP_DISPLAY_MODE`. The modes are Auto, Left, Top, LeftCompact, and
+  LeftMinimal.
+- NavigationView shows a built-in Settings item. `XtkNavDesc.hide_settings`
+  hides it. Selecting it reports `XTK_NAV_SETTINGS` (`-2`) in `.sel` and in
+  the select message. `XTK_PROP_SETTINGS_VISIBLE` is the imperative property
+  and defaults to visible, so the generated bindings use `settings_visible`
+  (false hides the item).
+- added `XtkNavDesc.pane_title` and `XTK_PROP_PANE_TITLE`.
+- added `XTK_NAV_FOOTER_HEADER` to `XtkNavKind`. It places a group header
+  among the footer items, as a `NavigationViewItemHeader` in WinUI's
+  `FooterMenuItems`. The value is appended, so existing kinds keep their
+  numbers, and every binding generates it.
+- added `xtk_nav_slot` (`XTK_CTRL_NAVSLOT`, `XtkNavSlot`) for the header,
+  custom content, pane footer, and search slots. `XTK_NAV_SLOT_CONTENT` is
+  the page body. Bindings expose it as `navslot` with a `slot` value.
+- added `XtkDialogDesc.default_button` and the typed ContentDialog property
+  for selecting the primary, secondary or close button as the default.
+- SplitView sends the boolean `OPEN` event when light dismiss closes the pane.
+  Bind it with `XtkSplitViewDesc.change` or `xtk_splitview_onopen`.
+- PersonPicture accepts a badge image and text for its automation name.
+- `xtk_automation` and the generated control setters expose UI Automation
+  metadata, including names, IDs, landmarks, relationships, live settings,
+  and access keys. List models can provide item names for automation queries
+  before the items are realized.
+- PagerControl supports ComboBox, NumberBox, and button panel display modes,
+  with automatic mode selection based on the page count. The button panel
+  can omit the first and last page number cells beside an ellipsis with
+  `hide_ends`.
+
+### Breaking changes
+
+| Change | Migration |
+| --- | --- |
+| `XtkTreeDesc.sel` is one-based in single-select mode | Pass 0 for no selection and 1 for the first row |
+| Multi-select TreeView reads selection from each node's `checked` field | Keep `checked` in the declarative model when rebuilding it, including after expansion |
+| TreeView `.select` delivers a one-based row in `msg.i` | Adjust selection handlers. `.expand` and `.invoke` still deliver zero-based rows |
+| ContentDialog starts without an accent command button | Set `default_button = XTK_DIALOG_BUTTON_PRIMARY` to make the primary button the default |
+| PersonPicture defaults to 96 DIP and `XtkPersonPictureDesc` has new fields | Rebuild C callers and set `size = 72` where the previous default is required |
+| PagerControl display modes changed | Replace `NUMBER_PANEL` with `XTK_PAGER_DISPLAY_BUTTON_PANEL`. `XTK_PAGER_DISPLAY_NUMBER_BOX` provides editable entry in place of the read-only `NUMBER_TEXT` display. Update any stored enum values |
+| PagerControl navigation button modes changed | Use `XTK_PAGER_BUTTON_VISIBLE` for `AUTO` or `ALWAYS`, `XTK_PAGER_BUTTON_HIDDEN_ON_EDGE` for `HIDDEN_EDGE`, and `XTK_PAGER_BUTTON_HIDDEN` for `NONE`. Visible buttons are disabled at the corresponding edge |
+| Generated control props and `XtkListDesc`, `XtkDialogDesc`, `XtkPagerDesc`, `XtkNavDesc`, and `XtkSplitViewDesc` have new fields | Rebuild consumers and regenerate bindings. In C, use designated initializers for descriptor fields |
+| NavigationView shows a built-in Settings item and can report selection `-2` | Set `hide_settings` (declarative) or `settings_visible = false` (imperative and bindings) to hide it. Handle `XTK_NAV_SETTINGS` (`-2`) in selection. `-1` is still no selection, and non-negative indices are unchanged. A footer item named Settings is a different item |
 
 ## 0.3.3
 

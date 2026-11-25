@@ -31,7 +31,7 @@ static bool size_add(uint32_t *size, size_t add) {
 static bool add_string_size(uint32_t *size, char const *text) { return !text || size_add(size, strlen(text) + 1u); }
 
 static bool nav_item_size(XtkNavItemDesc const *item, int *parent, int index, uint32_t *size) {
-	if (( unsigned ) item->kind > XTK_NAV_CHILD) return false;
+	if (( unsigned ) item->kind > XTK_NAV_FOOTER_HEADER) return false;
 	if (item->kind == XTK_NAV_CHILD && *parent < 0) return false;
 	if (item->kind == XTK_NAV_ITEM) *parent = index;
 	return add_string_size(size, item->icon) && add_string_size(size, item->label);
@@ -58,6 +58,11 @@ static void write_string(uint8_t *data, uint32_t *cursor, char const *text, uint
 	*cursor += *length + 1u;
 }
 
+static uint32_t title_bar_flags(uint8_t mode) {
+	if (mode == XTK_NAV_TITLE_BAR_TALL) return XTK_NAV_MODEL_WINDOW_TITLE_BAR | XTK_NAV_MODEL_TALL_TITLE_BAR;
+	return mode ? XTK_NAV_MODEL_WINDOW_TITLE_BAR : 0u;
+}
+
 bool xtk_navmodel_write(XtkNavDesc const *desc, void *buffer, uint32_t size) {
 	uint32_t required = xtk_navmodel_size(desc);
 	if (!required || !buffer || size != required) return false;
@@ -67,7 +72,7 @@ bool xtk_navmodel_write(XtkNavDesc const *desc, void *buffer, uint32_t size) {
 	store_u32(data + 4u, XTK_NAV_MODEL_VERSION);
 	store_u32(data + 8u, size);
 	store_u32(data + 12u, ( uint32_t ) desc->nitem);
-	store_u32(data + 16u, desc->window_title_bar ? XTK_NAV_MODEL_WINDOW_TITLE_BAR : 0u);
+	store_u32(data + 16u, title_bar_flags(desc->window_title_bar));
 	uint32_t cursor = NAV_HEADER_SIZE + ( uint32_t ) desc->nitem * NAV_ITEM_SIZE;
 	uint32_t offset;
 	uint32_t length;
@@ -104,18 +109,23 @@ read_string(uint8_t const *data, uint32_t size, uint32_t floor, uint32_t offset,
 	return true;
 }
 
+static bool valid_header(uint8_t const *data, uint32_t size, uint32_t count, uint32_t flags) {
+	if (load_u32(data) != NAV_MAGIC || load_u32(data + 4u) != XTK_NAV_MODEL_VERSION) return false;
+	if (load_u32(data + 8u) != size || count > (size - NAV_HEADER_SIZE) / NAV_ITEM_SIZE) return false;
+	uint32_t known_flags = XTK_NAV_MODEL_WINDOW_TITLE_BAR | XTK_NAV_MODEL_TALL_TITLE_BAR;
+	return (flags & ~known_flags) == 0u && load_u32(data + 28u) == 0u;
+}
+
 bool xtk_navmodel_open(void const *buffer, uint32_t size, XtkNavModelView *out) {
 	if (!buffer || !out || size < NAV_HEADER_SIZE) return false;
 	uint8_t const *data  = ( uint8_t const * ) buffer;
 	uint32_t       count = load_u32(data + 12u);
-	if (load_u32(data) != NAV_MAGIC || load_u32(data + 4u) != XTK_NAV_MODEL_VERSION) return false;
-	if (load_u32(data + 8u) != size || count > (size - NAV_HEADER_SIZE) / NAV_ITEM_SIZE) return false;
-	if ((load_u32(data + 16u) & ~XTK_NAV_MODEL_WINDOW_TITLE_BAR) != 0u || load_u32(data + 28u) != 0u) return false;
+	uint32_t       flags = load_u32(data + 16u);
+	if (!valid_header(data, size, count, flags)) return false;
 	uint32_t    floor = NAV_HEADER_SIZE + count * NAV_ITEM_SIZE;
 	char const *title;
 	if (!read_string(data, size, floor, load_u32(data + 20u), load_u32(data + 24u), &title)) return false;
-	*out = (XtkNavModelView) {
-	  .data = data, .size = size, .count = count, .flags = load_u32(data + 16u), .app_title = title};
+	*out = (XtkNavModelView) {.data = data, .size = size, .count = count, .flags = flags, .app_title = title};
 	XtkNavModelItemView item;
 	for (uint32_t i = 0; i < count; i++)
 		if (!xtk_navmodel_item(out, i, &item)) return false;
@@ -128,7 +138,7 @@ bool xtk_navmodel_item(XtkNavModelView const *model, uint32_t index, XtkNavModel
 	uint8_t const *wire   = model->data + NAV_HEADER_SIZE + index * NAV_ITEM_SIZE;
 	uint32_t       kind   = load_u32(wire);
 	int32_t        parent = ( int32_t ) load_u32(wire + 4u);
-	if (kind > XTK_NAV_CHILD || load_u32(wire + 24u) != 0u) return false;
+	if (kind > XTK_NAV_FOOTER_HEADER || load_u32(wire + 24u) != 0u) return false;
 	if (kind == XTK_NAV_CHILD && (parent < 0 || ( uint32_t ) parent >= index)) return false;
 	if (kind == XTK_NAV_CHILD
 	    && load_u32(model->data + NAV_HEADER_SIZE + ( uint32_t ) parent * NAV_ITEM_SIZE) != XTK_NAV_ITEM)

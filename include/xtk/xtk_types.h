@@ -142,6 +142,44 @@ typedef enum XtkBadgeMode
 	XTK_BADGE_ICON,
 } XtkBadgeMode;
 
+typedef enum XtkLandmark
+{
+	XTK_LANDMARK_NONE = 0,
+	XTK_LANDMARK_CUSTOM,
+	XTK_LANDMARK_FORM,
+	XTK_LANDMARK_MAIN,
+	XTK_LANDMARK_NAVIGATION,
+	XTK_LANDMARK_SEARCH,
+} XtkLandmark;
+
+typedef enum XtkLiveSetting
+{
+	XTK_LIVE_OFF = 0,
+	XTK_LIVE_POLITE,
+	XTK_LIVE_ASSERTIVE,
+} XtkLiveSetting;
+
+typedef enum XtkHeadingLevel
+{
+	XTK_HEADING_NONE = 0,
+	XTK_HEADING_LEVEL1,
+	XTK_HEADING_LEVEL2,
+	XTK_HEADING_LEVEL3,
+	XTK_HEADING_LEVEL4,
+	XTK_HEADING_LEVEL5,
+	XTK_HEADING_LEVEL6,
+	XTK_HEADING_LEVEL7,
+	XTK_HEADING_LEVEL8,
+	XTK_HEADING_LEVEL9,
+} XtkHeadingLevel;
+
+typedef enum XtkAccessView
+{
+	XTK_ACCESS_VIEW_CONTENT = 0,
+	XTK_ACCESS_VIEW_CONTROL,
+	XTK_ACCESS_VIEW_RAW,
+} XtkAccessView;
+
 typedef enum XtkInfoBarSeverity
 {
 	XTK_INFOBAR_INFORMATIONAL = 0,
@@ -210,6 +248,14 @@ typedef enum XtkLabelPosition
 	XTK_LABEL_COLLAPSED,
 } XtkLabelPosition;
 
+typedef enum XtkDialogButton
+{
+	XTK_DIALOG_BUTTON_NONE,
+	XTK_DIALOG_BUTTON_PRIMARY,
+	XTK_DIALOG_BUTTON_SECONDARY,
+	XTK_DIALOG_BUTTON_CLOSE,
+} XtkDialogButton;
+
 typedef enum XtkElementLabel
 {
 	XTK_ELEMENT_LABEL_DEFAULT = 0,
@@ -248,6 +294,7 @@ static_assert(sizeof(XtkScrollBarIndicator) == 4, "XtkScrollBarIndicator crosses
 static_assert(sizeof(XtkSortDirection) == 4, "XtkSortDirection crosses the ABI as int32");
 static_assert(sizeof(XtkAppBarMode) == 4, "XtkAppBarMode crosses the ABI as int32");
 static_assert(sizeof(XtkLabelPosition) == 4, "XtkLabelPosition crosses the ABI as int32");
+static_assert(sizeof(XtkDialogButton) == 4, "XtkDialogButton crosses the ABI as int32");
 static_assert(sizeof(XtkElementLabel) == 4, "XtkElementLabel crosses the ABI as int32");
 static_assert(sizeof(XtkOverflowButton) == 4, "XtkOverflowButton crosses the ABI as int32");
 static_assert(sizeof(XtkTeachingTipCloseReason) == 4, "XtkTeachingTipCloseReason crosses the ABI as int32");

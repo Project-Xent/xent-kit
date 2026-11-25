@@ -97,21 +97,29 @@ static bool bytes_equal(void const *a, uint32_t an, void const *b, uint32_t bn) 
 	return an == bn && (an == 0u || memcmp(a, b, an) == 0);
 }
 
+static bool real_equal(double a, double b) { return a == b || (isnan(a) && isnan(b)); }
+
+static bool scalar_equal(XtkValue const *a, XtkValue const *b) {
+	switch (a->kind) {
+	case XTK_VALUE_BOOL  : return a->u.b == b->u.b;
+	case XTK_VALUE_I32   : return a->u.i32 == b->u.i32;
+	case XTK_VALUE_F32   : return real_equal(a->u.f32, b->u.f32);
+	case XTK_VALUE_F64   : return real_equal(a->u.f64, b->u.f64);
+	case XTK_VALUE_ENUM  : return a->u.u32 == b->u.u32;
+	case XTK_VALUE_COLOR : return a->u.color.rgba == b->u.color.rgba;
+	default              : return false;
+	}
+}
+
 static bool value_equal(XtkValue const *a, XtkValue const *b) {
 	if (a->kind != b->kind) return false;
-	switch (a->kind) {
-	case XTK_VALUE_NONE     : return true;
-	case XTK_VALUE_BOOL     : return a->u.b == b->u.b;
-	case XTK_VALUE_I32      : return a->u.i32 == b->u.i32;
-	case XTK_VALUE_F32      : return a->u.f32 == b->u.f32 || (isnan(a->u.f32) && isnan(b->u.f32));
-	case XTK_VALUE_F64      : return a->u.f64 == b->u.f64 || (isnan(a->u.f64) && isnan(b->u.f64));
-	case XTK_VALUE_ENUM     : return a->u.u32 == b->u.u32;
-	case XTK_VALUE_COLOR    : return a->u.color.rgba == b->u.color.rgba;
-	case XTK_VALUE_STRING   : return bytes_equal(a->u.string.data, a->u.string.len, b->u.string.data, b->u.string.len);
-	case XTK_VALUE_RESOURCE : return a->u.resource == b->u.resource;
-	case XTK_VALUE_BYTES    : return bytes_equal(a->u.bytes.data, a->u.bytes.len, b->u.bytes.data, b->u.bytes.len);
-	}
-	return false;
+	if (a->kind == XTK_VALUE_NONE) return true;
+	if (a->kind == XTK_VALUE_RESOURCE) return a->u.resource == b->u.resource;
+	if (a->kind == XTK_VALUE_STRING)
+		return bytes_equal(a->u.string.data, a->u.string.len, b->u.string.data, b->u.string.len);
+	if (a->kind == XTK_VALUE_BYTES)
+		return bytes_equal(a->u.bytes.data, a->u.bytes.len, b->u.bytes.data, b->u.bytes.len);
+	return scalar_equal(a, b);
 }
 
 static XtkPropPatch const *find_prop(XtkPropPatch const *items, uint32_t count, XtkPropertyId id) {
@@ -123,7 +131,8 @@ static XtkPropPatch const *find_prop(XtkPropPatch const *items, uint32_t count, 
 static XtkValue default_value(XtkPropertyId id, XtkValueKind kind) {
 	XtkValue value = {.kind = kind};
 	if (id == XTK_PROP_WIDTH || id == XTK_PROP_HEIGHT) value.u.f32 = NAN;
-	if (id == XTK_PROP_ENABLED) value.u.b = true;
+	if (id == XTK_PROP_ENABLED || id == XTK_PROP_SETTINGS_VISIBLE || id == XTK_PROP_ALWAYS_SHOW_HEADER)
+		value.u.b = true;
 	if (kind == XTK_VALUE_STRING) {
 		value.u.string.data = "";
 		value.u.string.len  = 0u;

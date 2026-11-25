@@ -205,7 +205,94 @@ static bool encode_enum_fields(XtkBatch *batch, XtkNodeRef target, bool has_prev
 	return true;
 }
 
+typedef struct AutoField {
+	XtkPropertyId id;
+	size_t        offset;
+} AutoField;
+
+static AutoField const kAutoText [] = {
+  {XTK_PROP_A11Y_NAME,          offsetof(XtkAutomation, name)         },
+  {XTK_PROP_A11Y_ID,            offsetof(XtkAutomation, id)           },
+  {XTK_PROP_A11Y_HELP,          offsetof(XtkAutomation, help)         },
+  {XTK_PROP_A11Y_DESCRIPTION,   offsetof(XtkAutomation, description)  },
+  {XTK_PROP_A11Y_ITEM_STATUS,   offsetof(XtkAutomation, item_status)  },
+  {XTK_PROP_A11Y_ITEM_TYPE,     offsetof(XtkAutomation, item_type)    },
+  {XTK_PROP_A11Y_CONTROL_TYPE,  offsetof(XtkAutomation, control_type) },
+  {XTK_PROP_A11Y_ACCELERATOR,   offsetof(XtkAutomation, accelerator)  },
+  {XTK_PROP_A11Y_ACCESS_KEY,    offsetof(XtkAutomation, access_key)   },
+  {XTK_PROP_A11Y_LANDMARK_NAME, offsetof(XtkAutomation, landmark_name)},
+  {XTK_PROP_A11Y_LABELED_BY,    offsetof(XtkAutomation, labeled_by)   },
+  {XTK_PROP_A11Y_DESCRIBED_BY,  offsetof(XtkAutomation, described_by) },
+  {XTK_PROP_A11Y_FLOWS_TO,      offsetof(XtkAutomation, flows_to)     },
+  {XTK_PROP_A11Y_FLOWS_FROM,    offsetof(XtkAutomation, flows_from)   },
+  {XTK_PROP_A11Y_CONTROLLED,    offsetof(XtkAutomation, controls)     },
+};
+static AutoField const kAutoEnum [] = {
+  {XTK_PROP_A11Y_LANDMARK, offsetof(XtkAutomation, landmark)},
+  {XTK_PROP_A11Y_LIVE,     offsetof(XtkAutomation, live)    },
+  {XTK_PROP_A11Y_HEADING,  offsetof(XtkAutomation, heading) },
+  {XTK_PROP_A11Y_VIEW,     offsetof(XtkAutomation, view)    },
+};
+static AutoField const kAutoFlag [] = {
+  {XTK_PROP_A11Y_REQUIRED,   offsetof(XtkAutomation, required)  },
+  {XTK_PROP_A11Y_DATA_VALID, offsetof(XtkAutomation, invalid)   },
+  {XTK_PROP_A11Y_PERIPHERAL, offsetof(XtkAutomation, peripheral)},
+  {XTK_PROP_A11Y_DIALOG,     offsetof(XtkAutomation, dialog)    },
+};
+static AutoField const kAutoInt [] = {
+  {XTK_PROP_A11Y_POSITION, offsetof(XtkAutomation, position)},
+  {XTK_PROP_A11Y_SIZE,     offsetof(XtkAutomation, size)    },
+  {XTK_PROP_A11Y_LEVEL,    offsetof(XtkAutomation, level)   },
+  {XTK_PROP_A11Y_CULTURE,  offsetof(XtkAutomation, culture) },
+};
+
+#define AUTO_AT(type, a, f) (*( type const * ) (( char const * ) (a) + (f).offset))
+
+static bool encode_auto_text(XtkBatch *batch, XtkNodeRef target, XtkAutomation const *was, XtkAutomation const *now) {
+	for (size_t i = 0; i < sizeof(kAutoText) / sizeof(kAutoText [0]); i++) {
+		char const *a = AUTO_AT(char const *, was, kAutoText [i]), *b = AUTO_AT(char const *, now, kAutoText [i]);
+		if (!streq(a, b) && !value_string(batch, target, kAutoText [i].id, b)) return false;
+	}
+	return true;
+}
+
+static bool encode_auto_flags(XtkBatch *batch, XtkNodeRef target, XtkAutomation const *was, XtkAutomation const *now) {
+	for (size_t i = 0; i < sizeof(kAutoFlag) / sizeof(kAutoFlag [0]); i++) {
+		bool a = AUTO_AT(bool, was, kAutoFlag [i]), b = AUTO_AT(bool, now, kAutoFlag [i]);
+		bool v = kAutoFlag [i].id == XTK_PROP_A11Y_DATA_VALID ? !b : b;
+		if (a != b && !value_bool(batch, target, kAutoFlag [i].id, v)) return false;
+	}
+	return true;
+}
+
+static bool encode_auto_scalar(XtkBatch *batch, XtkNodeRef target, XtkAutomation const *was, XtkAutomation const *now) {
+	for (size_t i = 0; i < sizeof(kAutoEnum) / sizeof(kAutoEnum [0]); i++) {
+		uint32_t a = AUTO_AT(uint32_t, was, kAutoEnum [i]), b = AUTO_AT(uint32_t, now, kAutoEnum [i]);
+		if (a != b && !value_enum(batch, target, kAutoEnum [i].id, b)) return false;
+	}
+	if (!encode_auto_flags(batch, target, was, now)) return false;
+	for (size_t i = 0; i < sizeof(kAutoInt) / sizeof(kAutoInt [0]); i++) {
+		int32_t a = AUTO_AT(int32_t, was, kAutoInt [i]), b = AUTO_AT(int32_t, now, kAutoInt [i]);
+		if (a != b && !value_i32(batch, target, kAutoInt [i].id, b)) return false;
+	}
+	return true;
+}
+
+static bool encode_automation(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	static XtkAutomation const none = {0};
+	XtkAutomation const       *was  = prev && XTK_EL_DATA(prev)->automation ? XTK_EL_DATA(prev)->automation : &none;
+	XtkAutomation const       *now  = XTK_EL_DATA(el)->automation ? XTK_EL_DATA(el)->automation : &none;
+	if (was == now) return true;
+	return encode_auto_text(batch, target, was, now) && encode_auto_scalar(batch, target, was, now);
+}
+
+static bool encode_common_base(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
+
 static bool encode_common(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	return encode_common_base(batch, target, prev, el) && encode_automation(batch, target, prev, el);
+}
+
+static bool encode_common_base(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	if (!prev) {
 		F32Field fields [] = {
 		  {XTK_PROP_WIDTH,         NAN,  XTK_EL_DATA(el)->width,         !isnan(XTK_EL_DATA(el)->width)        },
@@ -220,7 +307,9 @@ static bool encode_common(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev,
 		if (XTK_EL_DATA(el)->align_self != 0
 		    && !value_enum(batch, target, XTK_PROP_ALIGN_SELF, ( uint32_t ) XTK_EL_DATA(el)->align_self))
 			return false;
-		return !XTK_EL_DATA(el)->tooltip || value_string(batch, target, XTK_PROP_TOOLTIP, XTK_EL_DATA(el)->tooltip);
+		if (XTK_EL_DATA(el)->tooltip && !value_string(batch, target, XTK_PROP_TOOLTIP, XTK_EL_DATA(el)->tooltip))
+			return false;
+		return !XTK_EL_DATA(el)->nav_slot || value_enum(batch, target, XTK_PROP_NAV_SLOT, XTK_EL_DATA(el)->nav_slot);
 	}
 	F32Field fields [] = {
 	  {XTK_PROP_WIDTH,         XTK_EL_DATA(prev)->width,         XTK_EL_DATA(el)->width,         true},
@@ -235,8 +324,11 @@ static bool encode_common(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev,
 	if (XTK_EL_DATA(prev)->align_self != XTK_EL_DATA(el)->align_self
 	    && !value_enum(batch, target, XTK_PROP_ALIGN_SELF, ( uint32_t ) XTK_EL_DATA(el)->align_self))
 		return false;
-	return streq(XTK_EL_DATA(prev)->tooltip, XTK_EL_DATA(el)->tooltip)
-	    || value_string(batch, target, XTK_PROP_TOOLTIP, XTK_EL_DATA(el)->tooltip);
+	if (!streq(XTK_EL_DATA(prev)->tooltip, XTK_EL_DATA(el)->tooltip)
+	    && !value_string(batch, target, XTK_PROP_TOOLTIP, XTK_EL_DATA(el)->tooltip))
+		return false;
+	return XTK_EL_DATA(prev)->nav_slot == XTK_EL_DATA(el)->nav_slot
+	    || value_enum(batch, target, XTK_PROP_NAV_SLOT, XTK_EL_DATA(el)->nav_slot);
 }
 
 static bool stack_host(XtkCtrlType type) {
@@ -755,11 +847,13 @@ static bool encode_dialog(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev,
 	};
 	if (!encode_string_fields(batch, target, old != NULL, strings, 3u)) return false;
 	ScalarField scalars [] = {
-	  {XTK_PROP_WIDTH,          SCALAR_F32,  !old || old->w != desc->w,               {.f32 = desc->w}       },
-	  {XTK_PROP_CONTENT_HEIGHT, SCALAR_F32,  !old || old->contenth != desc->contenth, {.f32 = desc->contenth}},
-	  {XTK_PROP_OPEN,           SCALAR_BOOL, !old || old->open != desc->open,         {.b = desc->open}      },
+	  {XTK_PROP_WIDTH,                 SCALAR_F32,  !old || old->w != desc->w,                           {.f32 = desc->w}       },
+	  {XTK_PROP_CONTENT_HEIGHT,        SCALAR_F32,  !old || old->contenth != desc->contenth,             {.f32 = desc->contenth}},
+	  {XTK_PROP_DIALOG_DEFAULT_BUTTON, SCALAR_ENUM, !old || old->default_button != desc->default_button,
+	   {.u32 = ( uint32_t ) desc->default_button}                                                                               },
+	  {XTK_PROP_OPEN,                  SCALAR_BOOL, !old || old->open != desc->open,                     {.b = desc->open}      },
 	};
-	return encode_scalar_fields(batch, target, scalars, 3u);
+	return encode_scalar_fields(batch, target, scalars, sizeof(scalars) / sizeof(scalars [0]));
 }
 
 static bool encode_teaching_tip(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
@@ -1015,6 +1109,12 @@ static bool tree_desc_equal(XtkTreeDesc const *a, XtkTreeDesc const *b) {
 	return a && b && a->nroot == b->nroot && tree_nodes_equal(a->roots, b->roots, a->nroot);
 }
 
+static bool encode_tree_selection(XtkBatch *batch, XtkNodeRef target, XtkTreeDesc const *old, XtkTreeDesc const *desc) {
+	if (desc->sel_mode != XTK_TREE_SELECT_SINGLE) return true;
+	bool same = old ? old->sel == desc->sel && old->sel_mode == desc->sel_mode : desc->sel == 0;
+	return same || value_i32(batch, target, XTK_PROP_SELECTED_INDEX, desc->sel > 0 ? desc->sel - 1 : -1);
+}
+
 static bool encode_tree_view(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	XtkTreeDesc const *desc  = XTK_EL_DETAIL(el, XtkTreeDesc);
 	XtkTreeDesc const *old   = prev ? XTK_EL_DETAIL(prev, XtkTreeDesc) : NULL;
@@ -1026,7 +1126,11 @@ static bool encode_tree_view(XtkBatch *batch, XtkNodeRef target, XtkEl const *pr
 		return false;
 	bool model_changed = !tree_desc_equal(old, desc);
 	if (model_changed && !xtk_items_tree(batch, target, desc)) return false;
-	return (old && old->sel == desc->sel) || value_i32(batch, target, XTK_PROP_SELECTED_INDEX, desc->sel);
+	return encode_tree_selection(batch, target, old, desc);
+}
+
+static float person_picture_size(XtkPersonPictureDesc const *desc) {
+	return desc && desc->size > 0.0f ? desc->size : 96.0f;
 }
 
 static bool encode_person_picture(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
@@ -1037,18 +1141,21 @@ static bool encode_person_picture(XtkBatch *batch, XtkNodeRef target, XtkEl cons
 	  {XTK_PROP_TEXT,        old ? old->display_name : NULL, desc->display_name},
 	  {XTK_PROP_INITIALS,    old ? old->initials : NULL,     desc->initials    },
 	  {XTK_PROP_BADGE_GLYPH, old ? old->badge_glyph : NULL,  desc->badge_glyph },
+	  {XTK_PROP_BADGE_TEXT,  old ? old->badge_text : NULL,   desc->badge_text  },
 	};
-	if (!encode_string_fields(batch, target, old != NULL, strings, 3u)) return false;
-	float       size       = desc->size > 0.0f ? desc->size : 72.0f;
-	float       prev_size  = old && old->size > 0.0f ? old->size : 72.0f;
+	if (!encode_string_fields(batch, target, old != NULL, strings, sizeof(strings) / sizeof(strings [0]))) return false;
+	float       size       = person_picture_size(desc);
+	float       prev_size  = person_picture_size(old);
 	ScalarField scalars [] = {
-	  {XTK_PROP_IMAGE_SOURCE, SCALAR_RESOURCE, !old || old->image != desc->image,               {.resource = desc->image}  },
-	  {XTK_PROP_WIDTH,        SCALAR_F32,      !old || prev_size != size,                       {.f32 = size}              },
-	  {XTK_PROP_HEIGHT,       SCALAR_F32,      !old || prev_size != size,                       {.f32 = size}              },
-	  {XTK_PROP_BADGE_VALUE,  SCALAR_I32,      !old || old->badge_number != desc->badge_number, {.i32 = desc->badge_number}},
-	  {XTK_PROP_IS_GROUP,     SCALAR_BOOL,     !old || old->is_group != desc->is_group,         {.b = desc->is_group}      },
+	  {XTK_PROP_IMAGE_SOURCE,       SCALAR_RESOURCE, !old || old->image != desc->image,               {.resource = desc->image}  },
+	  {XTK_PROP_BADGE_IMAGE_SOURCE, SCALAR_RESOURCE, !old || old->badge_image != desc->badge_image,
+	   {.resource = desc->badge_image}                                                                                           },
+	  {XTK_PROP_WIDTH,              SCALAR_F32,      !old || prev_size != size,                       {.f32 = size}              },
+	  {XTK_PROP_HEIGHT,             SCALAR_F32,      !old || prev_size != size,                       {.f32 = size}              },
+	  {XTK_PROP_BADGE_VALUE,        SCALAR_I32,      !old || old->badge_number != desc->badge_number, {.i32 = desc->badge_number}},
+	  {XTK_PROP_IS_GROUP,           SCALAR_BOOL,     !old || old->is_group != desc->is_group,         {.b = desc->is_group}      },
 	};
-	return encode_scalar_fields(batch, target, scalars, 5u);
+	return encode_scalar_fields(batch, target, scalars, sizeof(scalars) / sizeof(scalars [0]));
 }
 
 static bool encode_pager(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
@@ -1056,18 +1163,19 @@ static bool encode_pager(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, 
 	XtkPagerDesc const *desc       = XTK_EL_DETAIL(el, XtkPagerDesc);
 	XtkPagerDesc const *old        = prev ? XTK_EL_DETAIL(prev, XtkPagerDesc) : NULL;
 	ScalarField         scalars [] = {
-	  {XTK_PROP_ITEM_COUNT,      SCALAR_I32,  !old || old->nitem != desc->nitem,               {.i32 = desc->nitem}},
-	  {XTK_PROP_SELECTED_INDEX,  SCALAR_I32,  !old || old->sel != desc->sel,                   {.i32 = desc->sel}  },
+	  {XTK_PROP_ITEM_COUNT,      SCALAR_I32,  !old || old->nitem != desc->nitem,               {.i32 = desc->nitem}  },
+	  {XTK_PROP_SELECTED_INDEX,  SCALAR_I32,  !old || old->sel != desc->sel,                   {.i32 = desc->sel}    },
 	  {XTK_PROP_DISPLAY_MODE,    SCALAR_ENUM, !old || old->display_mode != desc->display_mode,
-	   {.u32 = ( uint32_t ) desc->display_mode}                                                                    },
+	   {.u32 = ( uint32_t ) desc->display_mode}                                                                      },
 	  {XTK_PROP_FIRST_BUTTON,    SCALAR_ENUM, !old || old->first_button != desc->first_button,
-	   {.u32 = ( uint32_t ) desc->first_button}                                                                    },
+	   {.u32 = ( uint32_t ) desc->first_button}                                                                      },
 	  {XTK_PROP_PREVIOUS_BUTTON, SCALAR_ENUM, !old || old->prev_button != desc->prev_button,
-	   {.u32 = ( uint32_t ) desc->prev_button}                                                                     },
+	   {.u32 = ( uint32_t ) desc->prev_button}                                                                       },
 	  {XTK_PROP_NEXT_BUTTON,     SCALAR_ENUM, !old || old->next_button != desc->next_button,
-	   {.u32 = ( uint32_t ) desc->next_button}                                                                     },
+	   {.u32 = ( uint32_t ) desc->next_button}                                                                       },
 	  {XTK_PROP_LAST_BUTTON,     SCALAR_ENUM, !old || old->last_button != desc->last_button,
-	   {.u32 = ( uint32_t ) desc->last_button}                                                                     },
+	   {.u32 = ( uint32_t ) desc->last_button}                                                                       },
+	  {XTK_PROP_HIDE_ENDS,       SCALAR_BOOL, !old || old->hide_ends != desc->hide_ends,       {.b = desc->hide_ends}},
 	};
 	if (!encode_scalar_fields(batch, target, scalars, sizeof(scalars) / sizeof(scalars [0]))) return false;
 	StringField strings [] = {
@@ -1120,12 +1228,31 @@ static bool encode_title_bar(XtkBatch *batch, XtkNodeRef target, XtkEl const *pr
 	return true;
 }
 
+static bool encode_nav_chrome(XtkBatch *batch, XtkNodeRef target, XtkNavDesc const *old, XtkNavDesc const *desc) {
+	if (old->hide_settings != desc->hide_settings
+	    && !value_bool(batch, target, XTK_PROP_SETTINGS_VISIBLE, !desc->hide_settings))
+		return false;
+	if (old->hide_header != desc->hide_header
+	    && !value_bool(batch, target, XTK_PROP_ALWAYS_SHOW_HEADER, !desc->hide_header))
+		return false;
+	if (old->back_button != desc->back_button
+	    && !value_enum(batch, target, XTK_PROP_NAV_BACK_BUTTON, desc->back_button))
+		return false;
+	if (old->back_enabled != desc->back_enabled
+	    && !value_bool(batch, target, XTK_PROP_NAV_BACK_ENABLED, desc->back_enabled))
+		return false;
+	return encode_string_change(batch, target, XTK_PROP_PANE_TITLE, true, old->pane_title, desc->pane_title);
+}
+
 static bool encode_nav(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
-	if (XTK_EL_DATA(el)->type != XTK_CTRL_NAV) return true;
 	XtkNavDesc const *desc = XTK_EL_DETAIL(el, XtkNavDesc);
+	XtkNavDesc const *old  = prev ? XTK_EL_DETAIL(prev, XtkNavDesc) : &(XtkNavDesc) {.sel = -1};
 	if (!prev && !xtk_items_nav(batch, target, desc)) return false;
-	int old_sel = prev ? XTK_EL_DETAIL(prev, XtkNavDesc)->sel : -1;
-	return (prev && old_sel == desc->sel) || value_i32(batch, target, XTK_PROP_SELECTED_INDEX, desc->sel);
+	if (old->pane_mode != desc->pane_mode
+	    && !value_enum(batch, target, XTK_PROP_DISPLAY_MODE, ( uint32_t ) desc->pane_mode))
+		return false;
+	if ((!prev || old->sel != desc->sel) && !value_i32(batch, target, XTK_PROP_SELECTED_INDEX, desc->sel)) return false;
+	return encode_nav_chrome(batch, target, old, desc);
 }
 
 typedef bool (*EncodeStep)(XtkBatch *, XtkNodeRef, XtkEl const *, XtkEl const *);

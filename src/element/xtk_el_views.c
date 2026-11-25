@@ -25,6 +25,7 @@ XtkEl *xtk_avatar(XtkUi *ui, XtkPersonPictureDesc desc) {
 	desc.display_name = xtk_strdup(ui, desc.display_name);
 	desc.initials     = xtk_strdup(ui, desc.initials);
 	desc.badge_glyph  = xtk_strdup(ui, desc.badge_glyph);
+	desc.badge_text   = xtk_strdup(ui, desc.badge_text);
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }
@@ -50,6 +51,27 @@ XtkEl *xtk_titlebar(XtkUi *ui, char const *title, XtkTitleBarDesc desc) {
 	desc.subtitle         = xtk_strdup(ui, desc.subtitle);
 	desc.icon             = xtk_strdup(ui, desc.icon);
 	if (!XTK_EL_STORE(el, desc)) return NULL;
+	return el;
+}
+
+XtkEl *xtk_titlebar_slots(
+  XtkUi *ui, char const *title, XtkTitleBarDesc desc, XtkEl *left_header, XtkEl *content, XtkEl *right_header
+) {
+	XtkEl *el = xtk_titlebar(ui, title, desc);
+	if (!el) return NULL;
+	XtkEl      *parts [] = {left_header, content, right_header};
+	char const *keys []  = {"left-header", "content", "right-header"};
+	XtkEl      *kids [4] = {0};
+	unsigned    n        = 0;
+	for (unsigned i = 0; i < 3; i++) {
+		if (!parts [i]) continue;
+		unsigned slot    = XTK_TITLE_BAR_SLOT_LEFT_HEADER + i;
+		XtkEl   *wrapper = xtk_nav_slot(ui, ( XtkNavSlot ) slot, parts [i]);
+		if (!wrapper) return NULL;
+		kids [n++] = xtk_keyed(ui, keys [i], wrapper);
+	}
+	kids [n] = XTK_END;
+	xtk_el_adopt(ui, el, kids);
 	return el;
 }
 

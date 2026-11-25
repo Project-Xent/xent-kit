@@ -24,30 +24,32 @@ typedef struct XtkArena {
 } XtkArena;
 
 typedef struct XtkElementData {
-	XtkEl        *handle;
-	XtkCtrlId     type;
-	XtkKey        key;
-	void         *component_props;
-	uint32_t      component_props_size;
-	float         width;
-	float         height;
-	float         grow;
-	XentFlexAlign align_self;
-	XentInsets    margin;
-	char const   *text;
-	char const   *tooltip;
-	uint32_t      child_offset;
-	int           child_count;
-	uint32_t      detail_offset;
-	uint32_t      detail_size;
-	uint32_t      subtree_begin;
-	uint32_t      subtree_end;
-	uint32_t      region_flags;
-	uint64_t      region_id;
-	uint64_t      region_revision;
-	int           virtual_first;
-	bool          virtualized;
-	bool          stack_row;
+	XtkEl               *handle;
+	XtkCtrlId            type;
+	XtkKey               key;
+	void                *component_props;
+	uint32_t             component_props_size;
+	float                width;
+	float                height;
+	float                grow;
+	XentFlexAlign        align_self;
+	XentInsets           margin;
+	char const          *text;
+	char const          *tooltip;
+	XtkAutomation const *automation;
+	uint32_t             child_offset;
+	int                  child_count;
+	uint32_t             detail_offset;
+	uint32_t             detail_size;
+	uint32_t             subtree_begin;
+	uint32_t             subtree_end;
+	uint32_t             region_flags;
+	uint64_t             region_id;
+	uint64_t             region_revision;
+	int                  virtual_first;
+	bool                 virtualized;
+	bool                 stack_row;
+	uint8_t              nav_slot;
 } XtkElementData;
 
 typedef struct XtkScrollDetail {

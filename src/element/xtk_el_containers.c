@@ -110,11 +110,26 @@ XtkEl *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []) {
 		items [i].icon  = xtk_strdup(ui, items [i].icon);
 		items [i].label = xtk_strdup(ui, items [i].label);
 	}
-	desc.items     = items;
-	desc.app_title = xtk_strdup(ui, desc.app_title);
+	desc.items      = items;
+	desc.app_title  = xtk_strdup(ui, desc.app_title);
+	desc.pane_title = xtk_strdup(ui, desc.pane_title);
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	xtk_el_adopt(ui, el, children);
 	return el;
+}
+
+XtkEl *xtk_nav_slot(XtkUi *ui, XtkNavSlot slot, XtkEl *child) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_NAVSLOT, NULL);
+	if (!el) return NULL;
+	if (slot != XTK_NAV_SLOT_CONTENT) XTK_EL_DATA(el)->nav_slot = ( uint8_t ) slot;
+	if (child) xtk_el_adopt(ui, el, xtk_kids(child));
+	return el;
+}
+
+XtkEl *xtk_nav_header_template(XtkUi *ui, void const *header, XtkNavHeaderTemplate render) {
+	if (!header || !render) return NULL;
+	XtkEl *content = render(ui, header);
+	return content ? xtk_nav_slot(ui, XTK_NAV_SLOT_PAGE_HEADER, content) : NULL;
 }
 
 XtkEl *xtk_refresh(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []) {

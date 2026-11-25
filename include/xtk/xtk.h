@@ -311,13 +311,14 @@ typedef struct XtkMenuBarDesc {
 } XtkMenuBarDesc;
 
 typedef struct XtkDialogDesc {
-	bool        open;
-	char const *primary;
-	char const *secondary;
-	char const *close;
-	float       w;
-	float       contenth;
-	XtkMsg      result;
+	bool            open;
+	char const     *primary;
+	char const     *secondary;
+	char const     *close;
+	float           w;
+	float           contenth;
+	XtkMsg          result;
+	XtkDialogButton default_button;
 } XtkDialogDesc;
 
 typedef enum XtkListSelMode
@@ -426,16 +427,16 @@ typedef struct XtkAutoSuggestDesc {
 typedef enum XtkPagerDisplayMode
 {
 	XTK_PAGER_DISPLAY_AUTO = 0,
-	XTK_PAGER_DISPLAY_NUMBER_PANEL,
-	XTK_PAGER_DISPLAY_NUMBER_TEXT,
+	XTK_PAGER_DISPLAY_COMBO_BOX,
+	XTK_PAGER_DISPLAY_NUMBER_BOX,
+	XTK_PAGER_DISPLAY_BUTTON_PANEL,
 } XtkPagerDisplayMode;
 
 typedef enum XtkPagerButtonVis
 {
-	XTK_PAGER_BUTTON_AUTO = 0,
-	XTK_PAGER_BUTTON_ALWAYS,
-	XTK_PAGER_BUTTON_HIDDEN_EDGE,
-	XTK_PAGER_BUTTON_NONE,
+	XTK_PAGER_BUTTON_VISIBLE = 0,
+	XTK_PAGER_BUTTON_HIDDEN_ON_EDGE,
+	XTK_PAGER_BUTTON_HIDDEN,
 } XtkPagerButtonVis;
 
 typedef struct XtkPagerDesc {
@@ -448,6 +449,7 @@ typedef struct XtkPagerDesc {
 	XtkPagerButtonVis   last_button;
 	char const         *prefix;
 	char const         *suffix;
+	bool                hide_ends;
 	XtkMsg              select;
 } XtkPagerDesc;
 
@@ -513,6 +515,7 @@ typedef enum XtkNavKind
 	XTK_NAV_SEPARATOR,
 	XTK_NAV_FOOTER,
 	XTK_NAV_CHILD,
+	XTK_NAV_FOOTER_HEADER,
 } XtkNavKind;
 
 typedef struct XtkNavItemDesc {
@@ -565,13 +568,61 @@ typedef struct XtkTreeDesc {
 	XtkMsg                 select;
 } XtkTreeDesc;
 
+typedef enum XtkNavPaneMode
+{
+	XTK_NAV_PANE_AUTO = 0,
+	XTK_NAV_PANE_LEFT,
+	XTK_NAV_PANE_TOP,
+	XTK_NAV_PANE_LEFT_COMPACT,
+	XTK_NAV_PANE_LEFT_MINIMAL,
+} XtkNavPaneMode;
+
+enum
+{
+	XTK_NAV_SETTINGS = -2,
+};
+
+typedef enum XtkNavSlot
+{
+	XTK_NAV_SLOT_CONTENT = 0,
+	XTK_NAV_SLOT_HEADER,
+	XTK_NAV_SLOT_CUSTOM,
+	XTK_NAV_SLOT_FOOTER,
+	XTK_NAV_SLOT_SEARCH,
+	XTK_NAV_SLOT_PAGE_HEADER = 8,
+	XTK_NAV_SLOT_CONTENT_OVERLAY,
+} XtkNavSlot;
+
+typedef enum XtkNavTitleBar
+{
+	XTK_NAV_TITLE_BAR_NONE,
+	XTK_NAV_TITLE_BAR_COMPACT,
+	XTK_NAV_TITLE_BAR_TALL,
+} XtkNavTitleBar;
+
+typedef enum XtkNavBackButton
+{
+	XTK_NAV_BACK_AUTO,
+	XTK_NAV_BACK_VISIBLE,
+	XTK_NAV_BACK_COLLAPSED,
+} XtkNavBackButton;
+
+typedef XtkEl *(*XtkNavHeaderTemplate)(XtkUi *ui, void const *header);
+
 typedef struct XtkNavDesc {
 	XtkNavItemDesc const *items;
 	int                   nitem;
 	int                   sel;
-	bool                  window_title_bar;
+	XtkNavPaneMode        pane_mode;
+	uint8_t               window_title_bar;
 	char const           *app_title;
 	XtkMsg                select;
+	bool                  hide_settings;
+	char const           *pane_title;
+	bool                  hide_header;
+	XtkNavBackButton      back_button;
+	bool                  back_enabled;
+	XtkMsg                back_requested;
 } XtkNavDesc;
 
 typedef struct XtkTeachingTipDesc {
@@ -598,6 +649,8 @@ typedef struct XtkPersonPictureDesc {
 	int32_t     badge_number;
 	float       size;
 	bool        is_group;
+	XtkResource badge_image;
+	char const *badge_text;
 } XtkPersonPictureDesc;
 
 typedef enum XtkSplitViewDisplayMode
@@ -620,6 +673,7 @@ typedef struct XtkSplitViewDesc {
 	XtkSplitViewPanePlacement pane_placement;
 	float                     open_pane_length;
 	float                     compact_pane_length;
+	XtkMsg                    change;
 } XtkSplitViewDesc;
 
 typedef struct XtkTitleBarDesc {
@@ -632,6 +686,13 @@ typedef struct XtkTitleBarDesc {
 	XtkMsg      on_back;
 	XtkMsg      on_pane_toggle;
 } XtkTitleBarDesc;
+
+typedef enum XtkTitleBarSlot
+{
+	XTK_TITLE_BAR_SLOT_LEFT_HEADER = XTK_NAV_SLOT_SEARCH + 1,
+	XTK_TITLE_BAR_SLOT_CONTENT,
+	XTK_TITLE_BAR_SLOT_RIGHT_HEADER,
+} XtkTitleBarSlot;
 
 typedef struct XtkColItemDesc {
 	float            width;
@@ -670,82 +731,87 @@ typedef struct XtkAppBarDesc {
 	XtkMsg      change;
 } XtkAppBarDesc;
 
-XENT_NODISCARD XtkUi  *xtk_ui_create(void);
+XENT_NODISCARD XtkUi *xtk_ui_create(void);
 
-void                   xtk_ui_destroy(XtkUi *ui);
+void                  xtk_ui_destroy(XtkUi *ui);
 
-void                   xtk_ui_begin(XtkUi *ui);
+void                  xtk_ui_begin(XtkUi *ui);
 
-XENT_NODISCARD char   *xtk_strdup(XtkUi *ui, char const *s);
+XENT_NODISCARD char  *xtk_strdup(XtkUi *ui, char const *s);
 
-XENT_NODISCARD char   *xtk_fmt(XtkUi *ui, char const *fmt, ...);
+XENT_NODISCARD char  *xtk_fmt(XtkUi *ui, char const *fmt, ...);
 
-XENT_NODISCARD XtkEl  *xtk_static_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx);
+XENT_NODISCARD XtkEl *xtk_static_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx);
 
-XENT_NODISCARD XtkEl  *xtk_memo_region(XtkUi *ui, uint64_t id, uint64_t revision, XtkRegionBuildFn build, void *ctx);
+XENT_NODISCARD XtkEl *xtk_memo_region(XtkUi *ui, uint64_t id, uint64_t revision, XtkRegionBuildFn build, void *ctx);
 
-XtkEl                 *xtk_text(XtkUi *ui, char const *content, XtkTextDesc desc);
-XtkEl                 *xtk_button(XtkUi *ui, char const *label, XtkButtonDesc desc);
-XtkEl                 *xtk_checkbox(XtkUi *ui, char const *label, XtkToggleDesc desc);
-XtkEl                 *xtk_radio(XtkUi *ui, char const *label, XtkToggleDesc desc);
-XtkEl                 *xtk_switch(XtkUi *ui, XtkToggleDesc desc);
-XtkEl                 *xtk_slider(XtkUi *ui, XtkSliderDesc desc);
-XtkEl                 *xtk_scroll_bar(XtkUi *ui, XtkScrollBarDesc desc);
-XtkEl                 *xtk_textbox(XtkUi *ui, char const *placeholder, XtkTextBoxDesc desc);
-XtkEl                 *xtk_password(XtkUi *ui, char const *placeholder, XtkTextBoxDesc desc);
-XtkEl                 *xtk_progress(XtkUi *ui, XtkProgressDesc desc);
-XtkEl                 *xtk_progressring(XtkUi *ui, XtkProgressDesc desc);
-XtkEl                 *xtk_badge(XtkUi *ui, XtkBadgeDesc desc);
-XtkEl                 *xtk_image(XtkUi *ui, XtkImageDesc desc);
-XtkEl                 *xtk_link(XtkUi *ui, char const *label, XtkHyperlinkDesc desc);
-XtkEl                 *xtk_divider(XtkUi *ui);
-XtkEl                 *xtk_spacer(XtkUi *ui);
-XtkEl                 *xtk_repeat(XtkUi *ui, char const *label, XtkButtonDesc desc);
-XtkEl                 *xtk_combo(XtkUi *ui, char const *placeholder, XtkComboDesc desc);
-XtkEl                 *xtk_looping_selector(XtkUi *ui, XtkLoopingDesc desc);
-XtkEl                 *xtk_date_picker(XtkUi *ui, XtkDatePickerDesc desc);
-XtkEl                 *xtk_time_picker(XtkUi *ui, XtkTimePickerDesc desc);
-XtkEl                 *xtk_calendar_view(XtkUi *ui, XtkCalendarDesc desc);
-XtkEl                 *xtk_color_picker(XtkUi *ui, XtkColorPickerDesc desc);
-XtkEl                 *xtk_infobar(XtkUi *ui, char const *title, char const *message, XtkInfoBarDesc desc);
-XtkEl                 *xtk_number(XtkUi *ui, XtkNumberDesc desc);
-XtkEl                 *xtk_dropdown(XtkUi *ui, char const *label, XtkDropdownDesc desc);
-XtkEl                 *xtk_split(XtkUi *ui, char const *label, XtkSplitDesc desc);
-XtkEl                 *xtk_togglesplit(XtkUi *ui, char const *label, XtkSplitDesc desc);
-XtkEl                 *xtk_radiogroup(XtkUi *ui, XtkRadioButtonsDesc desc);
-XtkEl                 *xtk_rating(XtkUi *ui, XtkRatingDesc desc);
-XtkEl                 *xtk_selector(XtkUi *ui, XtkSelectorBarDesc desc);
-XtkEl                 *xtk_breadcrumb(XtkUi *ui, XtkBreadcrumbDesc desc);
-XtkEl                 *xtk_menubar(XtkUi *ui, XtkMenuBarDesc desc);
-XtkEl                 *xtk_list(XtkUi *ui, XtkListDesc desc);
-XtkListRow             xtk_list_row(int32_t const *groups, int32_t ngroup, int32_t row);
-XtkEl                 *xtk_listbox(XtkUi *ui, XtkListDesc desc);
-XtkEl                 *xtk_gridview(XtkUi *ui, XtkListDesc desc);
-XtkEl                 *xtk_repeater(XtkUi *ui, XtkListDesc desc);
-XtkEl                 *xtk_itemsview(XtkUi *ui, XtkItemsViewDesc desc);
-XtkEl                 *xtk_tree(XtkUi *ui, XtkTreeDesc desc);
-XtkEl                 *xtk_pips(XtkUi *ui, XtkPipsDesc desc);
-XtkEl                 *xtk_avatar(XtkUi *ui, XtkPersonPictureDesc desc);
-XtkEl                 *xtk_pager(XtkUi *ui, XtkPagerDesc desc);
-XtkEl                 *xtk_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc);
-XtkEl                 *xtk_colitem(XtkUi *ui, char const *label, XtkColItemDesc desc);
-XtkEl                 *xtk_appbarbutton(XtkUi *ui, char const *label, XtkAppBarDesc desc);
-XtkEl                 *xtk_appbartoggle(XtkUi *ui, char const *label, XtkAppBarDesc desc);
-XtkEl                 *xtk_appbarsep(XtkUi *ui, XtkAppBarDesc desc);
+XtkEl                *xtk_text(XtkUi *ui, char const *content, XtkTextDesc desc);
+XtkEl                *xtk_button(XtkUi *ui, char const *label, XtkButtonDesc desc);
+XtkEl                *xtk_checkbox(XtkUi *ui, char const *label, XtkToggleDesc desc);
+XtkEl                *xtk_radio(XtkUi *ui, char const *label, XtkToggleDesc desc);
+XtkEl                *xtk_switch(XtkUi *ui, XtkToggleDesc desc);
+XtkEl                *xtk_slider(XtkUi *ui, XtkSliderDesc desc);
+XtkEl                *xtk_scroll_bar(XtkUi *ui, XtkScrollBarDesc desc);
+XtkEl                *xtk_textbox(XtkUi *ui, char const *placeholder, XtkTextBoxDesc desc);
+XtkEl                *xtk_password(XtkUi *ui, char const *placeholder, XtkTextBoxDesc desc);
+XtkEl                *xtk_progress(XtkUi *ui, XtkProgressDesc desc);
+XtkEl                *xtk_progressring(XtkUi *ui, XtkProgressDesc desc);
+XtkEl                *xtk_badge(XtkUi *ui, XtkBadgeDesc desc);
+XtkEl                *xtk_image(XtkUi *ui, XtkImageDesc desc);
+XtkEl                *xtk_link(XtkUi *ui, char const *label, XtkHyperlinkDesc desc);
+XtkEl                *xtk_divider(XtkUi *ui);
+XtkEl                *xtk_spacer(XtkUi *ui);
+XtkEl                *xtk_repeat(XtkUi *ui, char const *label, XtkButtonDesc desc);
+XtkEl                *xtk_combo(XtkUi *ui, char const *placeholder, XtkComboDesc desc);
+XtkEl                *xtk_looping_selector(XtkUi *ui, XtkLoopingDesc desc);
+XtkEl                *xtk_date_picker(XtkUi *ui, XtkDatePickerDesc desc);
+XtkEl                *xtk_time_picker(XtkUi *ui, XtkTimePickerDesc desc);
+XtkEl                *xtk_calendar_view(XtkUi *ui, XtkCalendarDesc desc);
+XtkEl                *xtk_color_picker(XtkUi *ui, XtkColorPickerDesc desc);
+XtkEl                *xtk_infobar(XtkUi *ui, char const *title, char const *message, XtkInfoBarDesc desc);
+XtkEl                *xtk_number(XtkUi *ui, XtkNumberDesc desc);
+XtkEl                *xtk_dropdown(XtkUi *ui, char const *label, XtkDropdownDesc desc);
+XtkEl                *xtk_split(XtkUi *ui, char const *label, XtkSplitDesc desc);
+XtkEl                *xtk_togglesplit(XtkUi *ui, char const *label, XtkSplitDesc desc);
+XtkEl                *xtk_radiogroup(XtkUi *ui, XtkRadioButtonsDesc desc);
+XtkEl                *xtk_rating(XtkUi *ui, XtkRatingDesc desc);
+XtkEl                *xtk_selector(XtkUi *ui, XtkSelectorBarDesc desc);
+XtkEl                *xtk_breadcrumb(XtkUi *ui, XtkBreadcrumbDesc desc);
+XtkEl                *xtk_menubar(XtkUi *ui, XtkMenuBarDesc desc);
+XtkEl                *xtk_list(XtkUi *ui, XtkListDesc desc);
+XtkListRow            xtk_list_row(int32_t const *groups, int32_t ngroup, int32_t row);
+XtkEl                *xtk_listbox(XtkUi *ui, XtkListDesc desc);
+XtkEl                *xtk_gridview(XtkUi *ui, XtkListDesc desc);
+XtkEl                *xtk_repeater(XtkUi *ui, XtkListDesc desc);
+XtkEl                *xtk_itemsview(XtkUi *ui, XtkItemsViewDesc desc);
+XtkEl                *xtk_tree(XtkUi *ui, XtkTreeDesc desc);
+XtkEl                *xtk_pips(XtkUi *ui, XtkPipsDesc desc);
+XtkEl                *xtk_avatar(XtkUi *ui, XtkPersonPictureDesc desc);
+XtkEl                *xtk_pager(XtkUi *ui, XtkPagerDesc desc);
+XtkEl                *xtk_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc);
+XtkEl                *xtk_colitem(XtkUi *ui, char const *label, XtkColItemDesc desc);
+XtkEl                *xtk_appbarbutton(XtkUi *ui, char const *label, XtkAppBarDesc desc);
+XtkEl                *xtk_appbartoggle(XtkUi *ui, char const *label, XtkAppBarDesc desc);
+XtkEl                *xtk_appbarsep(XtkUi *ui, XtkAppBarDesc desc);
 
-XtkEl                 *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
-XtkEl                 *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
-XtkEl                 *xtk_card(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
-XtkEl                 *xtk_dragdrop(XtkUi *ui, XtkDragDropDesc desc, XtkEl *child);
-XtkEl                 *xtk_scroll(XtkUi *ui, XtkScrollDesc desc, XtkEl *children []);
-XtkEl                 *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []);
-XtkEl                 *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []);
-XtkEl                 *xtk_tabs(XtkUi *ui, XtkTabViewDesc desc, XtkEl *children []);
-XtkEl                 *xtk_flip(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []);
-XtkEl                 *xtk_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkEl *children []);
-XtkEl                 *xtk_teachtip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl *children []);
-XtkEl                 *xtk_splitview(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *content);
-XtkEl                 *xtk_titlebar(XtkUi *ui, char const *title, XtkTitleBarDesc desc);
+XtkEl                *xtk_column(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
+XtkEl                *xtk_row(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
+XtkEl                *xtk_card(XtkUi *ui, XtkStackDesc desc, XtkEl *children []);
+XtkEl                *xtk_dragdrop(XtkUi *ui, XtkDragDropDesc desc, XtkEl *child);
+XtkEl                *xtk_scroll(XtkUi *ui, XtkScrollDesc desc, XtkEl *children []);
+XtkEl                *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *children []);
+XtkEl                *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []);
+XtkEl                *xtk_nav_slot(XtkUi *ui, XtkNavSlot slot, XtkEl *child);
+XtkEl                *xtk_nav_header_template(XtkUi *ui, void const *header, XtkNavHeaderTemplate render);
+XtkEl                *xtk_tabs(XtkUi *ui, XtkTabViewDesc desc, XtkEl *children []);
+XtkEl                *xtk_flip(XtkUi *ui, XtkFlipDesc desc, XtkEl *children []);
+XtkEl                *xtk_dialog(XtkUi *ui, char const *title, XtkDialogDesc desc, XtkEl *children []);
+XtkEl                *xtk_teachtip(XtkUi *ui, char const *title, XtkTeachingTipDesc desc, XtkEl *children []);
+XtkEl                *xtk_splitview(XtkUi *ui, XtkSplitViewDesc desc, XtkEl *pane, XtkEl *content);
+XtkEl                *xtk_titlebar(XtkUi *ui, char const *title, XtkTitleBarDesc desc);
+XtkEl                *xtk_titlebar_slots(
+  XtkUi *ui, char const *title, XtkTitleBarDesc desc, XtkEl *left_header, XtkEl *content, XtkEl *right_header
+);
 XtkEl                 *xtk_commandbar(XtkUi *ui, XtkCommandBarDesc desc, XtkEl *children []);
 XtkEl                 *xtk_refresh(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []);
 XtkEl                 *xtk_colheader(XtkUi *ui, XtkEl *children []);
@@ -757,11 +823,43 @@ XtkEl                 *xtk_keyed_u64(XtkEl *el, uint64_t key);
 
 XtkEl                 *xtk_tooltip(XtkUi *ui, XtkEl *el, char const *text);
 
-XtkEl                 *xtk_sized(XtkEl *el, float width, float height);
+typedef struct XtkAutomation {
+	char const     *name;
+	char const     *id;
+	char const     *help;
+	char const     *description;
+	char const     *item_status;
+	char const     *item_type;
+	char const     *control_type;
+	char const     *accelerator;
+	char const     *access_key;
+	char const     *landmark_name;
+	char const     *labeled_by;
+	char const     *described_by;
+	char const     *flows_to;
+	char const     *flows_from;
+	char const     *controls;
+	XtkLandmark     landmark;
+	XtkLiveSetting  live;
+	XtkHeadingLevel heading;
+	XtkAccessView   view;
+	bool            required;
+	bool            invalid;
+	bool            peripheral;
+	bool            dialog;
+	int32_t         position;
+	int32_t         size;
+	int32_t         level;
+	int32_t         culture;
+} XtkAutomation;
 
-XtkEl                 *xtk_grow(XtkEl *el, float grow);
-XtkEl                 *xtk_align(XtkEl *el, XentFlexAlign align_self);
-XtkEl                 *xtk_margin(XtkEl *el, XentInsets margin);
+XtkEl *xtk_automation(XtkUi *ui, XtkEl *el, XtkAutomation const *automation);
+
+XtkEl *xtk_sized(XtkEl *el, float width, float height);
+
+XtkEl *xtk_grow(XtkEl *el, float grow);
+XtkEl *xtk_align(XtkEl *el, XentFlexAlign align_self);
+XtkEl *xtk_margin(XtkEl *el, XentInsets margin);
 
 static_assert(sizeof(XtkKeyKind) == 4, "XtkKeyKind crosses the ABI as int32");
 static_assert(sizeof(XtkClock) == 4, "XtkClock crosses the ABI as int32");
@@ -774,6 +872,7 @@ static_assert(sizeof(XtkPipsNavVis) == 4, "XtkPipsNavVis crosses the ABI as int3
 static_assert(sizeof(XtkPagerDisplayMode) == 4, "XtkPagerDisplayMode crosses the ABI as int32");
 static_assert(sizeof(XtkPagerButtonVis) == 4, "XtkPagerButtonVis crosses the ABI as int32");
 static_assert(sizeof(XtkNavKind) == 4, "XtkNavKind crosses the ABI as int32");
+static_assert(sizeof(XtkNavPaneMode) == 4, "XtkNavPaneMode crosses the ABI as int32");
 static_assert(sizeof(XtkPullDirection) == 4, "XtkPullDirection crosses the ABI as int32");
 static_assert(sizeof(XtkTreeSelMode) == 4, "XtkTreeSelMode crosses the ABI as int32");
 static_assert(sizeof(XtkSplitViewDisplayMode) == 4, "XtkSplitViewDisplayMode crosses the ABI as int32");
