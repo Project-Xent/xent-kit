@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 (unreleased)
+## 0.4.0
 
 - the generated Cython stubs (`_controls.pyi`) list the `focus` argument that
   xenthon accepts on every element.
