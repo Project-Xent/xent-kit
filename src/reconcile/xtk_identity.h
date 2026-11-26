@@ -14,7 +14,14 @@ typedef enum XtkSiblingMode
 
 XtkSiblingMode xtk_sibling_mode(XtkEl const *parent);
 
-XtkIdentityError
-xtk_identity_validate_tree(XtkScene const *scene, XtkEl const *root, XtkScratch *scratch, XtkIdentityDiag *out);
+bool           xtk_identity_type_known(XtkScene const *scene, XtkCtrlId type);
+bool           xtk_identity_alloc_regions(XtkScratch *scratch, uint32_t count, uint64_t **out_slots, uint32_t *out_cap);
+XtkIdentityError xtk_identity_check_node(
+  XtkScene const *scene, XtkEl const *el, uint32_t depth, int const *path, uint64_t *regions, uint32_t region_capacity,
+  XtkIdentityDiag *out
+);
+XtkIdentityError xtk_identity_check_siblings(
+  XtkScene const *scene, XtkEl const *parent, XtkScratch *scratch, uint32_t depth, int const *path, XtkIdentityDiag *out
+);
 
 #endif

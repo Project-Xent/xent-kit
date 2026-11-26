@@ -97,20 +97,28 @@ XtkEl *xtk_expander(XtkUi *ui, char const *header, XtkExpanderDesc desc, XtkEl *
 	return el;
 }
 
-XtkEl *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []) {
-	XtkEl *el = xtk_el_new(ui, XTK_CTRL_NAV, NULL);
-	if (!el) return NULL;
-	if (desc.nitem < 0) desc.nitem = 0;
-	XtkNavItemDesc *items = ( XtkNavItemDesc * ) xtk_arena_alloc(
-	  xtk_ui_arena(ui), sizeof(XtkNavItemDesc) * ( size_t ) (desc.nitem ? desc.nitem : 1)
-	);
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) {
-		items [i]       = desc.items [i];
+static bool nav_dup_items(XtkUi *ui, XtkNavDesc *desc) {
+	if (desc->nitem < 0 || !desc->items) {
+		desc->items = NULL;
+		desc->nitem = 0;
+		return true;
+	}
+	if (xtk_model_ver_valid(desc->version)) return true;
+	XtkNavItemDesc *items
+	  = ( XtkNavItemDesc * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(XtkNavItemDesc) * ( size_t ) desc->nitem);
+	if (!items) return false;
+	for (int i = 0; i < desc->nitem; i++) {
+		items [i]       = desc->items [i];
 		items [i].icon  = xtk_strdup(ui, items [i].icon);
 		items [i].label = xtk_strdup(ui, items [i].label);
 	}
-	desc.items      = items;
+	desc->items = items;
+	return true;
+}
+
+XtkEl *xtk_nav(XtkUi *ui, XtkNavDesc desc, XtkEl *children []) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_NAV, NULL);
+	if (!el || !nav_dup_items(ui, &desc)) return NULL;
 	desc.app_title  = xtk_strdup(ui, desc.app_title);
 	desc.pane_title = xtk_strdup(ui, desc.pane_title);
 	if (!XTK_EL_STORE(el, desc)) return NULL;

@@ -164,16 +164,101 @@ local function header()
   return join(lines)
 end
 
-local function append_line(bit, prop)
-  local name, id, kind = prop[1], prop[2], prop[3]
-  local has = string.format("(props->set >> %du) & 1u", bit)
-  if kind == "string" then
-    return string.format(
-      "\txtk_controls_append_string(patches, &count, %s, %s, props->%s, props->%s_len, change);",
-      has, id, name, name)
+local value_kinds = {
+  bool = "XTK_VALUE_BOOL",
+  i32 = "XTK_VALUE_I32",
+  f32 = "XTK_VALUE_F32",
+  f64 = "XTK_VALUE_F64",
+  enum = "XTK_VALUE_ENUM",
+  color = "XTK_VALUE_COLOR",
+  string = "XTK_VALUE_STRING",
+  resource = "XTK_VALUE_RESOURCE",
+}
+
+local function a11y_template()
+  local lay = catalog.props.layout
+  local block = {}
+  for i = 10, #lay do block[#block + 1] = lay[i] end
+  return block
+end
+
+local a11y_fields = a11y_template()
+
+local function has_prop_restriction(group)
+  for _, prop in ipairs(catalog.props[group]) do
+    if prop[4] then return true end
   end
-  return string.format("\txtk_controls_append_%s(patches, &count, %s, %s, props->%s, change);",
-    kind, has, id, name)
+  return false
+end
+
+local function pack_key_for(control)
+  if not control.group then return nil end
+  return has_prop_restriction(control.group) and control.token or control.group
+end
+
+local function supported_props(control)
+  local list = {}
+  for bit, prop in ipairs(catalog.props[control.group]) do
+    if supports_prop(control, prop) then
+      list[#list + 1] = {bit = bit - 1, prop = prop}
+    end
+  end
+  return list
+end
+
+local function find_a11y_run(items)
+  local need = #a11y_fields
+  for i = 1, #items - need + 1 do
+    local ok = true
+    for j = 1, need do
+      local p, q = items[i + j - 1].prop, a11y_fields[j]
+      if p[1] ~= q[1] or p[2] ~= q[2] or p[3] ~= q[3] then
+        ok = false
+        break
+      end
+    end
+    if ok then
+      for j = 2, need do
+        if items[i + j - 1].bit ~= items[i].bit + j - 1 then
+          ok = false
+          break
+        end
+      end
+      if ok then return i, items[i].bit end
+    end
+  end
+  return nil, nil
+end
+
+local function collect_packs()
+  local list = {}
+  local seen = {}
+  for _, control in ipairs(catalog.public) do
+    local key = pack_key_for(control)
+    if key and not seen[key] then
+      seen[key] = true
+      local items = supported_props(control)
+      local a11y_pos, a11y_bit = find_a11y_run(items)
+      local fields = {}
+      local pre_count = 0
+      for i, item in ipairs(items) do
+        local in_a11y = a11y_pos and i >= a11y_pos and i < a11y_pos + #a11y_fields
+        if not in_a11y then
+          fields[#fields + 1] = item
+          if a11y_pos and i < a11y_pos then pre_count = pre_count + 1 end
+        end
+      end
+      list[#list + 1] = {
+        key = key,
+        struct = catalog.structs[control.group],
+        fields = fields,
+        pre_count = pre_count,
+        a11y_bit = a11y_bit or 0,
+        has_a11y = a11y_pos ~= nil,
+      }
+    end
+  end
+  return list
 end
 
 local function create_fn(control)
@@ -186,20 +271,13 @@ local function create_fn(control)
       "}",
     })
   end
-  local props = catalog.props[control.group]
-  local lines = {
+  local key = pack_key_for(control)
+  return join({
     "XtkLocalId " .. name .. "(XtkTxn *txn, XtkNodeRef parent, "
       .. catalog.structs[control.group] .. " const *props) {",
-    "\tif (!props) return xtk_txn_create(txn, " .. enum .. ", parent, xtk_ref_none(), NULL, 0u);",
-    "\tXtkPropPatch patches [" .. #props .. "];",
-    "\tuint32_t     count = 0u;",
-    "\tXtkChangeStamp change = props->stamp;",
-  }
-  for bit, prop in ipairs(props) do
-    if supports_prop(control, prop) then add(lines, append_line(bit - 1, prop)) end
-  end
-  add(lines, "\treturn xtk_txn_create(txn, " .. enum .. ", parent, xtk_ref_none(), patches, count);", "}")
-  return join(lines)
+    "\treturn xtk_controls_create(txn, " .. enum .. ", parent, props, &xtk_pack_" .. key .. ");",
+    "}",
+  })
 end
 
 local function setter_fn(control, prop)
@@ -242,76 +320,213 @@ local function source(control)
   return join(chunks)
 end
 
-local function internal_header()
+local function internal_header(packs)
   local lines = {
     "#ifndef XTK_CONTROLS_INTERNAL_H",
     "#define XTK_CONTROLS_INTERNAL_H",
     "",
     "#include <xtk/xtk_controls.h>",
     "",
+    "typedef struct XtkCtrlField {",
+    "\tuint16_t offset;",
+    "\tuint16_t len_offset;",
+    "\tuint16_t id;",
+    "\tuint8_t  bit;",
+    "\tuint8_t  kind;",
+    "} XtkCtrlField;",
+    "",
+    "typedef struct XtkCtrlPack {",
+    "\tXtkCtrlField const *fields;",
+    "\tuint16_t            a11y_offset;",
+    "\tuint8_t             pre_count;",
+    "\tuint8_t             field_count;",
+    "\tuint8_t             a11y_bit;",
+    "\tuint8_t             has_a11y;",
+    "} XtkCtrlPack;",
+    "",
     "uint32_t xtk_controls_text_len(char const *text, uint32_t len);",
-  }
-  local kinds = {"bool", "i32", "f32", "f64", "enum", "color", "resource"}
-  for _, kind in ipairs(kinds) do
-    add(lines, "void xtk_controls_append_" .. kind
-      .. "(XtkPropPatch *patches, uint32_t *count, bool has, XtkPropertyId id, "
-      .. catalog.kinds[kind].ctype .. " value, XtkChangeStamp change);")
-  end
-  add(lines,
-    "void xtk_controls_append_string(",
-    "  XtkPropPatch *patches, uint32_t *count, bool has, XtkPropertyId id, char const *text, uint32_t len,",
-    "  XtkChangeStamp change",
+    "XtkLocalId xtk_controls_create(",
+    "  XtkTxn *txn, XtkCtrlId type, XtkNodeRef parent, void const *props, XtkCtrlPack const *pack",
     ");",
     "",
-    "#endif",
-    "")
+  }
+  for _, pack in ipairs(packs) do
+    add(lines, "extern XtkCtrlPack const xtk_pack_" .. pack.key .. ";")
+  end
+  add(lines, "", "#endif", "")
   return join(lines)
 end
 
-local function support_source()
-  return [=[#include "xtk_controls_internal.h"
+local function rel_field_row(struct_name, base_field, bit, prop)
+  local name, id, kind = prop[1], prop[2], prop[3]
+  local off = "( uint16_t ) (offsetof(" .. struct_name .. ", " .. name .. ") - offsetof(" .. struct_name .. ", " .. base_field .. "))"
+  local loff = kind == "string"
+    and "( uint16_t ) (offsetof(" .. struct_name .. ", " .. name .. "_len) - offsetof(" .. struct_name .. ", " .. base_field .. "))"
+    or "0u"
+  return string.format("\t{%s, %s, %s, %du, %s},", off, loff, id, bit, assert(value_kinds[kind]))
+end
 
-#include <string.h>
+local function abs_field_row(struct_name, bit, prop)
+  local name, id, kind = prop[1], prop[2], prop[3]
+  local off = "( uint16_t ) offsetof(" .. struct_name .. ", " .. name .. ")"
+  local loff = kind == "string" and "( uint16_t ) offsetof(" .. struct_name .. ", " .. name .. "_len)" or "0u"
+  return string.format("\t{%s, %s, %s, %du, %s},", off, loff, id, bit, assert(value_kinds[kind]))
+end
 
+local function support_prelude()
+  local lines = {
+    '#include "xtk_controls_internal.h"',
+    "",
+    "#include <assert.h>",
+    "#include <stddef.h>",
+    "#include <string.h>",
+    "",
+    'static_assert(XTK_PROP_STANDARD_COUNT <= UINT16_MAX, "property id fits uint16_t");',
+    'static_assert(XTK_VALUE_BOOL < XTK_VALUE_I32 && XTK_VALUE_I32 < XTK_VALUE_F32 && XTK_VALUE_F32 < XTK_VALUE_F64 && XTK_VALUE_F64 < XTK_VALUE_ENUM, "numeric value kinds contiguous");',
+  }
+  local enum_names = {}
+  for name in pairs(catalog.enums) do enum_names[#enum_names + 1] = name end
+  table.sort(enum_names)
+  for _, name in ipairs(enum_names) do
+    add(lines, string.format('static_assert(sizeof(%s) == sizeof(uint32_t), "enum size fits uint32_t");', name))
+  end
+  add(lines, "", "static XtkCtrlField const k_a11y_fields [28] = {")
+  for j, prop in ipairs(a11y_fields) do
+    add(lines, rel_field_row("XtkLayoutProps", "tip", j - 1, prop))
+  end
+  add(lines, "};")
+  return join(lines)
+end
+
+local support_helpers = [=[
 uint32_t xtk_controls_text_len(char const *text, uint32_t len) {
 	if (!text) return 0u;
 	return len ? len : ( uint32_t ) strlen(text);
 }
 
-#define DEFINE_APPEND(suffix, c_type, wire_kind, field)                                         \
-	void xtk_controls_append_##suffix(                                                           \
-	  XtkPropPatch *patches, uint32_t *count, bool has, XtkPropertyId id, c_type value,           \
-	  XtkChangeStamp change                                                                      \
-	) {                                                                                           \
-		if (!has) return;                                                                          \
-		patches [(*count)++] = (XtkPropPatch) {                                                    \
-		  .id = id, .value = {.kind = wire_kind, .u.field = value}, .change = change,              \
-		};                                                                                         \
+static void pack_num_value(XtkValue *v, uint8_t const *p, uint8_t kind) {
+	if (kind == XTK_VALUE_BOOL) {
+		v->kind = XTK_VALUE_BOOL;
+		memcpy(&v->u.b, p, sizeof(v->u.b));
+		return;
 	}
+	if (kind == XTK_VALUE_I32) {
+		v->kind = XTK_VALUE_I32;
+		memcpy(&v->u.i32, p, sizeof(v->u.i32));
+		return;
+	}
+	if (kind == XTK_VALUE_F32) {
+		v->kind = XTK_VALUE_F32;
+		memcpy(&v->u.f32, p, sizeof(v->u.f32));
+		return;
+	}
+	v->kind = XTK_VALUE_F64;
+	memcpy(&v->u.f64, p, sizeof(v->u.f64));
+}
 
-DEFINE_APPEND(bool, bool, XTK_VALUE_BOOL, b)
-DEFINE_APPEND(i32, int32_t, XTK_VALUE_I32, i32)
-DEFINE_APPEND(f32, float, XTK_VALUE_F32, f32)
-DEFINE_APPEND(f64, double, XTK_VALUE_F64, f64)
-DEFINE_APPEND(enum, uint32_t, XTK_VALUE_ENUM, u32)
-DEFINE_APPEND(color, XtkColor, XTK_VALUE_COLOR, color)
-DEFINE_APPEND(resource, XtkResource, XTK_VALUE_RESOURCE, resource)
+static void pack_other_value(XtkValue *v, uint8_t const *base, XtkCtrlField const *f, uint16_t delta) {
+	uint8_t const *p = base + delta + f->offset;
+	if (f->kind == XTK_VALUE_ENUM) {
+		v->kind = XTK_VALUE_ENUM;
+		memcpy(&v->u.u32, p, sizeof(v->u.u32));
+		return;
+	}
+	if (f->kind == XTK_VALUE_COLOR) {
+		v->kind = XTK_VALUE_COLOR;
+		memcpy(&v->u.color, p, sizeof(v->u.color));
+		return;
+	}
+	if (f->kind == XTK_VALUE_RESOURCE) {
+		v->kind = XTK_VALUE_RESOURCE;
+		memcpy(&v->u.resource, p, sizeof(v->u.resource));
+		return;
+	}
+	char const *text = NULL;
+	uint32_t    len  = 0u;
+	memcpy(&text, p, sizeof(text));
+	memcpy(&len, base + delta + f->len_offset, sizeof(len));
+	v->kind          = XTK_VALUE_STRING;
+	v->u.string.data = ( char * ) text;
+	v->u.string.len  = xtk_controls_text_len(text, len);
+}
 
-void xtk_controls_append_string(
-  XtkPropPatch *patches, uint32_t *count, bool has, XtkPropertyId id, char const *text, uint32_t len,
-  XtkChangeStamp change
+static void pack_slice(
+  XtkPropPatch *patches, uint32_t *count, uint8_t const *base, uint64_t set, XtkChangeStamp change,
+  XtkCtrlField const *fields, uint32_t start, uint32_t end, uint16_t delta, uint8_t bit_base
 ) {
-	if (!has) return;
-	patches [(*count)++] = (XtkPropPatch) {
-	  .id = id,
-	  .value = {
-	    .kind = XTK_VALUE_STRING,
-	    .u.string = {.data = ( char * ) text, .len = xtk_controls_text_len(text, len)},
-	  },
-	  .change = change,
-	};
+	for (uint32_t i = start; i < end; i++) {
+		XtkCtrlField const *f = &fields [i];
+		if (!((set >> (bit_base + f->bit)) & 1ull)) continue;
+		XtkPropPatch *patch = &patches [(*count)++];
+		patch->id           = f->id;
+		patch->change       = change;
+		if (f->kind <= XTK_VALUE_F64) pack_num_value(&patch->value, base + delta + f->offset, f->kind);
+		else pack_other_value(&patch->value, base, f, delta);
+	}
+}
+
+XtkLocalId xtk_controls_create(
+  XtkTxn *txn, XtkCtrlId type, XtkNodeRef parent, void const *props, XtkCtrlPack const *pack
+) {
+	if (!props || !pack) return xtk_txn_create(txn, type, parent, xtk_ref_none(), NULL, 0u);
+	uint8_t const *base = ( uint8_t const * ) props;
+	uint64_t       set  = 0u;
+	memcpy(&set, base, sizeof(set));
+	if (set == 0u) return xtk_txn_create(txn, type, parent, xtk_ref_none(), NULL, 0u);
+
+	XtkChangeStamp change = {0};
+	memcpy(&change, base + offsetof(XtkLayoutProps, stamp), sizeof(change));
+
+	XtkPropPatch patches [64];
+	uint32_t     count = 0u;
+	if (pack->pre_count)
+		pack_slice(patches, &count, base, set, change, pack->fields, 0u, pack->pre_count, 0u, 0u);
+	if (pack->has_a11y)
+		pack_slice(
+		  patches, &count, base, set, change, k_a11y_fields, 0u, 28u, pack->a11y_offset, pack->a11y_bit
+		);
+	if (pack->field_count > pack->pre_count)
+		pack_slice(patches, &count, base, set, change, pack->fields, pack->pre_count, pack->field_count, 0u, 0u);
+	return xtk_txn_create(txn, type, parent, xtk_ref_none(), patches, count);
 }
 ]=]
+
+local function pack_source(pack)
+  local lines = {
+    string.format('static_assert(offsetof(%s, set) == 0u && offsetof(%s, stamp) == offsetof(XtkLayoutProps, stamp), "header prefix");', pack.struct, pack.struct),
+  }
+  if pack.has_a11y then
+    add(lines, string.format(
+      'static_assert(offsetof(%s, acontrols_len) - offsetof(%s, tip) == offsetof(XtkLayoutProps, acontrols_len) - offsetof(XtkLayoutProps, tip), "a11y span");',
+      pack.struct, pack.struct))
+  end
+  local fields_ref = "NULL"
+  if #pack.fields > 0 then
+    fields_ref = "k_fields_" .. pack.key
+    add(lines, "static XtkCtrlField const " .. fields_ref .. " [" .. #pack.fields .. "] = {")
+    for _, item in ipairs(pack.fields) do
+      add(lines, abs_field_row(pack.struct, item.bit, item.prop))
+    end
+    add(lines, "};")
+  end
+  local a11y_off = pack.has_a11y and ("( uint16_t ) offsetof(" .. pack.struct .. ", tip)") or "0u"
+  add(lines,
+    "XtkCtrlPack const xtk_pack_" .. pack.key .. " = {",
+    "\t.fields      = " .. fields_ref .. ",",
+    "\t.a11y_offset = " .. a11y_off .. ",",
+    "\t.pre_count   = " .. tostring(pack.pre_count) .. "u,",
+    "\t.field_count = " .. tostring(#pack.fields) .. "u,",
+    "\t.a11y_bit    = " .. tostring(pack.a11y_bit) .. "u,",
+    "\t.has_a11y    = " .. (pack.has_a11y and "1u" or "0u") .. ",",
+    "};")
+  return join(lines)
+end
+
+local function support_source(packs)
+  local chunks = {support_prelude(), "", support_helpers}
+  for _, pack in ipairs(packs) do add(chunks, pack_source(pack)) end
+  add(chunks, "")
+  return join(chunks)
 end
 
 local function enum_block(name, invalid, entries, count)
@@ -524,12 +739,13 @@ end
 
 local function generate()
   os.mkdir(out_dir)
+  local packs = collect_packs()
   local generated = {
     write(out_ids, ids_header()),
     write(out_catalog, catalog_source()),
     write(out_h, header()),
-    write(path.join(out_dir, "xtk_controls_internal.h"), internal_header()),
-    write(path.join(out_dir, "xtk_controls_support.c"), support_source()),
+    write(path.join(out_dir, "xtk_controls_internal.h"), internal_header(packs)),
+    write(path.join(out_dir, "xtk_controls_support.c"), support_source(packs)),
   }
   local expected = {}
   for _, pathname in ipairs(generated) do expected[pathname] = true end

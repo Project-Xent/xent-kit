@@ -20,6 +20,11 @@ static bool list_groups_copy(XtkUi *ui, XtkListDesc *desc) {
 		desc->ngroup = 0;
 		return true;
 	}
+	if (xtk_model_ver_valid(desc->version)) {
+		desc->nitem = 0;
+		for (int g = 0; g < desc->ngroup; g++) desc->nitem += desc->groups [g] > 0 ? desc->groups [g] : 0;
+		return true;
+	}
 	int32_t *copy = ( int32_t * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy) * ( size_t ) desc->ngroup);
 	if (!copy) return false;
 	desc->nitem = 0;
@@ -37,6 +42,7 @@ static bool list_names_copy(XtkUi *ui, XtkListDesc *desc) {
 		desc->nname = 0;
 		return true;
 	}
+	if (xtk_model_ver_valid(desc->version)) return true;
 	char const **copy = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy) * ( size_t ) desc->nname);
 	if (!copy) return false;
 	for (int i = 0; i < desc->nname; i++) copy [i] = xtk_strdup(ui, desc->names [i]);
@@ -52,6 +58,7 @@ static XtkEl *items_host(XtkUi *ui, XtkCtrlType type, XtkListDesc desc) {
 	if (desc.itemh < 0.0f) desc.itemh = 0.0f;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	XTK_EL_DATA(el)->virtualized = true;
+	ui->composition.has_lists    = true;
 	return el;
 }
 
@@ -119,8 +126,14 @@ XtkEl *xtk_tree(XtkUi *ui, XtkTreeDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_TREE, NULL);
 	if (!el) return NULL;
 	if (desc.rowh <= 0.0f) desc.rowh = 32.0f;
-	desc.roots = tree_nodes_dup(ui, desc.roots, desc.nroot);
-	if (!desc.roots) desc.nroot = 0;
+	if (!desc.roots || desc.nroot <= 0) {
+		desc.roots = NULL;
+		desc.nroot = 0;
+	}
+	else if (!xtk_model_ver_valid(desc.version)) {
+		desc.roots = tree_nodes_dup(ui, desc.roots, desc.nroot);
+		if (!desc.roots) desc.nroot = 0;
+	}
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }

@@ -68,6 +68,12 @@ static void composition_reset(XtkComposition *composition) {
 	composition->child_count   = 0u;
 	composition->detail_count  = 0u;
 	composition->failed        = false;
+	composition->has_compounds = false;
+	composition->has_lists     = false;
+}
+
+void xtk_ui_attach_rt(XtkUi *ui, struct XtkRt *rt) {
+	if (ui) ui->rt = rt;
 }
 
 XtkArena              *xtk_ui_arena(XtkUi *ui) { return &ui->arena; }
@@ -165,7 +171,6 @@ XtkUi *xtk_ui_create(void) {
 void xtk_ui_destroy(XtkUi *ui) {
 	if (!ui) return;
 	composition_dispose(&ui->composition);
-	xtk_alloc_free(ui->regions);
 	xtk_arena_dispose(&ui->arena);
 	xtk_alloc_free(ui);
 }

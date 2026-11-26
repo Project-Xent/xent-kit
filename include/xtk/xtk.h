@@ -11,6 +11,11 @@
 
 typedef XtkEl *(*XtkRegionBuildFn)(XtkUi *ui, void *ctx);
 
+typedef struct XtkModelVer {
+	void const *ptr;
+	uint64_t    revision;
+} XtkModelVer;
+
 typedef enum XtkKeyKind
 {
 	XTK_KEY_NONE = 0,
@@ -163,6 +168,7 @@ typedef struct XtkLoopingDesc {
 	bool               loop;
 	bool               disabled;
 	XtkMsg             select;
+	XtkModelVer        version;
 } XtkLoopingDesc;
 
 typedef enum XtkClock
@@ -234,6 +240,7 @@ typedef struct XtkComboDesc {
 	char const        *content;
 	XtkMsg             select;
 	XtkMsg             submit;
+	XtkModelVer        version;
 } XtkComboDesc;
 
 typedef struct XtkExpanderDesc {
@@ -297,6 +304,7 @@ typedef struct XtkTabViewDesc {
 	XtkMsg            select;
 	XtkMsg            close;
 	XtkMsg            add;
+	XtkModelVer       version;
 } XtkTabViewDesc;
 
 typedef struct XtkMenuDesc {
@@ -358,6 +366,7 @@ typedef struct XtkListDesc {
 	bool               rect_select;
 	char const *const *names;
 	int                nname;
+	XtkModelVer        version;
 } XtkListDesc;
 
 typedef struct XtkListRow {
@@ -422,6 +431,7 @@ typedef struct XtkAutoSuggestDesc {
 	XtkMsg             on_text;
 	XtkMsg             query;
 	XtkMsg             on_chosen;
+	XtkModelVer        version;
 } XtkAutoSuggestDesc;
 
 typedef enum XtkPagerDisplayMode
@@ -467,6 +477,7 @@ typedef struct XtkBreadcrumbDesc {
 	int                nitem;
 	bool               disabled;
 	XtkMsg             click;
+	XtkModelVer        version;
 } XtkBreadcrumbDesc;
 
 typedef struct XtkSelectorItem {
@@ -480,6 +491,7 @@ typedef struct XtkSelectorBarDesc {
 	int                    nitem;
 	int                    sel;
 	XtkMsg                 select;
+	XtkModelVer            version;
 } XtkSelectorBarDesc;
 
 typedef struct XtkRatingDesc {
@@ -566,6 +578,7 @@ typedef struct XtkTreeDesc {
 	XtkMsg                 invoke;
 	XtkMsg                 expand;
 	XtkMsg                 select;
+	XtkModelVer            version;
 } XtkTreeDesc;
 
 typedef enum XtkNavPaneMode
@@ -623,6 +636,7 @@ typedef struct XtkNavDesc {
 	XtkNavBackButton      back_button;
 	bool                  back_enabled;
 	XtkMsg                back_requested;
+	XtkModelVer           version;
 } XtkNavDesc;
 
 typedef struct XtkTeachingTipDesc {
@@ -744,6 +758,8 @@ XENT_NODISCARD char  *xtk_fmt(XtkUi *ui, char const *fmt, ...);
 XENT_NODISCARD XtkEl *xtk_static_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx);
 
 XENT_NODISCARD XtkEl *xtk_memo_region(XtkUi *ui, uint64_t id, uint64_t revision, XtkRegionBuildFn build, void *ctx);
+
+XENT_NODISCARD XtkEl *xtk_sub_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx);
 
 XtkEl                *xtk_text(XtkUi *ui, char const *content, XtkTextDesc desc);
 XtkEl                *xtk_button(XtkUi *ui, char const *label, XtkButtonDesc desc);

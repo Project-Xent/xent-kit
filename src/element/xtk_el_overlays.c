@@ -5,16 +5,21 @@
 XtkEl *xtk_tabs(XtkUi *ui, XtkTabViewDesc desc, XtkEl *children []) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_TABS, NULL);
 	if (!el) return NULL;
-	if (desc.ntab < 0) desc.ntab = 0;
-	XtkTabDesc *tabs
-	  = ( XtkTabDesc * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(XtkTabDesc) * ( size_t ) (desc.ntab ? desc.ntab : 1));
-	if (!tabs) return NULL;
-	for (int i = 0; i < desc.ntab; i++) {
-		tabs [i]       = desc.tabs [i];
-		tabs [i].icon  = xtk_strdup(ui, tabs [i].icon);
-		tabs [i].label = xtk_strdup(ui, tabs [i].label);
+	if (desc.ntab <= 0 || !desc.tabs) {
+		desc.tabs = NULL;
+		desc.ntab = 0;
 	}
-	desc.tabs = tabs;
+	else if (!xtk_model_ver_valid(desc.version)) {
+		XtkTabDesc *tabs
+		  = ( XtkTabDesc * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(XtkTabDesc) * ( size_t ) desc.ntab);
+		if (!tabs) return NULL;
+		for (int i = 0; i < desc.ntab; i++) {
+			tabs [i]       = desc.tabs [i];
+			tabs [i].icon  = xtk_strdup(ui, tabs [i].icon);
+			tabs [i].label = xtk_strdup(ui, tabs [i].label);
+		}
+		desc.tabs = tabs;
+	}
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	xtk_el_adopt(ui, el, children);
 	return el;

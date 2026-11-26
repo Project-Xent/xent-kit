@@ -11,7 +11,8 @@ bool            xtk_batch_stdprop_ok(XtkCtrlId control, XtkPropPatch const *patc
 bool            xtk_batch_phases_ok(XtkEventId event, uint32_t phases);
 
 void            xtk_batch_reset(XtkBatch *batch, uint64_t revision);
-bool            xtk_batch_capture_begin(XtkBatch *batch, XtkBatchOp *ops, uint32_t capacity);
-void            xtk_batch_capture_end(XtkBatch *batch);
+bool xtk_batch_replace_prop(XtkBatch *batch, uint32_t op_index, XtkValue const *value, XtkChangeStamp change);
+bool xtk_batch_capture_begin(XtkBatch *batch, XtkBatchOp *ops, uint32_t capacity);
+void xtk_batch_capture_end(XtkBatch *batch);
 
 #endif

@@ -8,7 +8,7 @@ end
 set_warnings("all")
 
 if is_mode("release") then
-    set_optimize("faster")
+    set_optimize("smallest")
 end
 
 add_repositories("xent-repo https://github.com/Project-Xent/xent-repo.git")
@@ -25,6 +25,14 @@ target("xtk")
         add_deps("xent_core")
     else
         add_packages("xent-core")
+    end
+    if is_plat("mingw") then
+        add_cflags("-ffunction-sections", "-fdata-sections", { force = true })
+        if is_mode("release") then
+            add_cflags("-fmerge-all-constants", { force = true })
+        end
+    elseif is_plat("windows") then
+        add_cflags("/Gy", "/Gw", { tools = "cl", force = true })
     end
     add_includedirs("include", { public = true })
     add_includedirs("src", { private = true })

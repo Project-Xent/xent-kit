@@ -208,6 +208,18 @@ static bool set_prop_value(XtkBatch *batch, XtkBatchOp *op, XtkValue const *valu
 	return value_copy(&op->u.set_prop.patch.value, value);
 }
 
+bool xtk_batch_replace_prop(XtkBatch *batch, uint32_t op_index, XtkValue const *value, XtkChangeStamp change) {
+	if (!batch || batch->sealed || op_index >= batch->count) return false;
+	XtkBatchOp *op = &batch->ops [op_index];
+	if (op->kind != XTK_BATCH_OP_SET_PROP || !xtk_batch_value_ok(value) || !xtk_changestamp_valid(change)) return false;
+	XtkValue copy;
+	if (!value_copy(&copy, value)) return false;
+	value_free(&op->u.set_prop.patch.value);
+	op->u.set_prop.patch.value  = copy;
+	op->u.set_prop.patch.change = change;
+	return true;
+}
+
 bool xtk_batch_set(XtkBatch *batch, XtkNodeRef target, XtkPropertyId id, XtkValue value, XtkChangeStamp change) {
 	if (id == XTK_PROP_ID_INVALID || !xtk_batch_value_ok(&value) || !xtk_changestamp_valid(change)) return false;
 	XtkBatchOp *op = batch_push(batch, XTK_BATCH_OP_SET_PROP);

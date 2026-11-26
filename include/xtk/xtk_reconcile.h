@@ -107,6 +107,7 @@ XtkPostStatus     xtk_rt_post(XtkRt *rt, XtkMsg msg);
 /** Must run on the thread that created `rt`. Copies `data`; the caller may free it. `len > 0` with NULL `data` is rejected. */
 XtkPostStatus     xtk_rt_poststring(XtkRt *rt, XtkMsg msg, char const *data, uint32_t len);
 void              xtk_rt_invalidate(XtkRt *rt);
+void              xtk_rt_invalidate_region(XtkRt *rt, uint64_t id);
 
 XtkOverflowStatus xtk_rt_overflow(XtkRt const *rt);
 void              xtk_rt_ackoverflow(XtkRt *rt);

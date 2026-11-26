@@ -317,6 +317,7 @@ local function zig()
     "pub const Value = rt.Value;",
     "pub const Theme = rt.Theme;",
     "pub const Window = rt.Window;",
+    "pub const Channel = rt.Channel;",
     "pub const run = rt.run;",
   }
   for _, name in ipairs(sorted_enums()) do add(chunks, "", zig_enum(name)) end

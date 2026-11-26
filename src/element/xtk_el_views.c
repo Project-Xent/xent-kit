@@ -87,17 +87,25 @@ XtkEl *xtk_pager(XtkUi *ui, XtkPagerDesc desc) {
 	return el;
 }
 
+static bool suggest_dup_items(XtkUi *ui, XtkAutoSuggestDesc *desc) {
+	if (desc->nitem <= 0 || !desc->suggestions) {
+		desc->suggestions = NULL;
+		desc->nitem       = 0;
+		return true;
+	}
+	if (xtk_model_ver_valid(desc->version)) return true;
+	char const **items = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) desc->nitem);
+	if (!items) return false;
+	for (int i = 0; i < desc->nitem; i++) items [i] = xtk_strdup(ui, desc->suggestions [i]);
+	desc->suggestions = items;
+	return true;
+}
+
 XtkEl *xtk_suggest(XtkUi *ui, char const *placeholder, XtkAutoSuggestDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_SUGGEST, placeholder);
-	if (!el) return NULL;
+	if (!el || !suggest_dup_items(ui, &desc)) return NULL;
 	desc.content    = xtk_strdup(ui, desc.content);
 	desc.query_icon = xtk_strdup(ui, desc.query_icon);
-	if (desc.nitem < 0) desc.nitem = 0;
-	char const **items
-	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.nitem ? desc.nitem : 1));
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) items [i] = xtk_strdup(ui, desc.suggestions [i]);
-	desc.suggestions = items;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }

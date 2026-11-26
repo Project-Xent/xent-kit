@@ -4,11 +4,19 @@
 #include "xtk_rt_internal.h"
 #include "../reconcile/xtk_reconcile_internal.h"
 #include "../reconcile/xtk_scratch.h"
+#include "xtk_hash.h"
 #include "xtk_internal.h"
 #include "../xtk_thread_internal.h"
 
 #include <stdint.h>
 #include <string.h>
+
+enum
+{
+	REGION_EMPTY     = 0,
+	REGION_OCCUPIED  = 1,
+	REGION_TOMBSTONE = 2,
+};
 
 static bool scratch_create(XtkScratch **out) {
 	XtkScratch *scratch = ( XtkScratch * ) xtk_alloc_zero(1, sizeof(*scratch));
@@ -24,6 +32,12 @@ static bool scratch_create(XtkScratch **out) {
 static void runtime_storage_dispose(XtkRt *rt) {
 	if (!rt) return;
 	xtk_batch_free(rt->batch);
+	if (rt->patch_arena) {
+		xtk_arena_dispose(rt->patch_arena);
+		xtk_alloc_free(rt->patch_arena);
+	}
+	xtk_alloc_free(rt->dirty_regions);
+	xtk_alloc_free(rt->regions);
 	xtk_scratch_dispose(rt->plan_scratch);
 	xtk_alloc_free(rt->plan_scratch);
 	xtk_scratch_dispose(rt->scratch);
@@ -35,6 +49,103 @@ static bool runtime_storage_create(XtkRt *rt) {
 	if (!scratch_create(&rt->plan_scratch)) return false;
 	rt->batch = xtk_batch_alloc(0u);
 	return rt->batch != NULL;
+}
+
+static bool region_rehash(XtkRt *rt, uint32_t new_cap) {
+	if (( size_t ) new_cap > SIZE_MAX / sizeof(XtkRtRegion)) return false;
+	XtkRtRegion *slots = ( XtkRtRegion * ) xtk_alloc_zero(new_cap, sizeof(XtkRtRegion));
+	if (!slots) return false;
+	uint32_t mask = new_cap - 1u;
+	uint32_t live = 0u;
+	for (uint32_t i = 0; i < rt->region_cap; i++) {
+		if (rt->regions [i].state != REGION_OCCUPIED) continue;
+		uint32_t slot = ( uint32_t ) xtk_hash_u64(rt->regions [i].id) & mask;
+		while (slots [slot].state == REGION_OCCUPIED) slot = (slot + 1u) & mask;
+		slots [slot] = rt->regions [i];
+		live++;
+	}
+	xtk_alloc_free(rt->regions);
+	rt->regions      = slots;
+	rt->region_cap   = new_cap;
+	rt->region_count = live;
+	return true;
+}
+
+XtkRtRegion *xtk_rt_region_find(XtkRt const *rt, uint64_t id) {
+	if (!rt || !id || !rt->region_cap) return NULL;
+	uint32_t mask = rt->region_cap - 1u;
+	uint32_t slot = ( uint32_t ) xtk_hash_u64(id) & mask;
+	for (uint32_t probe = 0; probe < rt->region_cap; probe++) {
+		XtkRtRegion *e = &rt->regions [slot];
+		if (e->state == REGION_EMPTY) return NULL;
+		if (e->state == REGION_OCCUPIED && e->id == id) return e;
+		slot = (slot + 1u) & mask;
+	}
+	return NULL;
+}
+
+XtkNode *xtk_rt_region_lookup(XtkRt const *rt, uint64_t id, uint64_t revision) {
+	XtkRtRegion const *e = xtk_rt_region_find(rt, id);
+	if (!e) return NULL;
+	return e->revision == revision ? e->node : NULL;
+}
+
+static bool region_ensure_cap(XtkRt *rt) {
+	if (rt->region_cap && (rt->region_count + 1u) * 10u < rt->region_cap * 7u) return true;
+	uint32_t next_cap = rt->region_cap ? rt->region_cap * 2u : 16u;
+	return next_cap >= rt->region_cap && region_rehash(rt, next_cap);
+}
+
+static void region_write_entry(XtkRtRegion *dst, XtkNode *node) {
+	*dst = (XtkRtRegion) {
+	  .id       = node->region_id,
+	  .revision = node->region_revision,
+	  .flags    = node->region_flags,
+	  .state    = REGION_OCCUPIED,
+	  .dirty    = false,
+	  .node     = node,
+	  .build    = node->region_build,
+	  .ctx      = node->region_ctx,
+	};
+}
+
+static XtkRtRegion *region_find_insert(XtkRt *rt, uint64_t id, bool *is_new) {
+	uint32_t     mask  = rt->region_cap - 1u;
+	uint32_t     slot  = ( uint32_t ) xtk_hash_u64(id) & mask;
+	XtkRtRegion *avail = NULL;
+	for (uint32_t probe = 0; probe < rt->region_cap; probe++) {
+		XtkRtRegion *e = &rt->regions [slot];
+		if (e->state == REGION_OCCUPIED && e->id == id) {
+			*is_new = false;
+			return e;
+		}
+		if (e->state == REGION_TOMBSTONE && !avail) avail = e;
+		if (e->state == REGION_EMPTY) {
+			*is_new = true;
+			return avail ? avail : e;
+		}
+		slot = (slot + 1u) & mask;
+	}
+	return NULL;
+}
+
+bool xtk_rt_region_register(XtkRt *rt, XtkNode *node) {
+	if (!rt || !node || !node->region_id) return true;
+	if (!region_ensure_cap(rt)) return false;
+	bool         is_new = false;
+	XtkRtRegion *dst    = region_find_insert(rt, node->region_id, &is_new);
+	if (!dst) return false;
+	region_write_entry(dst, node);
+	if (is_new) rt->region_count++;
+	return true;
+}
+
+void xtk_rt_region_remove(XtkRt *rt, XtkNode const *node) {
+	if (!rt || !node || !node->region_id) return;
+	XtkRtRegion *e = xtk_rt_region_find(rt, node->region_id);
+	if (!e || e->node != node) return;
+	*e = (XtkRtRegion) {.state = REGION_TOMBSTONE};
+	if (rt->region_count > 0u) rt->region_count--;
 }
 
 static void request_frame(XtkRt *rt) {
@@ -69,6 +180,7 @@ static XtkPostStatus queue_post(XtkRt *rt, XtkMsg msg, char *owned) {
 	rt->queue [slot]       = msg;
 	rt->queue_owned [slot] = owned;
 	rt->q_count++;
+	rt->fail_retries = 0u;
 	request_frame(rt);
 	return XTK_POST_ACCEPTED;
 }
@@ -130,7 +242,39 @@ XentNodeId xtk_node_id(XtkNode const *node) { return node ? node->node : XENT_NO
 
 void       xtk_rt_invalidate(XtkRt *rt) {
 	if (!rt) return;
-	rt->force = true;
+	rt->fail_retries = 0u;
+	rt->force        = true;
+	request_frame(rt);
+}
+
+static bool dirty_regions_push(XtkRt *rt, uint64_t id) {
+	if (rt->dirty_region_count == rt->dirty_region_cap) {
+		uint32_t cap = rt->dirty_region_cap ? rt->dirty_region_cap * 2u : 8u;
+		if (cap < rt->dirty_region_cap || ( size_t ) cap > SIZE_MAX / sizeof(uint64_t)) return false;
+		uint64_t *next = ( uint64_t * ) xtk_alloc_resize(rt->dirty_regions, sizeof(*next) * cap);
+		if (!next) return false;
+		rt->dirty_regions    = next;
+		rt->dirty_region_cap = cap;
+	}
+	rt->dirty_regions [rt->dirty_region_count++] = id;
+	return true;
+}
+
+void xtk_rt_invalidate_region(XtkRt *rt, uint64_t id) {
+	if (!rt || !id) return;
+	XtkRtRegion *reg = xtk_rt_region_find(rt, id);
+	if (!reg || !reg->node || !(reg->flags & XTK_REGION_SUB)) {
+		xtk_rt_invalidate(rt);
+		return;
+	}
+	rt->fail_retries = 0u;
+	if (!reg->dirty) {
+		if (!dirty_regions_push(rt, id)) {
+			xtk_rt_invalidate(rt);
+			return;
+		}
+		reg->dirty = true;
+	}
 	request_frame(rt);
 }
 
@@ -153,9 +297,10 @@ static void drain_messages(XtkRt *rt, XtkFrameResult *result, uint32_t count) {
 }
 
 static XtkFrameResult clean_frame(XtkRt *rt, XtkFrameResult result) {
+	rt->fail_retries      = 0u;
 	result.status         = XTK_FRAME_CLEAN;
 	result.revision_after = result.revision_before;
-	result.pending        = rt->q_count > 0 || rt->force;
+	result.pending        = rt->q_count > 0 || rt->force || rt->dirty_region_count > 0;
 	rt->in_frame          = false;
 	if (result.pending) request_frame(rt);
 	return result;
@@ -164,15 +309,22 @@ static XtkFrameResult clean_frame(XtkRt *rt, XtkFrameResult result) {
 static void finish_frame(XtkRt *rt, XtkFrameResult *result, XtkFrameStatus status) {
 	result->status         = status;
 	result->revision_after = xtk_scene_revision(&rt->scene);
-	result->pending        = rt->q_count > 0 || rt->force || rt->frame_pending;
-	if (status != XTK_FRAME_COMMITTED && status != XTK_FRAME_CLEAN) {
-		rt->force         = true;
-		rt->frame_pending = true;
-		result->pending   = true;
-		notify(rt, result);
-	}
-	rt->in_frame = false;
+	if (status == XTK_FRAME_COMMITTED || status == XTK_FRAME_CLEAN) rt->fail_retries = 0u;
+	else notify(rt, result);
+	result->pending = rt->q_count > 0 || rt->force || rt->dirty_region_count > 0 || rt->frame_pending;
+	rt->in_frame    = false;
 	if (result->pending) request_frame(rt);
+}
+
+static XtkFrameStatus run_region_frame(XtkRt *rt, XtkFrameResult *result) {
+	rt->frame_sequence++;
+	XtkBatchDiag   diag = {0};
+	XtkFrameStatus st   = xtk_reconcile_regions(
+	  rt, rt->dirty_regions, rt->dirty_region_count, &diag, &result->identity, &result->metrics
+	);
+	result->metrics.nodes_built = rt->ui->composition.element_count;
+	result->diagnostic          = diag;
+	return st;
 }
 
 XtkFrameResult xtk_rt_frame(XtkRt *rt) {
@@ -189,19 +341,23 @@ XtkFrameResult xtk_rt_frame(XtkRt *rt) {
 	}
 	rt->in_frame             = true;
 	rt->frame_pending        = false;
-
 	result.revision_before   = xtk_scene_revision(&rt->scene);
 	result.dropped_since_ack = rt->dropped_since_ack;
 	result.dropped_total     = rt->dropped_total;
 
 	uint32_t snapshot        = rt->q_count;
-	bool     dirty           = snapshot > 0 || !rt->root || rt->force;
+	bool     full_dirty      = snapshot > 0 || !rt->root || rt->force;
+	bool     region_dirty    = !full_dirty && rt->dirty_region_count > 0u;
 	rt->force                = false;
 	drain_messages(rt, &result, snapshot);
-	if (!dirty) return clean_frame(rt, result);
+	if (!full_dirty && !region_dirty) return clean_frame(rt, result);
+	if (region_dirty) {
+		XtkFrameStatus st = run_region_frame(rt, &result);
+		finish_frame(rt, &result, st);
+		return result;
+	}
 
 	xtk_ui_begin(rt->ui);
-	if (!xtk_ui_prepare_regions(rt->ui, rt->root)) xtk_ui_fail(rt->ui);
 	rt->frame_sequence++;
 	XtkEl *view                = rt->view(rt->ui, rt->model);
 	result.metrics.nodes_built = rt->ui->composition.element_count;
@@ -209,6 +365,7 @@ XtkFrameResult xtk_rt_frame(XtkRt *rt) {
 	XtkFrameStatus st          = xtk_reconcile_run(rt, view, &diag, &result.identity, &result.metrics);
 	result.metrics.nodes_built = rt->ui->composition.element_count;
 	result.diagnostic          = diag;
+	if (st == XTK_FRAME_COMMITTED) rt->dirty_region_count = 0u;
 	finish_frame(rt, &result, st);
 	return result;
 }
@@ -226,6 +383,7 @@ XtkRt *xtk_rt_create(
 		xtk_alloc_free(rt);
 		return NULL;
 	}
+	xtk_ui_attach_rt(rt->ui, rt);
 
 	if (!runtime_storage_create(rt)) {
 		runtime_storage_dispose(rt);

@@ -134,16 +134,6 @@ static XtkNode *committed_child(XtkNode *parent, XtkEl const *want, int index) {
 	return n && n->type_id == XTK_EL_DATA(want)->type ? n : NULL;
 }
 
-static bool normalize_lists(XtkRt *rt, XtkEl *el, XtkNode *committed) {
-	if (!el) return true;
-	if (XTK_EL_DATA(el)->virtualized && !list_realize(rt, committed, el)) return false;
-	for (int i = 0; i < XTK_EL_DATA(el)->child_count; i++) {
-		XtkNode *child = committed_child(committed, xtk_el_child(el, i), i);
-		if (!normalize_lists(rt, xtk_el_child(el, i), child)) return false;
-	}
-	return true;
-}
-
 static bool radio_fill_kids(XtkUi *ui, XtkRadioButtonsDesc const *d, XtkEl **kids, int n, int extra) {
 	int k = 0;
 	if (extra) {
@@ -170,16 +160,20 @@ static bool normalize_radio_buttons(XtkUi *ui, XtkEl *el) {
 	return xtk_el_set_children(el, kids, n + extra);
 }
 
-static bool normalize_one(XtkUi *ui, XtkEl *el) { return normalize_radio_buttons(ui, el); }
-
-static bool normalize_compounds(XtkUi *ui, XtkEl *el) {
+static bool normalize_walk(XtkRt *rt, XtkEl *el, XtkNode *committed, bool compounds, bool lists) {
 	if (!el) return true;
-	if (!normalize_one(ui, el)) return false;
-	for (int i = 0; i < XTK_EL_DATA(el)->child_count; i++)
-		if (!normalize_compounds(ui, xtk_el_child(el, i))) return false;
+	if (compounds && !normalize_radio_buttons(rt->ui, el)) return false;
+	if (lists && XTK_EL_DATA(el)->virtualized && !list_realize(rt, committed, el)) return false;
+	for (int i = 0; i < XTK_EL_DATA(el)->child_count; i++) {
+		XtkEl   *child_el = xtk_el_child(el, i);
+		XtkNode *child    = committed_child(committed, child_el, i);
+		if (!normalize_walk(rt, child_el, child, compounds, lists)) return false;
+	}
 	return true;
 }
 
-bool xtk_normalize_tree(XtkRt *rt, XtkEl *next) {
-	return normalize_compounds(rt->ui, next) && normalize_lists(rt, next, rt->root);
+bool xtk_normalize_tree(XtkRt *rt, XtkEl *next, XtkNode *committed) {
+	XtkComposition const *comp = &rt->ui->composition;
+	if (!comp->has_compounds && !comp->has_lists) return true;
+	return normalize_walk(rt, next, committed, comp->has_compounds, comp->has_lists);
 }

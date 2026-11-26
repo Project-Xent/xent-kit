@@ -139,11 +139,11 @@ static int test_failed_reconcile_preserves_committed(void) {
 		EXPECT(rt, "runtime creation");
 		EXPECT(xtk_rt_frame(rt).status == XTK_FRAME_COMMITTED, "initial mount commits");
 
-		XtkNode   *root_before  = rt->root;
-		XentNodeId child_id     = rt->root->children [0]->node;
-		void      *props_before = rt->root->children [0]->props;
-		uint64_t   rev_before   = host->vt->revision(host);
-		model.label             = "after";
+		XtkNode   *root_before      = rt->root;
+		XentNodeId child_id         = rt->root->children [0]->node;
+		uint64_t   props_rev_before = rt->root->children [0]->props ? rt->root->children [0]->props->revision : 0u;
+		uint64_t   rev_before       = host->vt->revision(host);
+		model.label                 = "after";
 		xtk_rt_invalidate(rt);
 		xtk_alloc_test_reset();
 		xtk_alloc_fail_at(fail_at);
@@ -158,13 +158,19 @@ static int test_failed_reconcile_preserves_committed(void) {
 
 		saw_failure = true;
 		EXPECT(rt->root == root_before, "committed root unchanged");
-		EXPECT(rt->root->children [0]->props == props_before, "retained props not advanced on failure");
+		EXPECT(
+		  (rt->root->children [0]->props ? rt->root->children [0]->props->revision : 0u) == props_rev_before,
+		  "retained props not advanced on failure"
+		);
 		EXPECT(rt->root->children [0]->node == child_id, "composition child handle unchanged");
 		EXPECT(host->vt->revision(host) == rev_before, "Host revision unchanged");
 		xtk_alloc_test_reset();
 		XtkFrameResult retry = xtk_rt_frame(rt);
 		EXPECT(retry.status == XTK_FRAME_COMMITTED, "retry commits entire candidate");
-		EXPECT(rt->root->children [0]->props != props_before, "retained props advance after retry");
+		EXPECT(
+		  (rt->root->children [0]->props ? rt->root->children [0]->props->revision : 0u) != props_rev_before,
+		  "retained props advance after retry"
+		);
 		EXPECT(rt->root->children [0]->node == child_id, "retry retains child identity");
 		EXPECT(xtk_rt_destroy(rt), "failed sweep runtime destroy");
 		xtk_retained_host_destroy(host);

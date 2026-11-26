@@ -4,7 +4,22 @@
 #include <xtk/xtk_reconcile.h>
 #include <xtk/xtk_scene.h>
 
-#define XTK_QUEUE_CAP 256
+enum
+{
+	XTK_QUEUE_CAP = 256,
+	XTK_RETRY_CAP = 4,
+};
+
+typedef struct XtkRtRegion {
+	uint64_t         id;
+	uint64_t         revision;
+	uint32_t         flags;
+	uint8_t          state;
+	bool             dirty;
+	struct XtkNode  *node;
+	XtkRegionBuildFn build;
+	void            *ctx;
+} XtkRtRegion;
 
 struct XtkRt {
 	XtkScene           scene;
@@ -31,12 +46,27 @@ struct XtkRt {
 	bool               force;
 	bool               frame_pending;
 	bool               in_frame;
+	uint8_t            fail_retries;
 	void const        *owner_thread;
 	uint64_t           frame_sequence;
+	uint32_t           committed_count;
+
+	XtkRtRegion       *regions;
+	uint32_t           region_cap;
+	uint32_t           region_count;
+	uint64_t          *dirty_regions;
+	uint32_t           dirty_region_count;
+	uint32_t           dirty_region_cap;
 
 	struct XtkScratch *scratch;
 	struct XtkScratch *plan_scratch;
+	struct XtkArena   *patch_arena;
 	XtkBatch          *batch;
 };
+
+struct XtkRtRegion *xtk_rt_region_find(struct XtkRt const *rt, uint64_t id);
+struct XtkNode     *xtk_rt_region_lookup(struct XtkRt const *rt, uint64_t id, uint64_t revision);
+bool                xtk_rt_region_register(struct XtkRt *rt, struct XtkNode *node);
+void                xtk_rt_region_remove(struct XtkRt *rt, struct XtkNode const *node);
 
 #endif

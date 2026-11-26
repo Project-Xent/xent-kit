@@ -49,6 +49,8 @@ static void diagnostic_path(XtkIdentityDiag *out, int const *path, uint32_t dept
 
 static bool type_known(XtkScene const *scene, XtkCtrlId type) { return xtk_scene_ctrldesc(scene, type) != NULL; }
 
+bool        xtk_identity_type_known(XtkScene const *scene, XtkCtrlId type) { return type_known(scene, type); }
+
 static bool keyed_keys_equal(XtkEl const *parent, int other, XtkKey const *key, uint32_t h, KeySlot const *slot) {
 	if (slot->hash != h) return false;
 	XtkKey const *other_key = &XTK_EL_DATA(xtk_el_child(parent, other))->key;
@@ -153,19 +155,9 @@ validate_siblings(XtkScene const *scene, XtkEl const *parent, XtkScratch *scratc
 	return XTK_IDENTITY_OK;
 }
 
-typedef struct IdentityWalk {
-	XtkScene const  *scene;
-	XtkScratch      *scratch;
-	XtkIdentityDiag *out;
-	uint64_t        *regions;
-	uint32_t         region_capacity;
-	uint32_t         order;
-	int              path [XTK_IDENTITY_PATH_MAX];
-} IdentityWalk;
-
-static bool prepare_regions(IdentityWalk *ctx, XtkEl const *root) {
-	if (!root->ui) return false;
-	uint32_t count = root->ui->composition.element_count;
+bool xtk_identity_alloc_regions(XtkScratch *scratch, uint32_t count, uint64_t **out_slots, uint32_t *out_cap) {
+	*out_slots = NULL;
+	*out_cap   = 0u;
 	if (!count) return true;
 	if (count > UINT32_MAX / 2u) return false;
 	uint32_t need     = count * 2u;
@@ -174,91 +166,67 @@ static bool prepare_regions(IdentityWalk *ctx, XtkEl const *root) {
 		if (capacity > UINT32_MAX / 2u) return false;
 		capacity *= 2u;
 	}
-	ctx->regions = xtk_scratch_reserve(ctx->scratch, sizeof(*ctx->regions) * capacity, _Alignof(uint64_t));
-	if (!ctx->regions) return false;
-	memset(ctx->regions, 0, sizeof(*ctx->regions) * capacity);
-	ctx->region_capacity = capacity;
+	uint64_t *slots = xtk_scratch_reserve(scratch, sizeof(*slots) * capacity, _Alignof(uint64_t));
+	if (!slots) return false;
+	memset(slots, 0, sizeof(*slots) * capacity);
+	*out_slots = slots;
+	*out_cap   = capacity;
 	return true;
 }
 
-static XtkIdentityError report_duplicate_region(IdentityWalk *ctx, uint64_t id) {
-	if (ctx->out) {
-		ctx->out->error     = XTK_IDENTITY_DUPLICATE_REGION;
-		ctx->out->region_id = id;
+static XtkIdentityError report_duplicate_region(XtkIdentityDiag *out, uint64_t id) {
+	if (out) {
+		out->error     = XTK_IDENTITY_DUPLICATE_REGION;
+		out->region_id = id;
 	}
 	return XTK_IDENTITY_DUPLICATE_REGION;
 }
 
-static XtkIdentityError validate_region(IdentityWalk *ctx, XtkEl const *el) {
+static XtkIdentityError
+validate_region(uint64_t *regions, uint32_t region_capacity, XtkEl const *el, XtkIdentityDiag *out) {
 	uint64_t id = XTK_EL_DATA(el)->region_id;
-	if (!id) return XTK_IDENTITY_OK;
-	uint32_t mask = ctx->region_capacity - 1u;
+	if (!id || !regions || !region_capacity) return XTK_IDENTITY_OK;
+	uint32_t mask = region_capacity - 1u;
 	uint32_t slot = ( uint32_t ) xtk_hash_u64(id) & mask;
-	while (ctx->regions [slot]) {
-		if (ctx->regions [slot] == id) return report_duplicate_region(ctx, id);
+	while (regions [slot]) {
+		if (regions [slot] == id) return report_duplicate_region(out, id);
 		slot = (slot + 1u) & mask;
 	}
-	ctx->regions [slot] = id;
+	regions [slot] = id;
 	return XTK_IDENTITY_OK;
 }
 
-static XtkIdentityError walk(IdentityWalk *ctx, XtkEl const *el, uint32_t depth);
-
-static XtkIdentityError walk_node(IdentityWalk *ctx, XtkEl const *el, uint32_t depth) {
+XtkIdentityError xtk_identity_check_node(
+  XtkScene const *scene, XtkEl const *el, uint32_t depth, int const *path, uint64_t *regions, uint32_t region_capacity,
+  XtkIdentityDiag *out
+) {
 	if (depth > XTK_IDENTITY_DEPTH_MAX) {
-		if (ctx->out) {
-			ctx->out->error       = XTK_IDENTITY_INVALID_COUNT;
-			ctx->out->parent_type = el ? XTK_EL_DATA(el)->type : XTK_CTRL_ID_INVALID;
-			diagnostic_path(ctx->out, ctx->path, depth);
+		if (out) {
+			out->error       = XTK_IDENTITY_INVALID_COUNT;
+			out->parent_type = el ? XTK_EL_DATA(el)->type : XTK_CTRL_ID_INVALID;
+			diagnostic_path(out, path, depth);
 		}
 		return XTK_IDENTITY_INVALID_COUNT;
 	}
-	if (!type_known(ctx->scene, XTK_EL_DATA(el)->type)) {
-		if (ctx->out) {
-			ctx->out->error       = XTK_IDENTITY_INVALID_TYPE;
-			ctx->out->parent_type = XTK_EL_DATA(el)->type;
-			diagnostic_path(ctx->out, ctx->path, depth);
+	if (!type_known(scene, XTK_EL_DATA(el)->type)) {
+		if (out) {
+			out->error       = XTK_IDENTITY_INVALID_TYPE;
+			out->parent_type = XTK_EL_DATA(el)->type;
+			diagnostic_path(out, path, depth);
 		}
 		return XTK_IDENTITY_INVALID_TYPE;
 	}
-	XtkIdentityError region = validate_region(ctx, el);
-	if (region != XTK_IDENTITY_OK) {
-		diagnostic_path(ctx->out, ctx->path, depth);
-		return region;
-	}
-	size_t           mark = xtk_scratch_mark(ctx->scratch);
-	XtkIdentityError err  = validate_siblings(ctx->scene, el, ctx->scratch, ctx->out);
-	xtk_scratch_rewind(ctx->scratch, mark);
-	if (err != XTK_IDENTITY_OK) {
-		diagnostic_path(ctx->out, ctx->path, depth);
-		return err;
-	}
-	return XTK_IDENTITY_OK;
+	XtkIdentityError region = validate_region(regions, region_capacity, el, out);
+	if (region != XTK_IDENTITY_OK) diagnostic_path(out, path, depth);
+	return region;
 }
 
-static XtkIdentityError walk_children(IdentityWalk *ctx, XtkEl const *el, uint32_t depth) {
-	for (int i = 0; i < XTK_EL_DATA(el)->child_count; i++) {
-		if (depth < XTK_IDENTITY_PATH_MAX) ctx->path [depth] = i;
-		XtkIdentityError err = walk(ctx, xtk_el_child(el, i), depth + 1u);
-		if (err != XTK_IDENTITY_OK) return err;
-	}
-	return XTK_IDENTITY_OK;
-}
-
-static XtkIdentityError walk(IdentityWalk *ctx, XtkEl const *el, uint32_t depth) {
-	XTK_EL_DATA(el)->subtree_begin = ctx->order++;
-	XtkIdentityError err           = walk_node(ctx, el, depth);
-	if (err != XTK_IDENTITY_OK) return err;
-	err = walk_children(ctx, el, depth);
-	if (err == XTK_IDENTITY_OK) XTK_EL_DATA(el)->subtree_end = ctx->order;
+XtkIdentityError xtk_identity_check_siblings(
+  XtkScene const *scene, XtkEl const *parent, XtkScratch *scratch, uint32_t depth, int const *path, XtkIdentityDiag *out
+) {
+	size_t           mark = xtk_scratch_mark(scratch);
+	XtkIdentityError err  = validate_siblings(scene, parent, scratch, out);
+	xtk_scratch_rewind(scratch, mark);
+	if (err != XTK_IDENTITY_OK) diagnostic_path(out, path, depth);
 	return err;
-}
-
-XtkIdentityError
-xtk_identity_validate_tree(XtkScene const *scene, XtkEl const *root, XtkScratch *scratch, XtkIdentityDiag *out) {
-	if (out) memset(out, 0, sizeof(*out));
-	if (!scene || !root || !scratch) return XTK_IDENTITY_INVALID_TYPE;
-	IdentityWalk ctx = {.scene = scene, .scratch = scratch, .out = out};
-	if (!prepare_regions(&ctx, root)) return XTK_IDENTITY_OOM;
-	return walk(&ctx, root, 0u);
 }

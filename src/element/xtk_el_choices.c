@@ -23,15 +23,24 @@ static XtkEl *menu_flyout_el(XtkUi *ui, char const *title, XtkMenuItemDesc const
 	return xtk_el_set_children(flyout, children, count) ? flyout : NULL;
 }
 
+static bool dup_string_items(XtkUi *ui, char const *const **items, int *count, XtkModelVer version) {
+	if (*count <= 0 || !*items) {
+		*items = NULL;
+		*count = 0;
+		return true;
+	}
+	if (xtk_model_ver_valid(version)) return true;
+	char const **copy = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) *count);
+	if (!copy) return false;
+	for (int i = 0; i < *count; i++) copy [i] = xtk_strdup(ui, (*items) [i]);
+	*items = copy;
+	return true;
+}
+
 XtkEl *xtk_combo(XtkUi *ui, char const *placeholder, XtkComboDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_COMBO, placeholder);
 	if (!el) return NULL;
-	if (desc.nitem < 0) desc.nitem = 0;
-	char const **items
-	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.nitem ? desc.nitem : 1));
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) items [i] = xtk_strdup(ui, desc.items [i]);
-	desc.items   = items;
+	if (!dup_string_items(ui, &desc.items, &desc.nitem, desc.version)) return NULL;
 	desc.content = xtk_strdup(ui, desc.content);
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
@@ -40,12 +49,7 @@ XtkEl *xtk_combo(XtkUi *ui, char const *placeholder, XtkComboDesc desc) {
 XtkEl *xtk_looping_selector(XtkUi *ui, XtkLoopingDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_LOOPING, NULL);
 	if (!el) return NULL;
-	if (desc.nitem < 0) desc.nitem = 0;
-	char const **items
-	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.nitem ? desc.nitem : 1));
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) items [i] = xtk_strdup(ui, desc.items [i]);
-	desc.items = items;
+	if (!dup_string_items(ui, &desc.items, &desc.nitem, desc.version)) return NULL;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }
@@ -118,36 +122,40 @@ XtkEl *xtk_radiogroup(XtkUi *ui, XtkRadioButtonsDesc desc) {
 	}
 	desc.items = items;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
+	ui->composition.has_compounds = true;
 	return el;
 }
 
 XtkEl *xtk_breadcrumb(XtkUi *ui, XtkBreadcrumbDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_BREADCRUMB, NULL);
 	if (!el) return NULL;
-	if (desc.nitem < 0) desc.nitem = 0;
-	char const **items
-	  = ( char const ** ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(char *) * ( size_t ) (desc.nitem ? desc.nitem : 1));
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) items [i] = xtk_strdup(ui, desc.items [i]);
-	desc.items = items;
+	if (!dup_string_items(ui, &desc.items, &desc.nitem, desc.version)) return NULL;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }
 
+static bool selector_dup_items(XtkUi *ui, XtkSelectorBarDesc *desc) {
+	if (desc->nitem <= 0 || !desc->items) {
+		desc->items = NULL;
+		desc->nitem = 0;
+		return true;
+	}
+	if (xtk_model_ver_valid(desc->version)) return true;
+	XtkSelectorItem *items
+	  = ( XtkSelectorItem * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(XtkSelectorItem) * ( size_t ) desc->nitem);
+	if (!items) return false;
+	for (int i = 0; i < desc->nitem; i++) {
+		items [i]      = desc->items [i];
+		items [i].text = xtk_strdup(ui, desc->items [i].text);
+		items [i].icon = xtk_strdup(ui, desc->items [i].icon);
+	}
+	desc->items = items;
+	return true;
+}
+
 XtkEl *xtk_selector(XtkUi *ui, XtkSelectorBarDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_SELECTOR, NULL);
-	if (!el) return NULL;
-	if (desc.nitem < 0) desc.nitem = 0;
-	XtkSelectorItem *items = ( XtkSelectorItem * ) xtk_arena_alloc(
-	  xtk_ui_arena(ui), sizeof(XtkSelectorItem) * ( size_t ) (desc.nitem ? desc.nitem : 1)
-	);
-	if (!items) return NULL;
-	for (int i = 0; i < desc.nitem; i++) {
-		items [i]      = desc.items [i];
-		items [i].text = xtk_strdup(ui, desc.items [i].text);
-		items [i].icon = xtk_strdup(ui, desc.items [i].icon);
-	}
-	desc.items = items;
+	if (!el || !selector_dup_items(ui, &desc)) return NULL;
 	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }
