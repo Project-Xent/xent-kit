@@ -407,6 +407,10 @@ static XtkPropDesc const properties [XTK_PROP_STANDARD_COUNT] = {
   [XTK_PROP_FRAME_BACK] = {XTK_PROP_FRAME_BACK,                 "frame-back",                  XTK_PROP_KIND_BOOL,     0u, STATE,                                                                  XTK_RESOURCE_TYPE_INVALID},
   [XTK_PROP_FRAME_PAGE_KEY]
   = {XTK_PROP_FRAME_PAGE_KEY,             "frame-page-key",              XTK_PROP_KIND_I32,      0u, TREE,                                                                   XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_FONT_FAMILY]
+  = {XTK_PROP_FONT_FAMILY,                "font-family",                 XTK_PROP_KIND_STRING,   0u, CONTENT,                                                                XTK_RESOURCE_TYPE_INVALID},
+  [XTK_PROP_MIRROR_RTL]
+  = {XTK_PROP_MIRROR_RTL,                 "mirrored-when-rtl",           XTK_PROP_KIND_BOOL,     0u, XTK_INVALIDATE_PAINT,                                                   XTK_RESOURCE_TYPE_INVALID},
 };
 
 static XtkEventDesc const events [XTK_EVENT_STANDARD_COUNT] = {
@@ -595,6 +599,7 @@ static XtkPropertyId const text_props [] = {
   XTK_PROP_TEXT_TRIM,
   XTK_PROP_TEXT_WRAP,
   XTK_PROP_SELECTABLE,
+  XTK_PROP_FONT_FAMILY,
   XTK_PROP_STYLE_BG,
   XTK_PROP_STYLE_BORDER,
   XTK_PROP_STYLE_RADIUS,
@@ -5658,6 +5663,65 @@ static XtkPropertyId const frame_props [] = {
   XTK_PROP_CONNECTED_CONFIG,
   XTK_PROP_CONNECTED_COORD,
 };
+static XtkPropertyId const fonticon_props [] = {
+  XTK_PROP_WIDTH,
+  XTK_PROP_HEIGHT,
+  XTK_PROP_GROW,
+  XTK_PROP_ALIGN_SELF,
+  XTK_PROP_MARGIN_LEFT,
+  XTK_PROP_MARGIN_TOP,
+  XTK_PROP_MARGIN_RIGHT,
+  XTK_PROP_MARGIN_BOTTOM,
+  XTK_PROP_TOOLTIP,
+  XTK_PROP_A11Y_NAME,
+  XTK_PROP_A11Y_ID,
+  XTK_PROP_A11Y_HELP,
+  XTK_PROP_A11Y_DESCRIPTION,
+  XTK_PROP_A11Y_ITEM_STATUS,
+  XTK_PROP_A11Y_ITEM_TYPE,
+  XTK_PROP_A11Y_CONTROL_TYPE,
+  XTK_PROP_A11Y_ACCELERATOR,
+  XTK_PROP_A11Y_ACCESS_KEY,
+  XTK_PROP_A11Y_LANDMARK,
+  XTK_PROP_A11Y_LANDMARK_NAME,
+  XTK_PROP_A11Y_LIVE,
+  XTK_PROP_A11Y_HEADING,
+  XTK_PROP_A11Y_VIEW,
+  XTK_PROP_A11Y_REQUIRED,
+  XTK_PROP_A11Y_DATA_VALID,
+  XTK_PROP_A11Y_PERIPHERAL,
+  XTK_PROP_A11Y_DIALOG,
+  XTK_PROP_A11Y_POSITION,
+  XTK_PROP_A11Y_SIZE,
+  XTK_PROP_A11Y_LEVEL,
+  XTK_PROP_A11Y_CULTURE,
+  XTK_PROP_A11Y_LABELED_BY,
+  XTK_PROP_A11Y_DESCRIBED_BY,
+  XTK_PROP_A11Y_FLOWS_TO,
+  XTK_PROP_A11Y_FLOWS_FROM,
+  XTK_PROP_A11Y_CONTROLLED,
+  XTK_PROP_ICON,
+  XTK_PROP_FONT_FAMILY,
+  XTK_PROP_FONT_SIZE,
+  XTK_PROP_FONT_WEIGHT,
+  XTK_PROP_FOREGROUND,
+  XTK_PROP_MIRROR_RTL,
+  XTK_PROP_STYLE_BG,
+  XTK_PROP_STYLE_BORDER,
+  XTK_PROP_STYLE_RADIUS,
+  XTK_PROP_STYLE_BORDER_W,
+  XTK_PROP_STYLE_OPACITY,
+  XTK_PROP_STYLE_TX,
+  XTK_PROP_STYLE_TY,
+  XTK_PROP_STYLE_SX,
+  XTK_PROP_STYLE_SY,
+  XTK_PROP_STYLE_ROTATION,
+  XTK_PROP_MOTION_IMPLICIT,
+  XTK_PROP_MOTION_ENTER_EXIT,
+  XTK_PROP_CONNECTED_KEY,
+  XTK_PROP_CONNECTED_CONFIG,
+  XTK_PROP_CONNECTED_COORD,
+};
 
 static XtkCtrlDesc const
 			controls
@@ -5843,6 +5907,8 @@ static XtkCtrlDesc const
                 = {XTK_CTRL_NAVSLOT,       "nav-slot",                       navslot_props,       COUNT_OF(navslot_props),       NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
 				[XTK_CTRL_FRAME]
                 = {XTK_CTRL_FRAME,         "frame",                          frame_props,         COUNT_OF(frame_props),         NULL,                0u,                            {XTK_ACCESS_ROLE_GROUP, false, false},     NULL, 0u, TREE, TREE},
+				[XTK_CTRL_FONTICON]
+                = {XTK_CTRL_FONTICON,      "font-icon",                      fonticon_props,      COUNT_OF(fonticon_props),      NULL,                0u,                            {XTK_ACCESS_ROLE_NONE, false, false},      NULL, 0u, TREE, TREE},
 };
 
 static bool id_in(uint32_t id, uint32_t const *ids, uint32_t count) {

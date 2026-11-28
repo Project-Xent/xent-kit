@@ -4,7 +4,7 @@ prop_order = {
   "infobar", "refresh", "flip", "pips", "suggest", "badge", "dialog", "teachtip", "avatar", "pager",
   "splitview", "titlebar", "rating", "link", "scrollbar", "looping", "datepicker", "timepicker", "calendar",
   "colorpicker", "column", "commandbar", "appbarbutton", "appbartoggle", "appbarsep",
-  "navslot", "frame",
+  "navslot", "frame", "fonticon",
 }
 
 props = {
@@ -201,6 +201,7 @@ props = {
     {"trim", "XTK_PROP_TEXT_TRIM", "enum", values = "XtkTextTrim"},
     {"textwrap", "XTK_PROP_TEXT_WRAP", "bool"},
     {"selectable", "XTK_PROP_SELECTABLE", "bool"},
+    {"fontfamily", "XTK_PROP_FONT_FAMILY", "string"},
   },
   button = {
     {"w", "XTK_PROP_WIDTH", "f32"},
@@ -2159,6 +2160,50 @@ props = {
     {"enabled", "XTK_PROP_ENABLED", "bool"},
     {"url", "XTK_PROP_URL", "string"},
   },
+  fonticon = {
+    {"w", "XTK_PROP_WIDTH", "f32"},
+    {"h", "XTK_PROP_HEIGHT", "f32"},
+    {"grow", "XTK_PROP_GROW", "f32"},
+    {"self", "XTK_PROP_ALIGN_SELF", "enum", values = "XentFlexAlign"},
+    {"ml", "XTK_PROP_MARGIN_LEFT", "f32"},
+    {"mt", "XTK_PROP_MARGIN_TOP", "f32"},
+    {"mr", "XTK_PROP_MARGIN_RIGHT", "f32"},
+    {"mb", "XTK_PROP_MARGIN_BOTTOM", "f32"},
+    {"tip", "XTK_PROP_TOOLTIP", "string"},
+    {"aname", "XTK_PROP_A11Y_NAME", "string"},
+    {"aid", "XTK_PROP_A11Y_ID", "string"},
+    {"ahelp", "XTK_PROP_A11Y_HELP", "string"},
+    {"adesc", "XTK_PROP_A11Y_DESCRIPTION", "string"},
+    {"astatus", "XTK_PROP_A11Y_ITEM_STATUS", "string"},
+    {"aitem", "XTK_PROP_A11Y_ITEM_TYPE", "string"},
+    {"actype", "XTK_PROP_A11Y_CONTROL_TYPE", "string"},
+    {"aaccel", "XTK_PROP_A11Y_ACCELERATOR", "string"},
+    {"akey", "XTK_PROP_A11Y_ACCESS_KEY", "string"},
+    {"alandmark", "XTK_PROP_A11Y_LANDMARK", "enum", values = "XtkLandmark"},
+    {"alandname", "XTK_PROP_A11Y_LANDMARK_NAME", "string"},
+    {"alive", "XTK_PROP_A11Y_LIVE", "enum", values = "XtkLiveSetting"},
+    {"aheading", "XTK_PROP_A11Y_HEADING", "enum", values = "XtkHeadingLevel"},
+    {"aview", "XTK_PROP_A11Y_VIEW", "enum", values = "XtkAccessView"},
+    {"arequired", "XTK_PROP_A11Y_REQUIRED", "bool"},
+    {"avalid", "XTK_PROP_A11Y_DATA_VALID", "bool"},
+    {"aperipheral", "XTK_PROP_A11Y_PERIPHERAL", "bool"},
+    {"adialog", "XTK_PROP_A11Y_DIALOG", "bool"},
+    {"apos", "XTK_PROP_A11Y_POSITION", "i32"},
+    {"asize", "XTK_PROP_A11Y_SIZE", "i32"},
+    {"alevel", "XTK_PROP_A11Y_LEVEL", "i32"},
+    {"aculture", "XTK_PROP_A11Y_CULTURE", "i32"},
+    {"alabel", "XTK_PROP_A11Y_LABELED_BY", "string"},
+    {"adescribed", "XTK_PROP_A11Y_DESCRIBED_BY", "string"},
+    {"aflowsto", "XTK_PROP_A11Y_FLOWS_TO", "string"},
+    {"aflowsfrom", "XTK_PROP_A11Y_FLOWS_FROM", "string"},
+    {"acontrols", "XTK_PROP_A11Y_CONTROLLED", "string"},
+    {"glyph", "XTK_PROP_ICON", "string"},
+    {"fontfamily", "XTK_PROP_FONT_FAMILY", "string"},
+    {"fontsize", "XTK_PROP_FONT_SIZE", "f32"},
+    {"fontweight", "XTK_PROP_FONT_WEIGHT", "enum", values = "XtkFontWeight"},
+    {"fg", "XTK_PROP_FOREGROUND", "color"},
+    {"mirrorrtl", "XTK_PROP_MIRROR_RTL", "bool"},
+  },
 }
 
 properties = {
@@ -2381,6 +2426,8 @@ properties = {
   {"XTK_PROP_FRAME_TRANSITION", "frame-transition", "enum", {"paint"}},
   {"XTK_PROP_FRAME_BACK", "frame-back", "bool", {"state"}},
   {"XTK_PROP_FRAME_PAGE_KEY", "frame-page-key", "i32", {"tree"}},
+  {"XTK_PROP_FONT_FAMILY", "font-family", "string", {"content"}},
+  {"XTK_PROP_MIRROR_RTL", "mirrored-when-rtl", "bool", {"paint"}},
 }
 
 event_defs = {
@@ -2512,6 +2559,7 @@ controls = {
   {token = "cmdovfrow", name = "command-bar-overflow-item", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TEXT", "XTK_PROP_TOOLTIP", "XTK_PROP_ENABLED", "XTK_PROP_SELECTED"}, events = {}, access = {"list_item", false, false}},
   {api = "nav_slot", token = "navslot", name = "nav-slot", group = "navslot", events = {}, access = {"group", false, false}},
   {api = "frame", token = "frame", name = "frame", group = "frame", events = {}, access = {"group", false, false}},
+  {api = "font_icon", token = "fonticon", name = "font-icon", group = "fonticon", events = {}, access = {"none", false, false}},
 }
 
 enums = {
@@ -2625,6 +2673,7 @@ structs = {
   appbartoggle = "XtkAppBarToggleProps",
   appbarsep = "XtkAppBarSeparatorProps",
   frame = "XtkFrameProps",
+  fonticon = "XtkFontIconProps",
 }
 
 function get()

@@ -17,6 +17,11 @@ static bool streq(char const *a, char const *b) {
 	return strcmp(a, b) == 0;
 }
 
+static bool str_prop_changed(char const *old_val, bool has_prev, char const *new_val) {
+	if (has_prev) return !streq(old_val, new_val);
+	return new_val && new_val [0];
+}
+
 static bool feq(float a, float b) { return (isnan(a) && isnan(b)) || a == b; }
 
 static bool value_string(XtkBatch *batch, XtkNodeRef target, XtkPropertyId id, char const *text) {
@@ -819,16 +824,18 @@ static bool encode_badge(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, 
 }
 
 static bool encode_text_font(XtkBatch *batch, XtkNodeRef target, XtkTextDesc const *old, XtkTextDesc const *text) {
-	if ((old ? old->size != text->size : text->size > 0.0f)
-	    && !value_f32(batch, target, XTK_PROP_FONT_SIZE, text->size > 0.0f ? text->size : 0.0f))
+	XtkTextDesc const  zero = {0};
+	XtkTextDesc const *was  = old ? old : &zero;
+	if (str_prop_changed(was->font_family, old != NULL, text->font_family)
+	    && !value_string(batch, target, XTK_PROP_FONT_FAMILY, text->font_family))
 		return false;
-	if ((old ? old->weight != text->weight : text->weight != XTK_FONT_INHERIT)
-	    && !value_enum(batch, target, XTK_PROP_FONT_WEIGHT, ( uint32_t ) text->weight))
-		return false;
-	if ((!old || old->align != text->align)
-	    && !value_enum(batch, target, XTK_PROP_TEXT_ALIGN, ( uint32_t ) text->align))
-		return false;
-	return (old && old->color.rgba == text->color.rgba) || value_color(batch, target, XTK_PROP_FOREGROUND, text->color);
+	ScalarField const fields [] = {
+	  {XTK_PROP_FONT_SIZE,   SCALAR_F32,  was->size != text->size,           {.f32 = text->size > 0.0f ? text->size : 0.0f}},
+	  {XTK_PROP_FONT_WEIGHT, SCALAR_ENUM, was->weight != text->weight,       {.u32 = ( uint32_t ) text->weight}            },
+	  {XTK_PROP_TEXT_ALIGN,  SCALAR_ENUM, !old || was->align != text->align, {.u32 = ( uint32_t ) text->align}             },
+	};
+	if (!encode_scalar_fields(batch, target, fields, 3u)) return false;
+	return (old && was->color.rgba == text->color.rgba) || value_color(batch, target, XTK_PROP_FOREGROUND, text->color);
 }
 
 static bool encode_text_flow(XtkBatch *batch, XtkNodeRef target, XtkTextDesc const *old, XtkTextDesc const *text) {
@@ -1457,6 +1464,35 @@ static bool  encode_model_skipped(XtkBatch *batch, XtkNodeRef target, XtkEl cons
 	return !step || step(batch, target, NULL, el, true);
 }
 
+static bool encode_fonticon_strings(
+  XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el, XtkFontIconDesc const *was,
+  XtkFontIconDesc const *now
+) {
+	char const *prev_glyph = prev ? XTK_EL_DATA(prev)->text : NULL;
+	if (str_prop_changed(prev_glyph, prev != NULL, XTK_EL_DATA(el)->text)
+	    && !value_string(batch, target, XTK_PROP_ICON, XTK_EL_DATA(el)->text))
+		return false;
+	return !str_prop_changed(was->font_family, prev != NULL, now->font_family)
+	    || value_string(batch, target, XTK_PROP_FONT_FAMILY, now->font_family);
+}
+
+static bool encode_fonticon(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkFontIconDesc const  zero = {0};
+	XtkFontIconDesc const *was  = prev ? XTK_EL_DETAIL(prev, XtkFontIconDesc) : &zero;
+	XtkFontIconDesc const *now  = XTK_EL_DETAIL(el, XtkFontIconDesc);
+	if (!now) now = &zero;
+	if (!encode_fonticon_strings(batch, target, prev, el, was, now)) return false;
+	if (was->color.rgba != now->color.rgba && !value_color(batch, target, XTK_PROP_FOREGROUND, now->color))
+		return false;
+	ScalarField const fields [] = {
+	  {XTK_PROP_FONT_SIZE,   SCALAR_F32,  was->size != now->size,                           {.f32 = now->size > 0.0f ? now->size : 0.0f}},
+	  {XTK_PROP_FONT_WEIGHT, SCALAR_ENUM, was->weight != now->weight,                       {.u32 = ( uint32_t ) now->weight}           },
+	  {XTK_PROP_MIRROR_RTL,  SCALAR_BOOL, was->mirrored_when_rtl != now->mirrored_when_rtl,
+	   {.b = now->mirrored_when_rtl}                                                                                                    },
+	};
+	return encode_scalar_fields(batch, target, fields, 3u);
+}
+
 static bool encode_frame(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
 	XtkFrameDesc        zero = {0};
 	XtkFrameDesc const *was  = prev ? XTK_EL_DETAIL(prev, XtkFrameDesc) : &zero;
@@ -1533,6 +1569,7 @@ encode_element_props_opt(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, 
 	  [XTK_CTRL_COLORPICKER]  = xtk_encode_color_picker,
 	  [XTK_CTRL_CONTAINER]    = encode_dragdrop,
 	  [XTK_CTRL_FRAME]        = encode_frame,
+	  [XTK_CTRL_FONTICON]     = encode_fonticon,
 	};
 	if (!encode_common(batch, target, prev, el)) return false;
 	if (!encode_stack(batch, target, prev, el)) return false;

@@ -275,7 +275,7 @@ static_assert(
     == offsetof(XtkLayoutProps, acontrols_len) - offsetof(XtkLayoutProps, tip),
   "a11y span"
 );
-static XtkCtrlField const k_fields_text [17] = {
+static XtkCtrlField const k_fields_text [18] = {
   {( uint16_t ) offsetof(XtkTextProps, w), 0u, XTK_PROP_WIDTH, 0u, XTK_VALUE_F32},
   {( uint16_t ) offsetof(XtkTextProps, h), 0u, XTK_PROP_HEIGHT, 1u, XTK_VALUE_F32},
   {( uint16_t ) offsetof(XtkTextProps, grow), 0u, XTK_PROP_GROW, 2u, XTK_VALUE_F32},
@@ -294,12 +294,14 @@ static XtkCtrlField const k_fields_text [17] = {
   {( uint16_t ) offsetof(XtkTextProps, trim), 0u, XTK_PROP_TEXT_TRIM, 42u, XTK_VALUE_ENUM},
   {( uint16_t ) offsetof(XtkTextProps, textwrap), 0u, XTK_PROP_TEXT_WRAP, 43u, XTK_VALUE_BOOL},
   {( uint16_t ) offsetof(XtkTextProps, selectable), 0u, XTK_PROP_SELECTABLE, 44u, XTK_VALUE_BOOL},
+  {( uint16_t ) offsetof(XtkTextProps, fontfamily), ( uint16_t ) offsetof(XtkTextProps, fontfamily_len),
+   XTK_PROP_FONT_FAMILY, 45u, XTK_VALUE_STRING},
 };
 XtkCtrlPack const xtk_pack_text = {
   .fields      = k_fields_text,
   .a11y_offset = ( uint16_t ) offsetof(XtkTextProps, tip),
   .pre_count   = 9u,
-  .field_count = 17u,
+  .field_count = 18u,
   .a11y_bit    = 9u,
   .has_a11y    = 1u,
 };
@@ -1945,4 +1947,39 @@ XtkCtrlPack const xtk_pack_frame = {
   .field_count = 8u,
   .a11y_bit    = 0u,
   .has_a11y    = 0u,
+};
+static_assert(
+  offsetof(XtkFontIconProps, set) == 0u && offsetof(XtkFontIconProps, stamp) == offsetof(XtkLayoutProps, stamp),
+  "header prefix"
+);
+static_assert(
+  offsetof(XtkFontIconProps, acontrols_len) - offsetof(XtkFontIconProps, tip)
+    == offsetof(XtkLayoutProps, acontrols_len) - offsetof(XtkLayoutProps, tip),
+  "a11y span"
+);
+static XtkCtrlField const k_fields_fonticon [14] = {
+  {( uint16_t ) offsetof(XtkFontIconProps, w), 0u, XTK_PROP_WIDTH, 0u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, h), 0u, XTK_PROP_HEIGHT, 1u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, grow), 0u, XTK_PROP_GROW, 2u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, self), 0u, XTK_PROP_ALIGN_SELF, 3u, XTK_VALUE_ENUM},
+  {( uint16_t ) offsetof(XtkFontIconProps, ml), 0u, XTK_PROP_MARGIN_LEFT, 4u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, mt), 0u, XTK_PROP_MARGIN_TOP, 5u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, mr), 0u, XTK_PROP_MARGIN_RIGHT, 6u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, mb), 0u, XTK_PROP_MARGIN_BOTTOM, 7u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, glyph), ( uint16_t ) offsetof(XtkFontIconProps, glyph_len), XTK_PROP_ICON,
+   36u, XTK_VALUE_STRING},
+  {( uint16_t ) offsetof(XtkFontIconProps, fontfamily), ( uint16_t ) offsetof(XtkFontIconProps, fontfamily_len),
+   XTK_PROP_FONT_FAMILY, 37u, XTK_VALUE_STRING},
+  {( uint16_t ) offsetof(XtkFontIconProps, fontsize), 0u, XTK_PROP_FONT_SIZE, 38u, XTK_VALUE_F32},
+  {( uint16_t ) offsetof(XtkFontIconProps, fontweight), 0u, XTK_PROP_FONT_WEIGHT, 39u, XTK_VALUE_ENUM},
+  {( uint16_t ) offsetof(XtkFontIconProps, fg), 0u, XTK_PROP_FOREGROUND, 40u, XTK_VALUE_COLOR},
+  {( uint16_t ) offsetof(XtkFontIconProps, mirrorrtl), 0u, XTK_PROP_MIRROR_RTL, 41u, XTK_VALUE_BOOL},
+};
+XtkCtrlPack const xtk_pack_fonticon = {
+  .fields      = k_fields_fonticon,
+  .a11y_offset = ( uint16_t ) offsetof(XtkFontIconProps, tip),
+  .pre_count   = 8u,
+  .field_count = 14u,
+  .a11y_bit    = 8u,
+  .has_a11y    = 1u,
 };

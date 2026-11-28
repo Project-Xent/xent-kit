@@ -421,6 +421,8 @@ typedef struct XtkTextProps {
 	XtkTextTrim     trim;
 	bool            textwrap;
 	bool            selectable;
+	char const     *fontfamily;
+	uint32_t        fontfamily_len;
 } XtkTextProps;
 
 #define XTK_TEXT_W_MASK           (1ull << 0u)
@@ -468,6 +470,7 @@ typedef struct XtkTextProps {
 #define XTK_TEXT_TRIM_MASK        (1ull << 42u)
 #define XTK_TEXT_TEXTWRAP_MASK    (1ull << 43u)
 #define XTK_TEXT_SELECTABLE_MASK  (1ull << 44u)
+#define XTK_TEXT_FONTFAMILY_MASK  (1ull << 45u)
 
 typedef struct XtkButtonProps {
 	uint64_t        set;
@@ -5228,6 +5231,114 @@ typedef struct XtkFrameProps {
 #define XTK_FRAME_IS_BACK_MASK    (1ull << 6u)
 #define XTK_FRAME_PAGE_KEY_MASK   (1ull << 7u)
 
+typedef struct XtkFontIconProps {
+	uint64_t        set;
+	XtkChangeStamp  stamp;
+	float           w;
+	float           h;
+	float           grow;
+	XentFlexAlign   self;
+	float           ml;
+	float           mt;
+	float           mr;
+	float           mb;
+	char const     *tip;
+	uint32_t        tip_len;
+	char const     *aname;
+	uint32_t        aname_len;
+	char const     *aid;
+	uint32_t        aid_len;
+	char const     *ahelp;
+	uint32_t        ahelp_len;
+	char const     *adesc;
+	uint32_t        adesc_len;
+	char const     *astatus;
+	uint32_t        astatus_len;
+	char const     *aitem;
+	uint32_t        aitem_len;
+	char const     *actype;
+	uint32_t        actype_len;
+	char const     *aaccel;
+	uint32_t        aaccel_len;
+	char const     *akey;
+	uint32_t        akey_len;
+	XtkLandmark     alandmark;
+	char const     *alandname;
+	uint32_t        alandname_len;
+	XtkLiveSetting  alive;
+	XtkHeadingLevel aheading;
+	XtkAccessView   aview;
+	bool            arequired;
+	bool            avalid;
+	bool            aperipheral;
+	bool            adialog;
+	int32_t         apos;
+	int32_t         asize;
+	int32_t         alevel;
+	int32_t         aculture;
+	char const     *alabel;
+	uint32_t        alabel_len;
+	char const     *adescribed;
+	uint32_t        adescribed_len;
+	char const     *aflowsto;
+	uint32_t        aflowsto_len;
+	char const     *aflowsfrom;
+	uint32_t        aflowsfrom_len;
+	char const     *acontrols;
+	uint32_t        acontrols_len;
+	char const     *glyph;
+	uint32_t        glyph_len;
+	char const     *fontfamily;
+	uint32_t        fontfamily_len;
+	float           fontsize;
+	XtkFontWeight   fontweight;
+	XtkColor        fg;
+	bool            mirrorrtl;
+} XtkFontIconProps;
+
+#define XTK_FONTICON_W_MASK           (1ull << 0u)
+#define XTK_FONTICON_H_MASK           (1ull << 1u)
+#define XTK_FONTICON_GROW_MASK        (1ull << 2u)
+#define XTK_FONTICON_SELF_MASK        (1ull << 3u)
+#define XTK_FONTICON_ML_MASK          (1ull << 4u)
+#define XTK_FONTICON_MT_MASK          (1ull << 5u)
+#define XTK_FONTICON_MR_MASK          (1ull << 6u)
+#define XTK_FONTICON_MB_MASK          (1ull << 7u)
+#define XTK_FONTICON_TIP_MASK         (1ull << 8u)
+#define XTK_FONTICON_ANAME_MASK       (1ull << 9u)
+#define XTK_FONTICON_AID_MASK         (1ull << 10u)
+#define XTK_FONTICON_AHELP_MASK       (1ull << 11u)
+#define XTK_FONTICON_ADESC_MASK       (1ull << 12u)
+#define XTK_FONTICON_ASTATUS_MASK     (1ull << 13u)
+#define XTK_FONTICON_AITEM_MASK       (1ull << 14u)
+#define XTK_FONTICON_ACTYPE_MASK      (1ull << 15u)
+#define XTK_FONTICON_AACCEL_MASK      (1ull << 16u)
+#define XTK_FONTICON_AKEY_MASK        (1ull << 17u)
+#define XTK_FONTICON_ALANDMARK_MASK   (1ull << 18u)
+#define XTK_FONTICON_ALANDNAME_MASK   (1ull << 19u)
+#define XTK_FONTICON_ALIVE_MASK       (1ull << 20u)
+#define XTK_FONTICON_AHEADING_MASK    (1ull << 21u)
+#define XTK_FONTICON_AVIEW_MASK       (1ull << 22u)
+#define XTK_FONTICON_AREQUIRED_MASK   (1ull << 23u)
+#define XTK_FONTICON_AVALID_MASK      (1ull << 24u)
+#define XTK_FONTICON_APERIPHERAL_MASK (1ull << 25u)
+#define XTK_FONTICON_ADIALOG_MASK     (1ull << 26u)
+#define XTK_FONTICON_APOS_MASK        (1ull << 27u)
+#define XTK_FONTICON_ASIZE_MASK       (1ull << 28u)
+#define XTK_FONTICON_ALEVEL_MASK      (1ull << 29u)
+#define XTK_FONTICON_ACULTURE_MASK    (1ull << 30u)
+#define XTK_FONTICON_ALABEL_MASK      (1ull << 31u)
+#define XTK_FONTICON_ADESCRIBED_MASK  (1ull << 32u)
+#define XTK_FONTICON_AFLOWSTO_MASK    (1ull << 33u)
+#define XTK_FONTICON_AFLOWSFROM_MASK  (1ull << 34u)
+#define XTK_FONTICON_ACONTROLS_MASK   (1ull << 35u)
+#define XTK_FONTICON_GLYPH_MASK       (1ull << 36u)
+#define XTK_FONTICON_FONTFAMILY_MASK  (1ull << 37u)
+#define XTK_FONTICON_FONTSIZE_MASK    (1ull << 38u)
+#define XTK_FONTICON_FONTWEIGHT_MASK  (1ull << 39u)
+#define XTK_FONTICON_FG_MASK          (1ull << 40u)
+#define XTK_FONTICON_MIRRORRTL_MASK   (1ull << 41u)
+
 XtkLocalId xtk_container_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_text_create(XtkTxn *txn, XtkNodeRef parent, XtkTextProps const *props);
 XtkLocalId xtk_button_create(XtkTxn *txn, XtkNodeRef parent, XtkButtonProps const *props);
@@ -5309,6 +5420,7 @@ XtkLocalId xtk_appbarsep_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarSeparat
 XtkLocalId xtk_groupheader_create(XtkTxn *txn, XtkNodeRef parent, XtkLayoutProps const *props);
 XtkLocalId xtk_navslot_create(XtkTxn *txn, XtkNodeRef parent, XtkNavSlotProps const *props);
 XtkLocalId xtk_frame_create(XtkTxn *txn, XtkNodeRef parent, XtkFrameProps const *props);
+XtkLocalId xtk_fonticon_create(XtkTxn *txn, XtkNodeRef parent, XtkFontIconProps const *props);
 bool       xtk_container_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -5421,6 +5533,7 @@ bool xtk_text_setmaxlines(XtkScene *scene, XtkCtrl control, int32_t value, XtkCh
 bool xtk_text_settrim(XtkScene *scene, XtkCtrl control, XtkTextTrim value, XtkChangeStamp change);
 bool xtk_text_settextwrap(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_text_setselectable(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_text_setfontfamily(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
 bool xtk_button_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_button_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_button_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -9088,5 +9201,53 @@ bool xtk_frame_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, Xt
 bool xtk_frame_settransition(XtkScene *scene, XtkCtrl control, XtkNavTransitionKind value, XtkChangeStamp change);
 bool xtk_frame_setis_back(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 bool xtk_frame_setpage_key(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_fonticon_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool xtk_fonticon_setml(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_setmt(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_setmr(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_setmb(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_settip(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setaname(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setaid(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setahelp(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setadesc(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setastatus(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setaitem(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setactype(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setaaccel(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setakey(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setalandmark(XtkScene *scene, XtkCtrl control, XtkLandmark value, XtkChangeStamp change);
+bool xtk_fonticon_setalandname(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setalive(XtkScene *scene, XtkCtrl control, XtkLiveSetting value, XtkChangeStamp change);
+bool xtk_fonticon_setaheading(XtkScene *scene, XtkCtrl control, XtkHeadingLevel value, XtkChangeStamp change);
+bool xtk_fonticon_setaview(XtkScene *scene, XtkCtrl control, XtkAccessView value, XtkChangeStamp change);
+bool xtk_fonticon_setarequired(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_fonticon_setavalid(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_fonticon_setaperipheral(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_fonticon_setadialog(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_fonticon_setapos(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_fonticon_setasize(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_fonticon_setalevel(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_fonticon_setaculture(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
+bool xtk_fonticon_setalabel(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setadescribed(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+bool xtk_fonticon_setaflowsto(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setaflowsfrom(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+bool xtk_fonticon_setacontrols(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setglyph(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change);
+bool xtk_fonticon_setfontfamily(
+  XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change
+);
+bool xtk_fonticon_setfontsize(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_fonticon_setfontweight(XtkScene *scene, XtkCtrl control, XtkFontWeight value, XtkChangeStamp change);
+bool xtk_fonticon_setfg(XtkScene *scene, XtkCtrl control, XtkColor value, XtkChangeStamp change);
+bool xtk_fonticon_setmirrorrtl(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
 
 #endif

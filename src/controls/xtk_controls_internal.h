@@ -75,5 +75,6 @@ extern XtkCtrlPack const xtk_pack_appbartoggle;
 extern XtkCtrlPack const xtk_pack_appbarsep;
 extern XtkCtrlPack const xtk_pack_navslot;
 extern XtkCtrlPack const xtk_pack_frame;
+extern XtkCtrlPack const xtk_pack_fonticon;
 
 #endif

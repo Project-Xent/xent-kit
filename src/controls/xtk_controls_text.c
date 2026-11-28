@@ -195,3 +195,7 @@ bool xtk_text_settextwrap(XtkScene *scene, XtkCtrl control, bool value, XtkChang
 bool xtk_text_setselectable(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change) {
 	return xtk_ctrl_setbool(scene, control, XTK_PROP_SELECTABLE, value, change);
 }
+
+bool xtk_text_setfontfamily(XtkScene *scene, XtkCtrl control, char const *data, uint32_t len, XtkChangeStamp change) {
+	return xtk_ctrl_setstring(scene, control, XTK_PROP_FONT_FAMILY, data, xtk_controls_text_len(data, len), change);
+}

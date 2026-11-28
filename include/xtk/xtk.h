@@ -38,6 +38,7 @@ typedef struct XtkKey {
 #define xtk_kids(...) (( XtkEl *[] ) {__VA_ARGS__ __VA_OPT__(, ) XTK_END})
 
 typedef struct XtkTextDesc {
+	char const   *font_family;
 	float         size;
 	XtkFontWeight weight;
 	XtkTextAlign  align;
@@ -47,6 +48,14 @@ typedef struct XtkTextDesc {
 	bool          nowrap;
 	bool          selectable;
 } XtkTextDesc;
+
+typedef struct XtkFontIconDesc {
+	char const   *font_family;
+	float         size;
+	XtkFontWeight weight;
+	XtkColor      color;
+	bool          mirrored_when_rtl;
+} XtkFontIconDesc;
 
 typedef struct XtkButtonDesc {
 	XtkButtonStyle style;
@@ -855,6 +864,7 @@ XENT_NODISCARD XtkEl *xtk_memo_region(XtkUi *ui, uint64_t id, uint64_t revision,
 XENT_NODISCARD XtkEl *xtk_sub_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx);
 
 XtkEl                *xtk_text(XtkUi *ui, char const *content, XtkTextDesc desc);
+XtkEl                *xtk_fonticon(XtkUi *ui, char const *glyph, XtkFontIconDesc desc);
 XtkEl                *xtk_button(XtkUi *ui, char const *label, XtkButtonDesc desc);
 XtkEl                *xtk_checkbox(XtkUi *ui, char const *label, XtkToggleDesc desc);
 XtkEl                *xtk_radio(XtkUi *ui, char const *label, XtkToggleDesc desc);

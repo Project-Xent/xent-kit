@@ -255,7 +255,17 @@ void xtk_el_adopt(XtkUi *ui, XtkEl *el, XtkEl *children []) {
 
 XtkEl *xtk_text(XtkUi *ui, char const *content, XtkTextDesc desc) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_TEXT, content);
-	if (el && !XTK_EL_STORE(el, desc)) return NULL;
+	if (!el) return NULL;
+	desc.font_family = xtk_strdup(ui, desc.font_family);
+	if (!XTK_EL_STORE(el, desc)) return NULL;
+	return el;
+}
+
+XtkEl *xtk_fonticon(XtkUi *ui, char const *glyph, XtkFontIconDesc desc) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_FONTICON, glyph);
+	if (!el) return NULL;
+	desc.font_family = xtk_strdup(ui, desc.font_family);
+	if (!XTK_EL_STORE(el, desc)) return NULL;
 	return el;
 }
 
