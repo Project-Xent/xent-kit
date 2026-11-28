@@ -19,6 +19,9 @@ XENT_NODISCARD XtkCompRt *xtk_comp_create(void);
 void                      xtk_comp_destroy(XtkCompRt *rt);
 
 bool                      xtk_comp_register(XtkCompRt *rt, XtkCompType const *type);
+/** Live instances keep the type they were mounted with; remount them to adopt `type`. */
+bool                      xtk_comp_replace(XtkCompRt *rt, XtkCompType const *type);
+void                      xtk_comp_unregister(XtkCompRt *rt, XtkCtrlId id);
 XtkCompType const        *xtk_comp_lookup(XtkCompRt const *rt, XtkCtrlId id);
 
 bool                      xtk_comp_setproviders(XtkCompRt *rt, XtkProviderDesc const *providers, uint32_t count);

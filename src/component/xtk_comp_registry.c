@@ -18,16 +18,37 @@ void xtk_comp_destroy(XtkCompRt *rt) {
 	xtk_alloc_free(rt);
 }
 
-bool xtk_comp_register(XtkCompRt *rt, XtkCompType const *type) {
-	if (!rt || !type || !type->control) return false;
-	if (!xtk_ctrl_iscomp(type->control->id)) return false;
+static bool type_valid(XtkCompType const *type) {
+	if (!type || !type->control || !xtk_ctrl_iscomp(type->control->id)) return false;
 	if (!type->ops.prepare_mount || !type->ops.commit_mount || !type->ops.abort || !type->ops.unmount) return false;
-	if (type->ops.prepare_update && (!type->ops.commit_update)) return false;
+	return !type->ops.prepare_update || type->ops.commit_update;
+}
+
+static XtkCompType const **type_slot(XtkCompRt *rt, XtkCtrlId id) {
 	for (uint32_t i = 0; i < rt->type_count; i++)
-		if (rt->types [i]->control->id == type->control->id) return false;
+		if (rt->types [i]->control->id == id) return &rt->types [i];
+	return NULL;
+}
+
+bool xtk_comp_register(XtkCompRt *rt, XtkCompType const *type) {
+	if (!rt || !type_valid(type) || type_slot(rt, type->control->id)) return false;
 	if (rt->type_count >= XTK_COMP_TYPE_CAP) return false;
 	rt->types [rt->type_count++] = type;
 	return true;
+}
+
+bool xtk_comp_replace(XtkCompRt *rt, XtkCompType const *type) {
+	if (!rt || !type_valid(type)) return false;
+	XtkCompType const **slot = type_slot(rt, type->control->id);
+	if (!slot) return xtk_comp_register(rt, type);
+	*slot = type;
+	return true;
+}
+
+void xtk_comp_unregister(XtkCompRt *rt, XtkCtrlId id) {
+	XtkCompType const **slot = rt ? type_slot(rt, id) : NULL;
+	if (!slot) return;
+	*slot = rt->types [--rt->type_count];
 }
 
 XtkCompType const *xtk_comp_lookup(XtkCompRt const *rt, XtkCtrlId id) {

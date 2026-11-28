@@ -29,7 +29,6 @@ bool                   xtk_binding_msgs_equal(XtkBinding const *a, XtkEl const *
 typedef struct XtkNode XtkNode;
 
 bool xtk_encode_create(XtkBatch *batch, XtkNodeRef parent, XtkNodeRef before, XtkEl const *el, XtkLocalId *out_local);
-bool xtk_encode_props(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
 bool xtk_encode_props_view(XtkBatch *batch, XtkNodeRef target, XtkEl const *el, bool skip_model);
 XtkModelVer xtk_el_model_ver(XtkEl const *el);
 bool        xtk_encode_subscribe(XtkBatch *batch, XtkNodeRef target, XtkBinding *binding, XtkEl const *el);

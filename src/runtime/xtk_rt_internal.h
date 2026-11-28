@@ -6,8 +6,9 @@
 
 enum
 {
-	XTK_QUEUE_CAP = 256,
-	XTK_RETRY_CAP = 4,
+	XTK_QUEUE_CAP   = 256,
+	XTK_RETRY_CAP   = 4,
+	XTK_REMOUNT_CAP = 32,
 };
 
 typedef struct XtkRtRegion {
@@ -44,6 +45,9 @@ struct XtkRt {
 	bool               sticky_overflow;
 
 	bool               force;
+	bool               regions_stale;
+	uint32_t           remount_count;
+	XtkCtrlId          remount [XTK_REMOUNT_CAP];
 	bool               frame_pending;
 	bool               in_frame;
 	uint8_t            fail_retries;
@@ -65,6 +69,8 @@ struct XtkRt {
 };
 
 struct XtkRtRegion *xtk_rt_region_find(struct XtkRt const *rt, uint64_t id);
+struct XtkRtRegion *xtk_rt_region_reusable(struct XtkRt const *rt, uint64_t id);
+bool                xtk_rt_remounting(struct XtkRt const *rt, XtkCtrlId type);
 struct XtkNode     *xtk_rt_region_lookup(struct XtkRt const *rt, uint64_t id, uint64_t revision);
 bool                xtk_rt_region_register(struct XtkRt *rt, struct XtkNode *node);
 void                xtk_rt_region_remove(struct XtkRt *rt, struct XtkNode const *node);

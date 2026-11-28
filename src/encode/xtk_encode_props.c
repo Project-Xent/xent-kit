@@ -1623,24 +1623,10 @@ XtkModelVer xtk_el_model_ver(XtkEl const *el) {
 #undef VER_SLOT
 
 bool xtk_encode_props_view(XtkBatch *batch, XtkNodeRef target, XtkEl const *el, bool skip_model) {
-	return encode_element_props_opt(batch, target, NULL, el, skip_model);
-}
-
-static bool component_props_equal(XtkEl const *prev, XtkEl const *el) {
-	if (!prev || XTK_EL_DATA(prev)->component_props_size != XTK_EL_DATA(el)->component_props_size) return false;
-	if (!XTK_EL_DATA(el)->component_props_size) return true;
-	return memcmp(
-			 XTK_EL_DATA(prev)->component_props, XTK_EL_DATA(el)->component_props, XTK_EL_DATA(el)->component_props_size
-		   )
-	    == 0;
-}
-
-bool xtk_encode_props(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
-	if (!encode_element_props(batch, target, prev, el)) return false;
-	if (XTK_EL_DATA(el)->type < XTK_CTRL_ID_COMPONENT_BASE || component_props_equal(prev, el)) return true;
-	return value_bytes(
-	  batch, target, XTK_PROP_COMPONENT_PROPS, XTK_EL_DATA(el)->component_props, XTK_EL_DATA(el)->component_props_size
-	);
+	if (!encode_element_props_opt(batch, target, NULL, el, skip_model)) return false;
+	XtkElementData const *data = XTK_EL_DATA(el);
+	if (data->type < XTK_CTRL_ID_COMPONENT_BASE || !data->component_props_size) return true;
+	return value_bytes(batch, target, XTK_PROP_COMPONENT_PROPS, data->component_props, data->component_props_size);
 }
 
 bool xtk_encode_create(XtkBatch *batch, XtkNodeRef parent, XtkNodeRef before, XtkEl const *el, XtkLocalId *out_local) {

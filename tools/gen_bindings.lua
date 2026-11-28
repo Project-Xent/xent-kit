@@ -319,6 +319,8 @@ local function zig()
     "pub const Window = rt.Window;",
     "pub const Channel = rt.Channel;",
     "pub const run = rt.run;",
+    "pub const app = rt.app;",
+    "pub const hot = @import(\"hot.zig\");",
   }
   for _, name in ipairs(sorted_enums()) do add(chunks, "", zig_enum(name)) end
   for _, control in ipairs(catalog.public) do add(chunks, "", zig_control(control)) end

@@ -433,11 +433,16 @@ static bool model_ver_same(XtkModelVer a, XtkModelVer b) {
 	return xtk_model_ver_valid(a) && a.ptr == b.ptr && a.revision == b.revision;
 }
 
+static bool node_reusable(XtkRt const *rt, XtkNode const *committed, XtkEl const *el) {
+	XtkCtrlId type = XTK_EL_DATA(el)->type;
+	return committed && committed->type_id == type && !xtk_rt_remounting(rt, type);
+}
+
 static bool plan_content(
   XtkReconcileTxn *txn, XtkPlanRec *plan, XtkNodeRef parent_ref, XtkEl const *el, XtkNode *committed, XtkNodeRef before,
   uint32_t depth
 ) {
-	bool         reuse      = committed && committed->type_id == XTK_EL_DATA(el)->type;
+	bool         reuse      = node_reusable(txn->rt, committed, el);
 	XtkModelVer  next_ver   = xtk_el_model_ver(el);
 	bool         skip_model = reuse && committed->props && model_ver_same(committed->props->model_ver, next_ver);
 	XtkPropPatch props_items [XTK_PROP_STANDARD_COUNT + 1u];
@@ -493,7 +498,7 @@ static bool plan_node(
 bool xtk_plan_subtree(
   XtkReconcileTxn *txn, XtkEl *next, XtkNode *committed, XtkNodeRef parent_ref, XtkNodeRef before, XtkPlanRec **root
 ) {
-	bool     reuse   = committed && committed->type_id == XTK_EL_DATA(next)->type;
+	bool     reuse   = node_reusable(txn->rt, committed, next);
 	XtkNode *old_ptr = reuse ? committed : NULL;
 	if (!plan_node(txn, NULL, parent_ref, next, old_ptr, before, 0u, root)) return false;
 	if (reuse || !committed) return true;

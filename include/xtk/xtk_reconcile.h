@@ -101,6 +101,10 @@ XtkRt *xtk_rt_create(
   XtkHost *host, XtkRtCfg const *cfg, XentNodeId host_root, void *model, XtkUpdateFn update, XtkViewFn view
 );
 bool              xtk_rt_destroy(XtkRt *rt);
+/** Old code stays reachable until the next committed full frame; callers must keep it loaded at least that long. */
+bool              xtk_rt_swap(XtkRt *rt, XtkUpdateFn update, XtkViewFn view);
+/** Nodes of `type` are recreated instead of updated until the next committed full frame. */
+bool              xtk_rt_remount(XtkRt *rt, XtkCtrlId type);
 XtkFrameResult    xtk_rt_frame(XtkRt *rt);
 /** Must run on the thread that created `rt`. */
 XtkPostStatus     xtk_rt_post(XtkRt *rt, XtkMsg msg);

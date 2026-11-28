@@ -47,7 +47,7 @@ XtkEl *xtk_sub_region(XtkUi *ui, uint64_t id, XtkRegionBuildFn build, void *ctx)
 		xtk_ui_fail(ui);
 		return NULL;
 	}
-	XtkRtRegion *reg = ui->rt ? xtk_rt_region_find(ui->rt, id) : NULL;
+	XtkRtRegion *reg = xtk_rt_region_reusable(ui->rt, id);
 	if (reg && reg->node && !reg->dirty && (reg->flags & XTK_REGION_SUB)) {
 		reg->build = build;
 		reg->ctx   = ctx;

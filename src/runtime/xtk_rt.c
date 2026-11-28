@@ -84,8 +84,12 @@ XtkRtRegion *xtk_rt_region_find(XtkRt const *rt, uint64_t id) {
 	return NULL;
 }
 
+XtkRtRegion *xtk_rt_region_reusable(XtkRt const *rt, uint64_t id) {
+	return rt && !rt->regions_stale ? xtk_rt_region_find(rt, id) : NULL;
+}
+
 XtkNode *xtk_rt_region_lookup(XtkRt const *rt, uint64_t id, uint64_t revision) {
-	XtkRtRegion const *e = xtk_rt_region_find(rt, id);
+	XtkRtRegion const *e = xtk_rt_region_reusable(rt, id);
 	if (!e) return NULL;
 	return e->revision == revision ? e->node : NULL;
 }
@@ -365,7 +369,11 @@ XtkFrameResult xtk_rt_frame(XtkRt *rt) {
 	XtkFrameStatus st          = xtk_reconcile_run(rt, view, &diag, &result.identity, &result.metrics);
 	result.metrics.nodes_built = rt->ui->composition.element_count;
 	result.diagnostic          = diag;
-	if (st == XTK_FRAME_COMMITTED) rt->dirty_region_count = 0u;
+	if (st == XTK_FRAME_COMMITTED) {
+		rt->dirty_region_count = 0u;
+		rt->regions_stale      = false;
+		rt->remount_count      = 0u;
+	}
 	finish_frame(rt, &result, st);
 	return result;
 }
@@ -401,6 +409,30 @@ XtkRt *xtk_rt_create(
 	rt->force        = true;
 	rt->owner_thread = xtk_thread_token();
 	return rt;
+}
+
+bool xtk_rt_swap(XtkRt *rt, XtkUpdateFn update, XtkViewFn view) {
+	if (!rt || !update || !view || rt->in_frame || !post_thread_ok(rt)) return false;
+	rt->update        = update;
+	rt->view          = view;
+	rt->regions_stale = true;
+	xtk_rt_invalidate(rt);
+	return true;
+}
+
+bool xtk_rt_remounting(XtkRt const *rt, XtkCtrlId type) {
+	for (uint32_t i = 0; i < rt->remount_count; i++)
+		if (rt->remount [i] == type) return true;
+	return false;
+}
+
+bool xtk_rt_remount(XtkRt *rt, XtkCtrlId type) {
+	if (!rt || rt->in_frame || !post_thread_ok(rt)) return false;
+	if (xtk_rt_remounting(rt, type)) return true;
+	if (rt->remount_count >= XTK_REMOUNT_CAP) return false;
+	rt->remount [rt->remount_count++] = type;
+	xtk_rt_invalidate(rt);
+	return true;
 }
 
 bool xtk_rt_destroy(XtkRt *rt) {
