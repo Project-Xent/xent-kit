@@ -577,6 +577,24 @@ local invalidation = {
   none = "XTK_INVALIDATE_NONE",
 }
 
+local common_extra = {
+  "XTK_PROP_STYLE_BG",
+  "XTK_PROP_STYLE_BORDER",
+  "XTK_PROP_STYLE_RADIUS",
+  "XTK_PROP_STYLE_BORDER_W",
+  "XTK_PROP_STYLE_OPACITY",
+  "XTK_PROP_STYLE_TX",
+  "XTK_PROP_STYLE_TY",
+  "XTK_PROP_STYLE_SX",
+  "XTK_PROP_STYLE_SY",
+  "XTK_PROP_STYLE_ROTATION",
+  "XTK_PROP_MOTION_IMPLICIT",
+  "XTK_PROP_MOTION_ENTER_EXIT",
+  "XTK_PROP_CONNECTED_KEY",
+  "XTK_PROP_CONNECTED_CONFIG",
+  "XTK_PROP_CONNECTED_COORD",
+}
+
 local function control_props(control)
   if control.internal then return control.props end
   local ids = {}
@@ -586,6 +604,7 @@ local function control_props(control)
     end
   end
   for _, id in ipairs(control.extra or {}) do ids[#ids + 1] = id end
+  for _, id in ipairs(common_extra) do ids[#ids + 1] = id end
   return ids
 end
 

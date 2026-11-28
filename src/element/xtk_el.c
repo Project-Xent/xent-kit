@@ -390,6 +390,59 @@ XtkEl *xtk_automation(XtkUi *ui, XtkEl *el, XtkAutomation const *automation) {
 	return el;
 }
 
+static uint32_t resolve_style_mask(XtkStyle const *s) {
+	if (s->mask) return s->mask;
+	uint32_t m = 0u;
+	if (s->background.rgba) m |= XTK_STYLE_BACKGROUND;
+	if (s->border_color.rgba) m |= XTK_STYLE_BORDER_COLOR;
+	if (s->corner_radius != 0.0f) m |= XTK_STYLE_CORNER_RADIUS;
+	if (s->border_width != 0.0f) m |= XTK_STYLE_BORDER_WIDTH;
+	if (s->opacity != 0.0f) m |= XTK_STYLE_OPACITY;
+	if (s->translate_x != 0.0f) m |= XTK_STYLE_TRANSLATE_X;
+	if (s->translate_y != 0.0f) m |= XTK_STYLE_TRANSLATE_Y;
+	if (s->scale_x != 0.0f) m |= XTK_STYLE_SCALE_X;
+	if (s->scale_y != 0.0f) m |= XTK_STYLE_SCALE_Y;
+	if (s->rotation != 0.0f) m |= XTK_STYLE_ROTATION;
+	return m;
+}
+
+XtkEl *xtk_style(XtkUi *ui, XtkEl *el, XtkStyle const *style) {
+	if (!el || !style) return el;
+	XtkStyle *copy = ( XtkStyle * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy));
+	if (!copy) return el;
+	*copy                  = *style;
+	copy->mask             = resolve_style_mask(style);
+	XTK_EL_DATA(el)->style = copy;
+	return el;
+}
+
+XtkEl *xtk_motion(XtkUi *ui, XtkEl *el, XtkMotion const *motion) {
+	if (!el || !motion) return el;
+	XtkMotion *copy = ( XtkMotion * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy));
+	if (!copy) return el;
+	*copy                   = *motion;
+	XTK_EL_DATA(el)->motion = copy;
+	return el;
+}
+
+XtkEl *xtk_connected(XtkUi *ui, XtkEl *el, char const *key, XtkConnectedDesc const *cfg) {
+	if (!el || !key) return el;
+	XTK_EL_DATA(el)->connected_key = xtk_strdup(ui, key);
+	if (cfg) {
+		XtkConnectedDesc *copy = ( XtkConnectedDesc * ) xtk_arena_alloc(xtk_ui_arena(ui), sizeof(*copy));
+		if (copy) {
+			*copy                          = *cfg;
+			XTK_EL_DATA(el)->connected_cfg = copy;
+		}
+	}
+	return el;
+}
+
+XtkEl *xtk_connected_coord(XtkUi *ui, XtkEl *el, char const *key) {
+	if (el && key) XTK_EL_DATA(el)->connected_coord = xtk_strdup(ui, key);
+	return el;
+}
+
 XtkEl *xtk_spacer(XtkUi *ui) {
 	XtkEl *el = xtk_el_new(ui, XTK_CTRL_CONTAINER, NULL);
 	if (!el) return NULL;

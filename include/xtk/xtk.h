@@ -745,6 +745,99 @@ typedef struct XtkAppBarDesc {
 	XtkMsg      change;
 } XtkAppBarDesc;
 
+typedef enum XtkNavTransitionKind
+{
+	XTK_NAV_TRANSITION_ENTRANCE = 0,
+	XTK_NAV_TRANSITION_SLIDE_RIGHT,
+	XTK_NAV_TRANSITION_SLIDE_LEFT,
+	XTK_NAV_TRANSITION_SLIDE_BOTTOM,
+	XTK_NAV_TRANSITION_DRILL_IN,
+	XTK_NAV_TRANSITION_SUPPRESS,
+} XtkNavTransitionKind;
+
+typedef enum XtkThemeTransitionKind
+{
+	XTK_THEME_TRANSITION_NONE = 0,
+	XTK_THEME_TRANSITION_ENTRANCE,
+	XTK_THEME_TRANSITION_ADD_DELETE,
+	XTK_THEME_TRANSITION_CONTENT,
+	XTK_THEME_TRANSITION_REORDER,
+	XTK_THEME_TRANSITION_POPUP,
+} XtkThemeTransitionKind;
+
+typedef enum XtkConnectedKind
+{
+	XTK_CONNECTED_GRAVITY = 0,
+	XTK_CONNECTED_DIRECT,
+	XTK_CONNECTED_BASIC,
+} XtkConnectedKind;
+
+typedef struct XtkFrameDesc {
+	XtkNavTransitionKind transition;
+	bool                 is_back;
+	int32_t              page_key;
+} XtkFrameDesc;
+
+enum
+{
+	XTK_STYLE_BACKGROUND    = 1u << 0,
+	XTK_STYLE_BORDER_COLOR  = 1u << 1,
+	XTK_STYLE_CORNER_RADIUS = 1u << 2,
+	XTK_STYLE_BORDER_WIDTH  = 1u << 3,
+	XTK_STYLE_OPACITY       = 1u << 4,
+	XTK_STYLE_TRANSLATE_X   = 1u << 5,
+	XTK_STYLE_TRANSLATE_Y   = 1u << 6,
+	XTK_STYLE_SCALE_X       = 1u << 7,
+	XTK_STYLE_SCALE_Y       = 1u << 8,
+	XTK_STYLE_ROTATION      = 1u << 9,
+};
+
+enum
+{
+	XTK_MOTION_OPACITY       = 1u << 0,
+	XTK_MOTION_TRANSLATE_X   = 1u << 1,
+	XTK_MOTION_TRANSLATE_Y   = 1u << 2,
+	XTK_MOTION_SCALE_X       = 1u << 3,
+	XTK_MOTION_SCALE_Y       = 1u << 4,
+	XTK_MOTION_ROTATION      = 1u << 5,
+	XTK_MOTION_BACKGROUND    = 1u << 6,
+	XTK_MOTION_BORDER_COLOR  = 1u << 7,
+	XTK_MOTION_CORNER_RADIUS = 1u << 8,
+	XTK_MOTION_TRANSLATE     = (1u << 1) | (1u << 2),
+	XTK_MOTION_SCALE         = (1u << 3) | (1u << 4),
+	XTK_MOTION_ALL           = 0x1ffu,
+};
+
+typedef struct XtkStyle {
+	uint32_t mask;
+	XtkColor background;
+	XtkColor border_color;
+	float    corner_radius;
+	float    border_width;
+	float    opacity;
+	float    translate_x;
+	float    translate_y;
+	float    scale_x;
+	float    scale_y;
+	float    rotation;
+} XtkStyle;
+
+typedef struct XtkMotion {
+	uint32_t               implicit_mask;
+	double                 opacity_duration;
+	double                 transform_duration;
+	double                 brush_duration;
+	XtkThemeTransitionKind enter_exit;
+} XtkMotion;
+
+typedef struct XtkConnectedDesc {
+	XtkConnectedKind kind;
+	bool             disable_shadow;
+	float            dip_x;
+	float            dip_y;
+	double           duration;
+} XtkConnectedDesc;
+
 XENT_NODISCARD XtkUi *xtk_ui_create(void);
 
 void                  xtk_ui_destroy(XtkUi *ui);
@@ -831,6 +924,8 @@ XtkEl                *xtk_titlebar_slots(
 XtkEl                 *xtk_commandbar(XtkUi *ui, XtkCommandBarDesc desc, XtkEl *children []);
 XtkEl                 *xtk_refresh(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []);
 XtkEl                 *xtk_colheader(XtkUi *ui, XtkEl *children []);
+XtkEl                 *xtk_frame(XtkUi *ui, XtkFrameDesc desc, XtkEl *child);
+XtkNavTransitionKind   xtk_nav_recommended_transition(int prev_index, int next_index, XtkNavPaneMode mode);
 
 XENT_NODISCARD XtkEl **xtk_children_alloc(XtkUi *ui, int capacity);
 
@@ -871,6 +966,11 @@ typedef struct XtkAutomation {
 
 XtkEl *xtk_automation(XtkUi *ui, XtkEl *el, XtkAutomation const *automation);
 
+XtkEl *xtk_style(XtkUi *ui, XtkEl *el, XtkStyle const *style);
+XtkEl *xtk_motion(XtkUi *ui, XtkEl *el, XtkMotion const *motion);
+XtkEl *xtk_connected(XtkUi *ui, XtkEl *el, char const *key, XtkConnectedDesc const *cfg);
+XtkEl *xtk_connected_coord(XtkUi *ui, XtkEl *el, char const *key);
+
 XtkEl *xtk_sized(XtkEl *el, float width, float height);
 
 XtkEl *xtk_grow(XtkEl *el, float grow);
@@ -893,5 +993,8 @@ static_assert(sizeof(XtkPullDirection) == 4, "XtkPullDirection crosses the ABI a
 static_assert(sizeof(XtkTreeSelMode) == 4, "XtkTreeSelMode crosses the ABI as int32");
 static_assert(sizeof(XtkSplitViewDisplayMode) == 4, "XtkSplitViewDisplayMode crosses the ABI as int32");
 static_assert(sizeof(XtkSplitViewPanePlacement) == 4, "XtkSplitViewPanePlacement crosses the ABI as int32");
+static_assert(sizeof(XtkNavTransitionKind) == 4, "XtkNavTransitionKind crosses the ABI as int32");
+static_assert(sizeof(XtkThemeTransitionKind) == 4, "XtkThemeTransitionKind crosses the ABI as int32");
+static_assert(sizeof(XtkConnectedKind) == 4, "XtkConnectedKind crosses the ABI as int32");
 
 #endif

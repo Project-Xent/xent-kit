@@ -5206,6 +5206,28 @@ typedef struct XtkNavSlotProps {
 #define XTK_NAVSLOT_SELF_MASK   (1ull << 4u)
 #define XTK_NAVSLOT_SLOT_MASK   (1ull << 5u)
 
+typedef struct XtkFrameProps {
+	uint64_t             set;
+	XtkChangeStamp       stamp;
+	float                w;
+	float                h;
+	float                grow;
+	float                shrink;
+	XentFlexAlign        self;
+	XtkNavTransitionKind transition;
+	bool                 is_back;
+	int32_t              page_key;
+} XtkFrameProps;
+
+#define XTK_FRAME_W_MASK          (1ull << 0u)
+#define XTK_FRAME_H_MASK          (1ull << 1u)
+#define XTK_FRAME_GROW_MASK       (1ull << 2u)
+#define XTK_FRAME_SHRINK_MASK     (1ull << 3u)
+#define XTK_FRAME_SELF_MASK       (1ull << 4u)
+#define XTK_FRAME_TRANSITION_MASK (1ull << 5u)
+#define XTK_FRAME_IS_BACK_MASK    (1ull << 6u)
+#define XTK_FRAME_PAGE_KEY_MASK   (1ull << 7u)
+
 XtkLocalId xtk_container_create(XtkTxn *txn, XtkNodeRef parent, XtkContainerProps const *props);
 XtkLocalId xtk_text_create(XtkTxn *txn, XtkNodeRef parent, XtkTextProps const *props);
 XtkLocalId xtk_button_create(XtkTxn *txn, XtkNodeRef parent, XtkButtonProps const *props);
@@ -5286,6 +5308,7 @@ XtkLocalId xtk_appbartoggle_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarTogg
 XtkLocalId xtk_appbarsep_create(XtkTxn *txn, XtkNodeRef parent, XtkAppBarSeparatorProps const *props);
 XtkLocalId xtk_groupheader_create(XtkTxn *txn, XtkNodeRef parent, XtkLayoutProps const *props);
 XtkLocalId xtk_navslot_create(XtkTxn *txn, XtkNodeRef parent, XtkNavSlotProps const *props);
+XtkLocalId xtk_frame_create(XtkTxn *txn, XtkNodeRef parent, XtkFrameProps const *props);
 bool       xtk_container_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool       xtk_container_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
@@ -9057,5 +9080,13 @@ bool xtk_navslot_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChang
 bool xtk_navslot_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
 bool xtk_navslot_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
 bool xtk_navslot_setslot(XtkScene *scene, XtkCtrl control, XtkNavSlot value, XtkChangeStamp change);
+bool xtk_frame_setw(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_frame_seth(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_frame_setgrow(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_frame_setshrink(XtkScene *scene, XtkCtrl control, float value, XtkChangeStamp change);
+bool xtk_frame_setself(XtkScene *scene, XtkCtrl control, XentFlexAlign value, XtkChangeStamp change);
+bool xtk_frame_settransition(XtkScene *scene, XtkCtrl control, XtkNavTransitionKind value, XtkChangeStamp change);
+bool xtk_frame_setis_back(XtkScene *scene, XtkCtrl control, bool value, XtkChangeStamp change);
+bool xtk_frame_setpage_key(XtkScene *scene, XtkCtrl control, int32_t value, XtkChangeStamp change);
 
 #endif

@@ -22,6 +22,7 @@ static_assert(sizeof(XtkBadgeMode) == sizeof(uint32_t), "enum size fits uint32_t
 static_assert(sizeof(XtkButtonStyle) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkCalendarMode) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkClock) == sizeof(uint32_t), "enum size fits uint32_t");
+static_assert(sizeof(XtkConnectedKind) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkDialogButton) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkDropOperation) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkElementLabel) == sizeof(uint32_t), "enum size fits uint32_t");
@@ -37,6 +38,7 @@ static_assert(sizeof(XtkNavBackButton) == sizeof(uint32_t), "enum size fits uint
 static_assert(sizeof(XtkNavKind) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkNavPaneMode) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkNavSlot) == sizeof(uint32_t), "enum size fits uint32_t");
+static_assert(sizeof(XtkNavTransitionKind) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkOverflowButton) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkPagerButtonVis) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkPagerDisplayMode) == sizeof(uint32_t), "enum size fits uint32_t");
@@ -54,6 +56,7 @@ static_assert(sizeof(XtkTeachingTipPlacement) == sizeof(uint32_t), "enum size fi
 static_assert(sizeof(XtkTeachingTipTail) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkTextAlign) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkTextTrim) == sizeof(uint32_t), "enum size fits uint32_t");
+static_assert(sizeof(XtkThemeTransitionKind) == sizeof(uint32_t), "enum size fits uint32_t");
 static_assert(sizeof(XtkTickPlacement) == sizeof(uint32_t), "enum size fits uint32_t");
 
 static XtkCtrlField const k_a11y_fields [28] = {
@@ -1918,6 +1921,28 @@ XtkCtrlPack const xtk_pack_navslot = {
   .a11y_offset = 0u,
   .pre_count   = 0u,
   .field_count = 6u,
+  .a11y_bit    = 0u,
+  .has_a11y    = 0u,
+};
+static_assert(
+  offsetof(XtkFrameProps, set) == 0u && offsetof(XtkFrameProps, stamp) == offsetof(XtkLayoutProps, stamp),
+  "header prefix"
+);
+static XtkCtrlField const k_fields_frame [8] = {
+  {( uint16_t ) offsetof(XtkFrameProps, w),          0u, XTK_PROP_WIDTH,            0u, XTK_VALUE_F32 },
+  {( uint16_t ) offsetof(XtkFrameProps, h),          0u, XTK_PROP_HEIGHT,           1u, XTK_VALUE_F32 },
+  {( uint16_t ) offsetof(XtkFrameProps, grow),       0u, XTK_PROP_GROW,             2u, XTK_VALUE_F32 },
+  {( uint16_t ) offsetof(XtkFrameProps, shrink),     0u, XTK_PROP_SHRINK,           3u, XTK_VALUE_F32 },
+  {( uint16_t ) offsetof(XtkFrameProps, self),       0u, XTK_PROP_ALIGN_SELF,       4u, XTK_VALUE_ENUM},
+  {( uint16_t ) offsetof(XtkFrameProps, transition), 0u, XTK_PROP_FRAME_TRANSITION, 5u, XTK_VALUE_ENUM},
+  {( uint16_t ) offsetof(XtkFrameProps, is_back),    0u, XTK_PROP_FRAME_BACK,       6u, XTK_VALUE_BOOL},
+  {( uint16_t ) offsetof(XtkFrameProps, page_key),   0u, XTK_PROP_FRAME_PAGE_KEY,   7u, XTK_VALUE_I32 },
+};
+XtkCtrlPack const xtk_pack_frame = {
+  .fields      = k_fields_frame,
+  .a11y_offset = 0u,
+  .pre_count   = 0u,
+  .field_count = 8u,
   .a11y_bit    = 0u,
   .has_a11y    = 0u,
 };

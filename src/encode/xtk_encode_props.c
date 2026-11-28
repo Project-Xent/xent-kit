@@ -283,8 +283,126 @@ static bool encode_automation(XtkBatch *batch, XtkNodeRef target, XtkEl const *p
 
 static bool encode_common_base(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el);
 
+typedef struct MotionImplicitWire {
+	uint32_t mask;
+	float    opacity_dur;
+	float    transform_dur;
+	float    brush_dur;
+} MotionImplicitWire;
+
+typedef struct ConnectedCfgWire {
+	uint32_t kind;
+	uint32_t shadow;
+	float    dip_x;
+	float    dip_y;
+	float    duration;
+} ConnectedCfgWire;
+
+static float style_f32(XtkStyle const *s, uint32_t bit, float fallback) {
+	if (!s || !(s->mask & bit)) return fallback;
+	if (bit == XTK_STYLE_CORNER_RADIUS) return s->corner_radius;
+	if (bit == XTK_STYLE_BORDER_WIDTH) return s->border_width;
+	if (bit == XTK_STYLE_OPACITY) return s->opacity;
+	if (bit == XTK_STYLE_TRANSLATE_X) return s->translate_x;
+	if (bit == XTK_STYLE_TRANSLATE_Y) return s->translate_y;
+	if (bit == XTK_STYLE_SCALE_X) return s->scale_x;
+	if (bit == XTK_STYLE_SCALE_Y) return s->scale_y;
+	return s->rotation;
+}
+
+static XtkColor style_color(XtkStyle const *s, uint32_t bit) {
+	if (!s || !(s->mask & bit)) return (XtkColor) {0};
+	return bit == XTK_STYLE_BACKGROUND ? s->background : s->border_color;
+}
+
+static bool encode_style(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkStyle const *was = prev ? XTK_EL_DATA(prev)->style : NULL;
+	XtkStyle const *now = XTK_EL_DATA(el)->style;
+	if (!was && !now) return true;
+	if (was && now && memcmp(was, now, sizeof(*now)) == 0) return true;
+
+	XtkColor old_bg = style_color(was, XTK_STYLE_BACKGROUND), new_bg = style_color(now, XTK_STYLE_BACKGROUND);
+	if (old_bg.rgba != new_bg.rgba && !value_color(batch, target, XTK_PROP_STYLE_BG, new_bg)) return false;
+	XtkColor old_bd = style_color(was, XTK_STYLE_BORDER_COLOR), new_bd = style_color(now, XTK_STYLE_BORDER_COLOR);
+	if (old_bd.rgba != new_bd.rgba && !value_color(batch, target, XTK_PROP_STYLE_BORDER, new_bd)) return false;
+
+	F32Field fields [] = {
+	  {XTK_PROP_STYLE_RADIUS,   style_f32(was, XTK_STYLE_CORNER_RADIUS, 0.0f),
+	   style_f32(now,                                                                         XTK_STYLE_CORNER_RADIUS, 0.0f), (now && (now->mask & XTK_STYLE_CORNER_RADIUS))},
+	  {XTK_PROP_STYLE_BORDER_W, style_f32(was, XTK_STYLE_BORDER_WIDTH,  0.0f),
+	   style_f32(now,                                                                         XTK_STYLE_BORDER_WIDTH,  0.0f), (now && (now->mask & XTK_STYLE_BORDER_WIDTH)) },
+	  {XTK_PROP_STYLE_OPACITY,  style_f32(was, XTK_STYLE_OPACITY,       1.0f), style_f32(now, XTK_STYLE_OPACITY,       1.0f),
+	   (now && (now->mask & XTK_STYLE_OPACITY))                                                                                                                             },
+	  {XTK_PROP_STYLE_TX,       style_f32(was, XTK_STYLE_TRANSLATE_X,   0.0f), style_f32(now, XTK_STYLE_TRANSLATE_X,   0.0f),
+	   (now && (now->mask & XTK_STYLE_TRANSLATE_X))                                                                                                                         },
+	  {XTK_PROP_STYLE_TY,       style_f32(was, XTK_STYLE_TRANSLATE_Y,   0.0f), style_f32(now, XTK_STYLE_TRANSLATE_Y,   0.0f),
+	   (now && (now->mask & XTK_STYLE_TRANSLATE_Y))                                                                                                                         },
+	  {XTK_PROP_STYLE_SX,       style_f32(was, XTK_STYLE_SCALE_X,       1.0f), style_f32(now, XTK_STYLE_SCALE_X,       1.0f),
+	   (now && (now->mask & XTK_STYLE_SCALE_X))                                                                                                                             },
+	  {XTK_PROP_STYLE_SY,       style_f32(was, XTK_STYLE_SCALE_Y,       1.0f), style_f32(now, XTK_STYLE_SCALE_Y,       1.0f),
+	   (now && (now->mask & XTK_STYLE_SCALE_Y))                                                                                                                             },
+	  {XTK_PROP_STYLE_ROTATION, style_f32(was, XTK_STYLE_ROTATION,      0.0f), style_f32(now, XTK_STYLE_ROTATION,      0.0f),
+	   (now && (now->mask & XTK_STYLE_ROTATION))                                                                                                                            },
+	};
+	return encode_f32_fields(batch, target, was != NULL, fields, 8u);
+}
+
+static bool encode_motion(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	static XtkMotion const none = {0};
+	XtkMotion const       *was  = prev && XTK_EL_DATA(prev)->motion ? XTK_EL_DATA(prev)->motion : &none;
+	XtkMotion const       *now  = XTK_EL_DATA(el)->motion ? XTK_EL_DATA(el)->motion : &none;
+	if (was == now) return true;
+	if (memcmp(was, now, sizeof(*now)) == 0) return true;
+
+	MotionImplicitWire wire = {
+	  .mask          = now->implicit_mask,
+	  .opacity_dur   = ( float ) now->opacity_duration,
+	  .transform_dur = ( float ) now->transform_duration,
+	  .brush_dur     = ( float ) now->brush_duration,
+	};
+	if (memcmp(was, &none, offsetof(XtkMotion, enter_exit)) != memcmp(now, &none, offsetof(XtkMotion, enter_exit))
+	    || was->implicit_mask != now->implicit_mask
+	    || was->opacity_duration != now->opacity_duration
+	    || was->transform_duration != now->transform_duration
+	    || was->brush_duration != now->brush_duration)
+	{
+		if (!value_bytes(batch, target, XTK_PROP_MOTION_IMPLICIT, &wire, sizeof(wire))) return false;
+	}
+	if (was->enter_exit != now->enter_exit
+	    && !value_enum(batch, target, XTK_PROP_MOTION_ENTER_EXIT, ( uint32_t ) now->enter_exit))
+		return false;
+	return true;
+}
+
+static bool encode_connected(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkElementData const *wd = prev ? XTK_EL_DATA(prev) : NULL;
+	XtkElementData const *nd = XTK_EL_DATA(el);
+	if (nd->connected_cfg) {
+		ConnectedCfgWire cw = {
+		  .kind     = ( uint32_t ) nd->connected_cfg->kind,
+		  .shadow   = nd->connected_cfg->disable_shadow ? 0u : 1u,
+		  .dip_x    = nd->connected_cfg->dip_x,
+		  .dip_y    = nd->connected_cfg->dip_y,
+		  .duration = ( float ) nd->connected_cfg->duration,
+		};
+		bool same
+		  = wd && wd->connected_cfg && memcmp(wd->connected_cfg, nd->connected_cfg, sizeof(XtkConnectedDesc)) == 0;
+		if (!same && !value_bytes(batch, target, XTK_PROP_CONNECTED_CONFIG, &cw, sizeof(cw))) return false;
+	}
+	char const *ok = wd ? wd->connected_key : NULL;
+	char const *nk = nd->connected_key;
+	if (!streq(ok, nk) && !value_string(batch, target, XTK_PROP_CONNECTED_KEY, nk)) return false;
+	char const *oc = wd ? wd->connected_coord : NULL;
+	char const *nc = nd->connected_coord;
+	return streq(oc, nc) || value_string(batch, target, XTK_PROP_CONNECTED_COORD, nc);
+}
+
 static bool encode_common(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
-	return encode_common_base(batch, target, prev, el) && encode_automation(batch, target, prev, el);
+	return encode_common_base(batch, target, prev, el)
+	    && encode_automation(batch, target, prev, el)
+	    && encode_style(batch, target, prev, el)
+	    && encode_motion(batch, target, prev, el)
+	    && encode_connected(batch, target, prev, el);
 }
 
 static bool encode_common_base(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
@@ -1339,6 +1457,21 @@ static bool  encode_model_skipped(XtkBatch *batch, XtkNodeRef target, XtkEl cons
 	return !step || step(batch, target, NULL, el, true);
 }
 
+static bool encode_frame(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el) {
+	XtkFrameDesc        zero = {0};
+	XtkFrameDesc const *was  = prev ? XTK_EL_DETAIL(prev, XtkFrameDesc) : &zero;
+	XtkFrameDesc const *now  = XTK_EL_DETAIL(el, XtkFrameDesc);
+	if (!now) now = &zero;
+	if ((!prev || was->transition != now->transition)
+	    && !value_enum(batch, target, XTK_PROP_FRAME_TRANSITION, ( uint32_t ) now->transition))
+		return false;
+	if ((!prev || was->is_back != now->is_back) && !value_bool(batch, target, XTK_PROP_FRAME_BACK, now->is_back))
+		return false;
+	return (!prev && now->page_key == 0)
+	    || (was->page_key == now->page_key)
+	    || value_i32(batch, target, XTK_PROP_FRAME_PAGE_KEY, now->page_key);
+}
+
 static bool
 encode_element_props_opt(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, XtkEl const *el, bool skip_model) {
 	static EncodeStep const specialized [XTK_CTRL_TYPE_COUNT] = {
@@ -1399,6 +1532,7 @@ encode_element_props_opt(XtkBatch *batch, XtkNodeRef target, XtkEl const *prev, 
 	  [XTK_CTRL_CALENDAR]     = xtk_encode_calendar,
 	  [XTK_CTRL_COLORPICKER]  = xtk_encode_color_picker,
 	  [XTK_CTRL_CONTAINER]    = encode_dragdrop,
+	  [XTK_CTRL_FRAME]        = encode_frame,
 	};
 	if (!encode_common(batch, target, prev, el)) return false;
 	if (!encode_stack(batch, target, prev, el)) return false;

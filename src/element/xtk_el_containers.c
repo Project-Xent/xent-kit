@@ -147,3 +147,17 @@ XtkEl *xtk_refresh(XtkUi *ui, XtkRefreshDesc desc, XtkEl *children []) {
 	xtk_el_adopt(ui, el, children);
 	return el;
 }
+
+XtkEl *xtk_frame(XtkUi *ui, XtkFrameDesc desc, XtkEl *child) {
+	XtkEl *el = xtk_el_new(ui, XTK_CTRL_FRAME, NULL);
+	if (!el) return NULL;
+	if (!XTK_EL_STORE(el, desc)) return NULL;
+	if (child) xtk_el_adopt(ui, el, xtk_kids(child));
+	return el;
+}
+
+XtkNavTransitionKind xtk_nav_recommended_transition(int prev_index, int next_index, XtkNavPaneMode mode) {
+	if (mode != XTK_NAV_PANE_TOP || prev_index < 0 || next_index < 0 || prev_index == next_index)
+		return XTK_NAV_TRANSITION_ENTRANCE;
+	return next_index > prev_index ? XTK_NAV_TRANSITION_SLIDE_RIGHT : XTK_NAV_TRANSITION_SLIDE_LEFT;
+}

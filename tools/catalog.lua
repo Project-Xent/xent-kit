@@ -4,7 +4,7 @@ prop_order = {
   "infobar", "refresh", "flip", "pips", "suggest", "badge", "dialog", "teachtip", "avatar", "pager",
   "splitview", "titlebar", "rating", "link", "scrollbar", "looping", "datepicker", "timepicker", "calendar",
   "colorpicker", "column", "commandbar", "appbarbutton", "appbartoggle", "appbarsep",
-  "navslot",
+  "navslot", "frame",
 }
 
 props = {
@@ -999,6 +999,16 @@ props = {
     {"shrink", "XTK_PROP_SHRINK", "f32"},
     {"self", "XTK_PROP_ALIGN_SELF", "enum", values = "XentFlexAlign"},
     {"slot", "XTK_PROP_NAV_SLOT", "enum", values = "XtkNavSlot"},
+  },
+  frame = {
+    {"w", "XTK_PROP_WIDTH", "f32"},
+    {"h", "XTK_PROP_HEIGHT", "f32"},
+    {"grow", "XTK_PROP_GROW", "f32"},
+    {"shrink", "XTK_PROP_SHRINK", "f32"},
+    {"self", "XTK_PROP_ALIGN_SELF", "enum", values = "XentFlexAlign"},
+    {"transition", "XTK_PROP_FRAME_TRANSITION", "enum", values = "XtkNavTransitionKind"},
+    {"is_back", "XTK_PROP_FRAME_BACK", "bool"},
+    {"page_key", "XTK_PROP_FRAME_PAGE_KEY", "i32"},
   },
 
   list = {
@@ -2353,6 +2363,24 @@ properties = {
   {"XTK_PROP_ALWAYS_SHOW_HEADER", "always-show-header", "bool", {"layout"}},
   {"XTK_PROP_NAV_BACK_BUTTON", "nav-back-button", "enum", {"layout", "semantics"}},
   {"XTK_PROP_NAV_BACK_ENABLED", "nav-back-enabled", "bool", {"state", "semantics"}},
+  {"XTK_PROP_STYLE_BG", "style-background", "color", {"paint"}},
+  {"XTK_PROP_STYLE_BORDER", "style-border-color", "color", {"paint"}},
+  {"XTK_PROP_STYLE_RADIUS", "style-corner-radius", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_BORDER_W", "style-border-width", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_OPACITY", "style-opacity", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_TX", "style-translate-x", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_TY", "style-translate-y", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_SX", "style-scale-x", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_SY", "style-scale-y", "f32", {"paint"}},
+  {"XTK_PROP_STYLE_ROTATION", "style-rotation", "f32", {"paint"}},
+  {"XTK_PROP_MOTION_IMPLICIT", "motion-implicit", "bytes", {"paint"}},
+  {"XTK_PROP_MOTION_ENTER_EXIT", "motion-enter-exit", "enum", {"paint"}},
+  {"XTK_PROP_CONNECTED_KEY", "connected-key", "string", {"paint"}},
+  {"XTK_PROP_CONNECTED_CONFIG", "connected-config", "bytes", {"paint"}},
+  {"XTK_PROP_CONNECTED_COORD", "connected-coord", "string", {"paint"}},
+  {"XTK_PROP_FRAME_TRANSITION", "frame-transition", "enum", {"paint"}},
+  {"XTK_PROP_FRAME_BACK", "frame-back", "bool", {"state"}},
+  {"XTK_PROP_FRAME_PAGE_KEY", "frame-page-key", "i32", {"tree"}},
 }
 
 event_defs = {
@@ -2483,6 +2511,7 @@ controls = {
   {token = "cmdovf", name = "command-bar-overflow-presenter", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TEXT", "XTK_PROP_TOOLTIP", "XTK_PROP_ENABLED", "XTK_PROP_SELECTED"}, events = {}, access = {"list_item", false, false}},
   {token = "cmdovfrow", name = "command-bar-overflow-item", internal = true, props = {"XTK_PROP_WIDTH", "XTK_PROP_HEIGHT", "XTK_PROP_GROW", "XTK_PROP_ALIGN_SELF", "XTK_PROP_MARGIN_LEFT", "XTK_PROP_MARGIN_TOP", "XTK_PROP_MARGIN_RIGHT", "XTK_PROP_MARGIN_BOTTOM", "XTK_PROP_TEXT", "XTK_PROP_TOOLTIP", "XTK_PROP_ENABLED", "XTK_PROP_SELECTED"}, events = {}, access = {"list_item", false, false}},
   {api = "nav_slot", token = "navslot", name = "nav-slot", group = "navslot", events = {}, access = {"group", false, false}},
+  {api = "frame", token = "frame", name = "frame", group = "frame", events = {}, access = {"group", false, false}},
 }
 
 enums = {
@@ -2529,6 +2558,9 @@ enums = {
   XtkLiveSetting = {prefix = "XTK_LIVE_", members = {"OFF", "POLITE", "ASSERTIVE"}},
   XtkHeadingLevel = {prefix = "XTK_HEADING_", members = {"NONE", "LEVEL1", "LEVEL2", "LEVEL3", "LEVEL4", "LEVEL5", "LEVEL6", "LEVEL7", "LEVEL8", "LEVEL9"}},
   XtkAccessView = {prefix = "XTK_ACCESS_VIEW_", members = {"CONTENT", "CONTROL", "RAW"}},
+  XtkNavTransitionKind = {prefix = "XTK_NAV_TRANSITION_", members = {"ENTRANCE", "SLIDE_RIGHT", "SLIDE_LEFT", "SLIDE_BOTTOM", "DRILL_IN", "SUPPRESS"}},
+  XtkThemeTransitionKind = {prefix = "XTK_THEME_TRANSITION_", members = {"NONE", "ENTRANCE", "ADD_DELETE", "CONTENT", "REORDER", "POPUP"}},
+  XtkConnectedKind = {prefix = "XTK_CONNECTED_", members = {"GRAVITY", "DIRECT", "BASIC"}},
 }
 
 kinds = {
@@ -2592,6 +2624,7 @@ structs = {
   appbarbutton = "XtkAppBarButtonProps",
   appbartoggle = "XtkAppBarToggleProps",
   appbarsep = "XtkAppBarSeparatorProps",
+  frame = "XtkFrameProps",
 }
 
 function get()
